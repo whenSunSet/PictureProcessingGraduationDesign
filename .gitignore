@@ -1,5 +1,4 @@
 *.iml
-.gradle
 /local.properties
 /.idea
 .DS_Store
@@ -7,9 +6,3 @@
 /captures
 .externalNativeBuild
 libs/
-build.gradle
-lint.xml
-src/main/AndroidManifest.xml
-src/main/aidl/
-src/main/java/
-src/main/res/
