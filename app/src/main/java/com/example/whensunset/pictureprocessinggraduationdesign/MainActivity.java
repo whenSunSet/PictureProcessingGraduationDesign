@@ -1,16 +1,24 @@
 package com.example.whensunset.pictureprocessinggraduationdesign;
 
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.TextView;
+import android.widget.ImageView;
 
-import com.example.opencvlibrary.OpencvApi;
+import org.opencv.android.BaseLoaderCallback;
+import org.opencv.android.LoaderCallbackInterface;
+import org.opencv.android.OpenCVLoader;
+import org.opencv.android.Utils;
+import org.opencv.core.Mat;
+import org.opencv.imgproc.Imgproc;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -32,8 +40,8 @@ public class MainActivity extends AppCompatActivity {
         });
 
         // Example of a call to a native method
-        TextView tv = (TextView) findViewById(R.id.sample_text);
-        tv.setText(OpencvApi.INSTANCE.stringFromJNI());
+
+
     }
 
     @Override
@@ -58,5 +66,42 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (!OpenCVLoader.initDebug()) {
+            OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_0_0, this, mLoaderCallback);
+        } else {
+            mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
+        }
+    }
 
+    private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
+        @Override
+        public void onManagerConnected(int status) {
+            switch (status) {
+                case LoaderCallbackInterface.SUCCESS: {
+                    Log.i("xuekelindun", "OpenCV loaded successfully");
+                    final Bitmap bitmap =((BitmapDrawable)getResources().getDrawable(R.mipmap.image)).getBitmap();
+                    ImageView iv_image = findViewById(R.id.image);
+                    Bitmap grayBitmap = toGrayByOpencv(bitmap);
+                    iv_image.setImageBitmap(grayBitmap);
+                }
+                break;
+                default: {
+                    super.onManagerConnected(status);
+                }
+                break;
+            }
+        }
+    };
+
+    public Bitmap toGrayByOpencv(Bitmap srcBitmap){
+        Mat mat = new Mat();
+        Utils.bitmapToMat(srcBitmap,mat);
+        Mat grayMat = new Mat();
+        Imgproc.cvtColor(mat, grayMat, Imgproc.COLOR_BGRA2GRAY, 1);
+        Utils.matToBitmap(grayMat,srcBitmap);
+        return srcBitmap;
+    }
 }

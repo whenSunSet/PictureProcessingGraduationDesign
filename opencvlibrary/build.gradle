@@ -4,14 +4,11 @@ apply plugin: 'kotlin-android'
 android {
     compileSdkVersion 26
 
-
-
     defaultConfig {
         minSdkVersion 15
         targetSdkVersion 26
         versionCode 1
         versionName "1.0"
-
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
             cmake {
@@ -34,6 +31,8 @@ android {
         }
     }
 
+
+
 }
 
 dependencies {
@@ -47,7 +46,7 @@ dependencies {
 
     compile 'io.reactivex.rxjava2:rxjava:2.1.10'
     compile 'com.facebook.fresco:fresco:1.8.1'
-
+    compile project(":openCVLibrary340")
 }
 repositories {
     mavenCentral()
