@@ -16,6 +16,12 @@ android {
             }
         }
 
+        ndk {
+            // Specifies the ABI configurations of your native
+            // libraries Gradle should build and package with your APK.
+            abiFilters 'armeabi'
+            abiFilters 'x86'
+        }
     }
 
     buildTypes {
@@ -31,8 +37,11 @@ android {
         }
     }
 
-
-
+    sourceSets {
+        main {
+            jniLibs.srcDirs = ['src/main/jniLibs']
+        }
+    }
 }
 
 dependencies {

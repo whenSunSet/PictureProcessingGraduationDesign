@@ -13,6 +13,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 
+import com.example.opencvlibrary.MyClass;
+import com.example.opencvlibrary.OpencvApi;
+
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
@@ -82,10 +85,17 @@ public class MainActivity extends AppCompatActivity {
             switch (status) {
                 case LoaderCallbackInterface.SUCCESS: {
                     Log.i("xuekelindun", "OpenCV loaded successfully");
-                    final Bitmap bitmap =((BitmapDrawable)getResources().getDrawable(R.mipmap.image)).getBitmap();
+                    Log.i("xuekelindun", OpencvApi.INSTANCE.stringFromJNI());
                     ImageView iv_image = findViewById(R.id.image);
-                    Bitmap grayBitmap = toGrayByOpencv(bitmap);
-                    iv_image.setImageBitmap(grayBitmap);
+                    Bitmap bitmap = ((BitmapDrawable) getResources().getDrawable(
+                            R.mipmap.image)).getBitmap();
+                    int w = bitmap.getWidth(), h = bitmap.getHeight();
+                    int[] pix = new int[w * h];
+                    bitmap.getPixels(pix, 0, w, 0, 0, w, h);
+                    int [] resultPixes= MyClass.gray(pix,w,h);
+                    Bitmap result = Bitmap.createBitmap(w,h, Bitmap.Config.RGB_565);
+                    result.setPixels(resultPixes, 0, w, 0, 0,w, h);
+                    iv_image.setImageBitmap(result);
                 }
                 break;
                 default: {

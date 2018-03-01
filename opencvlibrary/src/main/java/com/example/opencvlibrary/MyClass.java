@@ -5,7 +5,6 @@ package com.example.opencvlibrary;
  */
 
 public class MyClass {
-    public static void test() {
 
-    }
+    public static native int[] gray(int[] i , int w, int h);
 }

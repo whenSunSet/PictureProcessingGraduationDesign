@@ -14,4 +14,5 @@ object OpencvApi {
      * which is packaged with this application.
      */
     external fun stringFromJNI(): String
+
 }
