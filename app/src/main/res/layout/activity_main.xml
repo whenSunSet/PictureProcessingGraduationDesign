@@ -1,34 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.CoordinatorLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="com.example.whensunset.pictureprocessinggraduationdesign.MainActivity">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:bind="http://schemas.android.com/apk/res-auto">
 
-    <android.support.design.widget.AppBarLayout
+    <data class = 'com.example.whensunset.pictureprocessinggraduationdesign.ui.MainActivityBinding'>
+        <import type="android.view.ViewGroup.LayoutParams"/>
+        <import type="com.example.whensunset.pictureprocessinggraduationdesign.dataBindingUtil.LayoutManager"/>
+        <import type="com.example.whensunset.pictureprocessinggraduationdesign.dataBindingUtil.ItemDecoration"/>
+        <import type="android.view.View"/>
+
+        <variable name="viewModel" type="com.example.whensunset.pictureprocessinggraduationdesign.viewModel.MainActivityVM"/>
+    </data>
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:background="@color/lessPink"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:theme="@style/AppTheme.AppBarOverlay">
+        android:layout_height="match_parent">
 
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/toolbar"
+        <include
+            layout="@layout/directory_spinner_bar"
+            android:layout_height="50dp"
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
-            app:popupTheme="@style/AppTheme.PopupOverlay"/>
+            android:id="@+id/directory_spinner_bar"
+            bind:viewModel="@{viewModel.mDirectorySpinnerBarVM}"/>
 
-    </android.support.design.widget.AppBarLayout>
+        <android.support.v7.widget.RecyclerView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/picture_recycle_view"
+            bind:layoutManager="@{LayoutManager.grid(3)}"
+            bind:itemView="@{viewModel.mViewSelector}"
+            bind:itemDecor="@{ItemDecoration.defaultItemDecoration()}"
+            bind:items="@{viewModel.mListItemManager.dataItems}"
+            bind:itemWidth="@{LayoutParams.MATCH_PARENT}"
+            bind:itemHeight="@{viewModel.mPictureItemHeight}">
+        </android.support.v7.widget.RecyclerView>
 
-    <include layout="@layout/content_main"/>
+    </LinearLayout>
 
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fab"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="@dimen/fab_margin"
-        app:srcCompat="@android:drawable/ic_dialog_email"/>
-
-</android.support.design.widget.CoordinatorLayout>
+</layout>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:bind="http://schemas.android.com/apk/res-auto"
+    xmlns:app="http://schemas.android.com/tools"
+    app:ignore="NamespaceTypo">
+
+    <data class = 'com.example.whensunset.pictureprocessinggraduationdesign.ui.DirectorySpinnerBarBinding'>
+        <import type="android.view.View"/>
+        <variable name="viewModel" type="com.example.whensunset.pictureprocessinggraduationdesign.viewModel.DirectorySpinnerBarVM"/>
+    </data>
+
+    <android.support.design.widget.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:theme="@style/AppTheme.AppBarOverlay">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="?attr/colorPrimary"
+            app:popupTheme="@style/AppTheme.PopupOverlay" >
+
+            <Spinner
+                android:entries="@{viewModel.mListItemManager.dataItems}"
+                android:onItemSelected="@{(parent, view, position, id) -> viewModel.mListItemManager.onItemSelected(position)}"
+                android:id="@+id/directory_spinner"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent">
+            </Spinner>
+
+        </android.support.v7.widget.Toolbar>
+
+    </android.support.design.widget.AppBarLayout>
+
+
+</layout>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:bind="http://schemas.android.com/apk/res-auto"
+    xmlns:fresco="http://schemas.android.com/tools">
+
+    <data>
+        <variable name="viewModel" type="com.example.whensunset.pictureprocessinggraduationdesign.viewModel.MainActivityVM.PictureItemVM"/>
+        <import type="com.example.whensunset.pictureprocessinggraduationdesign.viewModel.MainActivityVM.PictureItemManager"/>
+    </data>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <com.facebook.drawee.view.SimpleDraweeView
+            android:id="@+id/item_image_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:onClick="@{() -> viewModel.clickPicture()}"
+            bind:imageUri="@{viewModel.mImageUri}"
+            bind:resizeHeight="@{PictureItemManager.mItemPictureResizeHeight}"
+            bind:resizeWidth="@{PictureItemManager.mItemPictureResizeWidth}"
+            fresco:actualImageScaleType="centerCrop"
+            fresco:roundTopLeft="true"
+            fresco:roundTopRight="true"
+            fresco:roundBottomLeft="true"
+            fresco:roundBottomRight="true"
+            fresco:roundingBorderWidth="@dimen/picture_simple_drawee_round_size"/>
+
+    </FrameLayout>
+
+</layout>

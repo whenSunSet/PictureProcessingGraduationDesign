@@ -1,3 +1,5 @@
 <resources>
     <dimen name="fab_margin">16dp</dimen>
+    <dimen name="picture_item_height">1000dp</dimen>
+    <dimen name="picture_simple_drawee_round_size">2dp</dimen>
 </resources>
