@@ -2,9 +2,13 @@ package com.example.whensunset.pictureprocessinggraduationdesign.dataBindingUtil
 
 import android.databinding.BindingAdapter;
 import android.databinding.BindingConversion;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
+import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 
 import com.facebook.drawee.backends.pipeline.Fresco;
 import com.facebook.drawee.backends.pipeline.PipelineDraweeController;
@@ -38,6 +42,23 @@ public class BindingAdapters {
     @BindingAdapter("layoutManager")
     public static void setLayoutManager(RecyclerView recyclerView, LayoutManager.LayoutManagerFactory layoutManagerFactory) {
         recyclerView.setLayoutManager(layoutManagerFactory.create(recyclerView));
+    }
+
+    @BindingAdapter("bitmap")
+    public static void setBitMap(ImageView view , Bitmap bitmap) {
+        view.setImageBitmap(bitmap);
+    }
+
+    @BindingAdapter(value = {"viewHeight","viewWidth" , "viewLeftMargin" , "viewRightMargin"}, requireAll = false)
+    public static void setLayoutParam(View view , int viewHeight , int viewWidth , int viewLeftMargin , int viewRightMargin) {
+        if (viewHeight == 0 || viewWidth == 0 || view == null) {
+            return;
+        }
+
+        LinearLayout.LayoutParams viewParams = new LinearLayout.LayoutParams(viewWidth , viewHeight);
+        viewParams.leftMargin = viewLeftMargin;
+        viewParams.rightMargin = viewRightMargin;
+        view.setLayoutParams(viewParams);
     }
 
     @BindingAdapter(value = {"resizeWidth" , "resizeHeight" , "imageUri"} , requireAll = false)

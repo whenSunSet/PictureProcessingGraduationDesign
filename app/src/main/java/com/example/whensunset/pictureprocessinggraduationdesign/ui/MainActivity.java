@@ -3,13 +3,12 @@ package com.example.whensunset.pictureprocessinggraduationdesign.ui;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.databinding.Observable;
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
 import com.example.whensunset.pictureprocessinggraduationdesign.R;
-import com.example.whensunset.pictureprocessinggraduationdesign.dataBindingUtil.Utils;
+import com.example.whensunset.pictureprocessinggraduationdesign.dataBindingUtil.BindingUtils;
 import com.example.whensunset.pictureprocessinggraduationdesign.viewModel.MainActivityVM;
 
 import org.opencv.android.BaseLoaderCallback;
@@ -20,10 +19,14 @@ public class MainActivity extends AppCompatActivity {
     private com.example.whensunset.pictureprocessinggraduationdesign.ui.MainActivityBinding mMainActivityBinding;
     private MainActivityVM mMainActivityVM;
 
+    static  {
+        System.loadLibrary("native-lib");
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mMainActivityBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
+        mMainActivityBinding = DataBindingUtil.setContentView(this , R.layout.activity_main);
         mMainActivityVM = new MainActivityVM();
         mMainActivityBinding.setViewModel(mMainActivityVM);
 
@@ -32,10 +35,10 @@ public class MainActivity extends AppCompatActivity {
 
     public void uiActionInit() {
         // 监听列表中item的点击事件
-        mMainActivityVM.mListItemManager.mClickedItemListener.addOnPropertyChangedCallback(new Observable.OnPropertyChangedCallback() {
+        mMainActivityVM.mPictureItemManager.mClickedItemListener.addOnPropertyChangedCallback(new Observable.OnPropertyChangedCallback() {
             @Override
             public void onPropertyChanged(Observable observable, int i) {
-                String imageUri = (String) Utils.getValueFromObservable(observable , "mImageUri");
+                String imageUri = (String) BindingUtils.getValueFromObservable(observable , "mImageUri");
                 Intent intent = new Intent(MainActivity.this , PictureProcessingActivity.class);
                 intent.putExtra("imageUri" , imageUri);
                 MainActivity.this.startActivity(intent);
@@ -45,11 +48,11 @@ public class MainActivity extends AppCompatActivity {
         });
 
         // 监听bar上面的目录切换事件
-        mMainActivityVM.mDirectorySpinnerBarVM.mListItemManager.mClickedItemListener.addOnPropertyChangedCallback(new Observable.OnPropertyChangedCallback() {
+        mMainActivityVM.mDirectorySpinnerItemManagerVM.mClickedItemListener.addOnPropertyChangedCallback(new Observable.OnPropertyChangedCallback() {
             @Override
             public void onPropertyChanged(Observable observable, int i) {
-                String directoryName = (String) Utils.getValueFromObservable(observable , "mDirectoryName");
-                mMainActivityVM.mListItemManager.freshPictureList(directoryName);
+                String directoryName = (String) BindingUtils.getValueFromObservable(observable , "mDirectoryName");
+                mMainActivityVM.mPictureItemManager.freshPictureList(directoryName);
 
                 Log.d("何时夕:MainActivity", ("切换了目录：directoryName:" + directoryName));
             }
@@ -72,7 +75,7 @@ public class MainActivity extends AppCompatActivity {
             switch (status) {
                 case LoaderCallbackInterface.SUCCESS: {
 //                    Log.i("xuekelindun", "OpenCV loaded successfully");
-//                    Log.i("xuekelindun", OpencvApi.INSTANCE.stringFromJNI());
+//                    Log.i("xuekelindun", OpenCVApi.INSTANCE.stringFromJNI());
 //                    ImageView iv_image = findViewById(R.id.image);
 //                    Bitmap bitmap = ((BitmapDrawable) getResources().getDrawable(
 //                            R.mipmap.image)).getBitmap();
@@ -93,12 +96,4 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-    public Bitmap toGrayByOpencv(Bitmap srcBitmap){
-//        Mat mat = new Mat();
-//        Utils.bitmapToMat(srcBitmap,mat);
-//        Mat grayMat = new Mat();
-//        Imgproc.cvtColor(mat, grayMat, Imgproc.COLOR_BGRA2GRAY, 1);
-//        Utils.matToBitmap(grayMat,srcBitmap);
-        return srcBitmap;
-    }
 }

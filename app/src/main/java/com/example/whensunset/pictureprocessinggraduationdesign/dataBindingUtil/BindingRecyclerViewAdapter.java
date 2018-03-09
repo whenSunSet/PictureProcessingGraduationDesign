@@ -69,7 +69,7 @@ public class BindingRecyclerViewAdapter<T> extends RecyclerView.Adapter<Recycler
         if (itemViewArg.bindingVariable() != ItemViewArg.ItemView.BINDING_VARIABLE_NONE) {
             boolean result = binding.setVariable(itemViewArg.bindingVariable(), item);
             if (!result) {
-                Utils.throwMissingVariable(binding, itemViewArg.bindingVariable(), itemViewArg.layoutRes());
+                BindingUtils.throwMissingVariable(binding, itemViewArg.bindingVariable(), itemViewArg.layoutRes());
             }
             binding.executePendingBindings();
         }
@@ -169,7 +169,7 @@ public class BindingRecyclerViewAdapter<T> extends RecyclerView.Adapter<Recycler
             if (adapter == null) {
                 return;
             }
-            Utils.ensureChangeOnMainThread();
+            BindingUtils.ensureChangeOnMainThread();
             adapter.notifyDataSetChanged();
         }
 
@@ -179,7 +179,7 @@ public class BindingRecyclerViewAdapter<T> extends RecyclerView.Adapter<Recycler
             if (adapter == null) {
                 return;
             }
-            Utils.ensureChangeOnMainThread();
+            BindingUtils.ensureChangeOnMainThread();
             adapter.notifyItemRangeChanged(positionStart, itemCount);
         }
 
@@ -189,7 +189,7 @@ public class BindingRecyclerViewAdapter<T> extends RecyclerView.Adapter<Recycler
             if (adapter == null) {
                 return;
             }
-            Utils.ensureChangeOnMainThread();
+            BindingUtils.ensureChangeOnMainThread();
             adapter.notifyItemRangeInserted(positionStart, itemCount);
         }
 
@@ -199,7 +199,7 @@ public class BindingRecyclerViewAdapter<T> extends RecyclerView.Adapter<Recycler
             if (adapter == null) {
                 return;
             }
-            Utils.ensureChangeOnMainThread();
+            BindingUtils.ensureChangeOnMainThread();
             for (int i = 0; i < itemCount; i++) {
                 adapter.notifyItemMoved(fromPosition + i, toPosition + i);
             }
@@ -211,7 +211,7 @@ public class BindingRecyclerViewAdapter<T> extends RecyclerView.Adapter<Recycler
             if (adapter == null) {
                 return;
             }
-            Utils.ensureChangeOnMainThread();
+            BindingUtils.ensureChangeOnMainThread();
             adapter.notifyItemRangeRemoved(positionStart, itemCount);
         }
     }

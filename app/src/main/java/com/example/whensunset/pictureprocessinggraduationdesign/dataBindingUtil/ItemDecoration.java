@@ -12,7 +12,6 @@ public class ItemDecoration {
     public static RecyclerView.ItemDecoration defaultItemDecoration() {
         return new RecyclerView.ItemDecoration(){
             public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
-                outRect.set(1 , 1 , 1 , 1);
             }
         };
     }

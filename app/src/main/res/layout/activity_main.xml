@@ -1,39 +1,59 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:bind="http://schemas.android.com/apk/res-auto">
+    xmlns:bind="http://schemas.android.com/apk/res-auto"
+    xmlns:app="http://schemas.android.com/tools"
+    app:ignore="NamespaceTypo">
 
     <data class = 'com.example.whensunset.pictureprocessinggraduationdesign.ui.MainActivityBinding'>
         <import type="android.view.ViewGroup.LayoutParams"/>
         <import type="com.example.whensunset.pictureprocessinggraduationdesign.dataBindingUtil.LayoutManager"/>
         <import type="com.example.whensunset.pictureprocessinggraduationdesign.dataBindingUtil.ItemDecoration"/>
         <import type="android.view.View"/>
+        <import type="com.example.whensunset.pictureprocessinggraduationdesign.dataBindingUtil.BindingUtils"/>
 
         <variable name="viewModel" type="com.example.whensunset.pictureprocessinggraduationdesign.viewModel.MainActivityVM"/>
     </data>
 
     <LinearLayout
         android:orientation="vertical"
-        android:background="@color/lessPink"
+        android:background="@color/black"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <include
-            layout="@layout/directory_spinner_bar"
-            android:layout_height="50dp"
+        <android.support.design.widget.AppBarLayout
             android:layout_width="match_parent"
-            android:id="@+id/directory_spinner_bar"
-            bind:viewModel="@{viewModel.mDirectorySpinnerBarVM}"/>
+            android:layout_height="50dp"
+            android:theme="@style/AppTheme.AppBarOverlay">
+
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="?attr/colorPrimary"
+                app:popupTheme="@style/AppTheme.PopupOverlay" >
+
+                <Spinner
+                    android:entries="@{viewModel.mDirectorySpinnerItemManagerVM.mDataItemList}"
+                    android:onItemSelected="@{(parent, view, position, id) -> viewModel.mDirectorySpinnerItemManagerVM.onItemSelected(position)}"
+                    android:id="@+id/directory_spinner"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent">
+                </Spinner>
+
+            </android.support.v7.widget.Toolbar>
+
+        </android.support.design.widget.AppBarLayout>
 
         <android.support.v7.widget.RecyclerView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:id="@+id/picture_recycle_view"
             bind:layoutManager="@{LayoutManager.grid(3)}"
-            bind:itemView="@{viewModel.mViewSelector}"
+            bind:itemView="@{viewModel.mPictureItemManager.mViewSelector}"
             bind:itemDecor="@{ItemDecoration.defaultItemDecoration()}"
-            bind:items="@{viewModel.mListItemManager.dataItems}"
+            bind:items="@{viewModel.mPictureItemManager.mDataItemList}"
             bind:itemWidth="@{LayoutParams.MATCH_PARENT}"
-            bind:itemHeight="@{viewModel.mPictureItemHeight}">
+            bind:itemHeight="@{BindingUtils.getDisplayWidth() / 3}">
         </android.support.v7.widget.RecyclerView>
 
     </LinearLayout>

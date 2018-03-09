@@ -4,8 +4,8 @@
     xmlns:fresco="http://schemas.android.com/tools">
 
     <data>
-        <variable name="viewModel" type="com.example.whensunset.pictureprocessinggraduationdesign.viewModel.MainActivityVM.PictureItemVM"/>
-        <import type="com.example.whensunset.pictureprocessinggraduationdesign.viewModel.MainActivityVM.PictureItemManager"/>
+        <variable name="viewModel" type="com.example.whensunset.pictureprocessinggraduationdesign.viewModel.itemManagerVM.PictureItemManagerVM.PictureItemVM"/>
+        <import type="com.example.whensunset.pictureprocessinggraduationdesign.viewModel.itemManagerVM.PictureItemManagerVM"/>
     </data>
 
     <FrameLayout
@@ -18,8 +18,8 @@
             android:layout_height="match_parent"
             android:onClick="@{() -> viewModel.clickPicture()}"
             bind:imageUri="@{viewModel.mImageUri}"
-            bind:resizeHeight="@{PictureItemManager.mItemPictureResizeHeight}"
-            bind:resizeWidth="@{PictureItemManager.mItemPictureResizeWidth}"
+            bind:resizeHeight="@{PictureItemManagerVM.ITEM_PICTURE_RESIZE_HEIGHT}"
+            bind:resizeWidth="@{PictureItemManagerVM.ITEM_PICTURE_RESIZE_WIDTH}"
             fresco:actualImageScaleType="centerCrop"
             fresco:roundTopLeft="true"
             fresco:roundTopRight="true"

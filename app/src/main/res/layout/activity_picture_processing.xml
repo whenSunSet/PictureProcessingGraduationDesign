@@ -4,12 +4,108 @@
 
     <data class = 'com.example.whensunset.pictureprocessinggraduationdesign.ui.PictureProcessingActivityBinding'>
         <import type="android.view.View"/>
+        <import type="com.example.whensunset.pictureprocessinggraduationdesign.viewModel.PictureProcessingActivityVM"/>
+        <import type="com.example.whensunset.pictureprocessinggraduationdesign.dataBindingUtil.BindingUtils"/>
+        <import type="android.support.v7.widget.RecyclerView"/>
+        <import type="com.example.whensunset.pictureprocessinggraduationdesign.dataBindingUtil.LayoutManager"/>
+
+        <variable name="viewModel" type="com.example.whensunset.pictureprocessinggraduationdesign.viewModel.PictureProcessingActivityVM"/>
     </data>
 
-    <LinearLayout
-        android:background="@color/black"
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-    </LinearLayout>
+
+        <com.example.whensunset.pictureprocessinggraduationdesign.mete.PinchImageView
+            android:id="@+id/pic"
+            android:background="@color/black"
+            android:layout_above="@+id/selectMenu"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            bind:bitmap="@{viewModel.mImageBitMap}"/>
+
+        <FrameLayout
+            android:id="@+id/selectMenu"
+            android:background="@color/gray"
+            android:layout_above="@id/tab"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+
+            <include
+                layout="@layout/activity_picture_processing_picture_transform_menu"
+                bind:viewModel="@{viewModel.mPictureTransformMenuVM}"
+                android:visibility="@{(viewModel.mSelectTab == PictureProcessingActivityVM.SELECT_PICTURE_TRANSFORM) ? View.VISIBLE : View.GONE}"
+                android:id="@+id/picture_transform_menu">
+            </include>
+
+            <include
+                layout="@layout/activity_picture_processing_picture_param_menu"
+                bind:viewModel="@{viewModel.mPictureParamMenuVM}"
+                android:visibility="@{(viewModel.mSelectTab == PictureProcessingActivityVM.SELECT_PICTURE_PARAM) ? View.VISIBLE : View.GONE}"
+                android:id="@+id/picture_param_menu">
+            </include>
+
+            <LinearLayout
+                android:visibility="@{(viewModel.mSelectTab == PictureProcessingActivityVM.SELECT_PICTURE_FRAME) ? View.VISIBLE : View.GONE}"
+                android:id="@+id/picture_frame_menu"
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:visibility="@{(viewModel.mSelectTab == PictureProcessingActivityVM.SELECT_PICTURE_TEXT) ? View.VISIBLE : View.GONE}"
+                android:id="@+id/picture_text_menu"
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+            </LinearLayout>
+
+        </FrameLayout>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:background="@color/black"
+            android:id="@+id/tab"
+            android:layout_alignParentBottom="true"
+            android:layout_width="match_parent"
+            android:layout_height="30dp">
+
+            <ImageView
+                android:id="@+id/picture_filter_image_view"
+                android:src="@{(viewModel.mSelectTab == PictureProcessingActivityVM.SELECT_PICTURE_FILTER) ? @drawable/picture_filter_blue : @drawable/picture_filter_white}"
+                android:onClick="@{() -> viewModel.clickPictureFilterTab()}"
+                style="@style/PictureProcessingTabImageView"/>
+
+            <ImageView
+                android:src="@{(viewModel.mSelectTab == PictureProcessingActivityVM.SELECT_PICTURE_TRANSFORM) ? @drawable/picture_transform_blue : @drawable/picture_transform_white}"
+                android:id="@+id/picture_transform_image_view"
+                android:onClick="@{() -> viewModel.clickPictureTransformTab()}"
+                style="@style/PictureProcessingTabImageView"/>
+
+            <ImageView
+                android:src="@{(viewModel.mSelectTab == PictureProcessingActivityVM.SELECT_PICTURE_PARAM) ? @drawable/picture_param_blue : @drawable/picture_param_white}"
+                android:id="@+id/picture_param_image_view"
+                android:onClick="@{() -> viewModel.clickPictureParamTab()}"
+                style="@style/PictureProcessingTabImageView"/>
+
+            <ImageView
+                android:src="@{(viewModel.mSelectTab == PictureProcessingActivityVM.SELECT_PICTURE_FRAME) ? @drawable/picture_frame_blue : @drawable/picture_frame_white}"
+                android:onClick="@{() -> viewModel.clickPictureFrameTab()}"
+                android:id="@+id/picture_frame_image_view"
+                style="@style/PictureProcessingTabImageView"/>
+
+            <ImageView
+                android:src="@{(viewModel.mSelectTab == PictureProcessingActivityVM.SELECT_PICTURE_TEXT) ? @drawable/picture_text_blue : @drawable/picture_text_white}"
+                android:onClick="@{() -> viewModel.clickPictureTextTab()}"
+                android:id="@+id/picture_text_image_view"
+                style="@style/PictureProcessingTabImageView"/>
+
+        </LinearLayout>
+
+    </RelativeLayout>
 
 </layout>
