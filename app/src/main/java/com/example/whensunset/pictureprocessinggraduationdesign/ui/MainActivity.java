@@ -4,18 +4,22 @@ import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.databinding.Observable;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
 import com.example.whensunset.pictureprocessinggraduationdesign.R;
-import com.example.whensunset.pictureprocessinggraduationdesign.dataBindingUtil.BindingUtils;
+import com.example.whensunset.pictureprocessinggraduationdesign.base.BaseActivity;
+import com.example.whensunset.pictureprocessinggraduationdesign.base.ObserverParamMap;
+import com.example.whensunset.pictureprocessinggraduationdesign.dataBindingUtil.MyExceptionOnPropertyChangedCallback;
 import com.example.whensunset.pictureprocessinggraduationdesign.viewModel.MainActivityVM;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 
-public class MainActivity extends AppCompatActivity {
+import static com.example.whensunset.pictureprocessinggraduationdesign.staticParam.ObserverMapKey.DirectorySpinnerItemManagerVM_directoryName;
+import static com.example.whensunset.pictureprocessinggraduationdesign.staticParam.ObserverMapKey.PictureItemManagerVM_mImageUri;
+
+public class MainActivity extends BaseActivity {
     private com.example.whensunset.pictureprocessinggraduationdesign.ui.MainActivityBinding mMainActivityBinding;
     private MainActivityVM mMainActivityVM;
 
@@ -35,28 +39,31 @@ public class MainActivity extends AppCompatActivity {
 
     public void uiActionInit() {
         // 监听列表中item的点击事件
-        mMainActivityVM.mPictureItemManager.mClickedItemListener.addOnPropertyChangedCallback(new Observable.OnPropertyChangedCallback() {
+        mMainActivityVM.mPictureItemManager.mClickedItemListener.addOnPropertyChangedCallback(new MyExceptionOnPropertyChangedCallback(new Observable.OnPropertyChangedCallback() {
             @Override
             public void onPropertyChanged(Observable observable, int i) {
-                String imageUri = (String) BindingUtils.getValueFromObservable(observable , "mImageUri");
+                String imageUri = ObserverParamMap.staticGetValue(observable , PictureItemManagerVM_mImageUri);
                 Intent intent = new Intent(MainActivity.this , PictureProcessingActivity.class);
                 intent.putExtra("imageUri" , imageUri);
                 MainActivity.this.startActivity(intent);
 
                 Log.d("何时夕:MainActivity", ("点击了图片：imageUri:" + imageUri));
             }
-        });
+        } , e -> showToast(e.getMessage())));
 
         // 监听bar上面的目录切换事件
-        mMainActivityVM.mDirectorySpinnerItemManagerVM.mClickedItemListener.addOnPropertyChangedCallback(new Observable.OnPropertyChangedCallback() {
+        mMainActivityVM.mDirectorySpinnerItemManagerVM.mClickedItemListener.addOnPropertyChangedCallback(new MyExceptionOnPropertyChangedCallback(new Observable.OnPropertyChangedCallback() {
             @Override
             public void onPropertyChanged(Observable observable, int i) {
-                String directoryName = (String) BindingUtils.getValueFromObservable(observable , "mDirectoryName");
+                String directoryName = ObserverParamMap.staticGetValue(observable, DirectorySpinnerItemManagerVM_directoryName);
                 mMainActivityVM.mPictureItemManager.freshPictureList(directoryName);
 
                 Log.d("何时夕:MainActivity", ("切换了目录：directoryName:" + directoryName));
             }
-        });
+        }, e -> showToast(e.getMessage())));
+
+        // 监听bar上面目录切换时候的toast显示
+        mMainActivityVM.mDirectorySpinnerItemManagerVM.mShowToast.addOnPropertyChangedCallback(showToast());
     }
 
     @Override

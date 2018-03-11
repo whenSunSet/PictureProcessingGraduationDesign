@@ -5,6 +5,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
+import com.example.whensunset.pictureprocessinggraduationdesign.base.MyUtil;
+
 /**
  * Created by whensunset on 2018/3/6.
  */
@@ -26,10 +28,10 @@ public class LayoutParamAdapter {
                                       int bindingBottomMargin ,
                                       int bindingRightMargin) {
         ViewGroup.LayoutParams layoutParams = view.getLayoutParams();
-        if (bindingWidth != 0)layoutParams.width = BindingUtils.dip2px(bindingWidth);
-        if (bindingHeight != 0)layoutParams.height = BindingUtils.dip2px(bindingHeight);
+        if (bindingWidth != 0)layoutParams.width = MyUtil.dip2px(bindingWidth);
+        if (bindingHeight != 0)layoutParams.height = MyUtil.dip2px(bindingHeight);
         if ((bindingBottomMargin | bindingTopMargin | bindingLeftMargin | bindingRightMargin) != 0 && (layoutParams instanceof ViewGroup.MarginLayoutParams))
-            ((ViewGroup.MarginLayoutParams)layoutParams).setMargins(BindingUtils.dip2px(bindingLeftMargin) , BindingUtils.dip2px(bindingTopMargin) , BindingUtils.dip2px(bindingRightMargin) , BindingUtils.dip2px(bindingBottomMargin));
+            ((ViewGroup.MarginLayoutParams)layoutParams).setMargins(MyUtil.dip2px(bindingLeftMargin) , MyUtil.dip2px(bindingTopMargin) , MyUtil.dip2px(bindingRightMargin) , MyUtil.dip2px(bindingBottomMargin));
         view.setLayoutParams(layoutParams);
     }
 
@@ -40,8 +42,8 @@ public class LayoutParamAdapter {
                                       int bindingWeight ,
                                       int bindingGravity) {
         LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) view.getLayoutParams();
-        if (bindingWeight != 0)layoutParams.weight = BindingUtils.dip2px(bindingWeight);
-        if (bindingGravity != 0)layoutParams.gravity = BindingUtils.dip2px(bindingGravity);
+        if (bindingWeight != 0)layoutParams.weight = MyUtil.dip2px(bindingWeight);
+        if (bindingGravity != 0)layoutParams.gravity = MyUtil.dip2px(bindingGravity);
         view.setLayoutParams(layoutParams);
     }
 
@@ -56,7 +58,7 @@ public class LayoutParamAdapter {
                                   int bindingBottomPadding ,
                                   int bindingRightPadding) {
         if ((bindingBottomPadding | bindingTopPadding | bindingLeftPadding | bindingRightPadding) != 0)
-            view.setPadding(BindingUtils.dip2px(bindingLeftPadding) , BindingUtils.dip2px(bindingTopPadding) , BindingUtils.dip2px(bindingRightPadding) , BindingUtils.dip2px(bindingBottomPadding));
+            view.setPadding(MyUtil.dip2px(bindingLeftPadding) , MyUtil.dip2px(bindingTopPadding) , MyUtil.dip2px(bindingRightPadding) , MyUtil.dip2px(bindingBottomPadding));
     }
 
 }

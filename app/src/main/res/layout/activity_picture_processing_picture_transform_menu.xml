@@ -30,20 +30,6 @@
             bind:bindingTopMargin="@{PictureTransformMenuVM.MENU_ITEM_MARGIN}"
             bind:bindingBottomMargin="@{PictureTransformMenuVM.MENU_ITEM_MARGIN}"
 
-            android:src="@drawable/picture_transform_cut"
-            android:onClick="@{() -> viewModel.clickPictureCut()}"
-            android:id="@+id/picture_transform_cut_image_view"
-            style="@style/PictureProcessingTransformTabMenuImageView"/>
-
-        <ImageView
-            bind:bindingWidth="@{PictureTransformMenuVM.MENU_ITEM_WIDTH}"
-            bind:bindingHeight="@{PictureTransformMenuVM.MENU_ITEM_WIDTH}"
-
-            bind:bindingLeftMargin="@{PictureTransformMenuVM.MENU_ITEM_MARGIN}"
-            bind:bindingRightMargin="@{PictureTransformMenuVM.MENU_ITEM_MARGIN}"
-            bind:bindingTopMargin="@{PictureTransformMenuVM.MENU_ITEM_MARGIN}"
-            bind:bindingBottomMargin="@{PictureTransformMenuVM.MENU_ITEM_MARGIN}"
-
             android:onClick="@{() -> viewModel.clickPictureRotate()}"
             android:src="@drawable/picture_transform_rotate"
             android:id="@+id/picture_transform_rotate_image_view"
@@ -75,6 +61,20 @@
             android:onClick="@{() -> viewModel.clickPictureVerticalFlip()}"
             android:src="@drawable/picture_transform_vertical_flip"
             android:id="@+id/picture_transform_vertical_flip_image_view"
+            style="@style/PictureProcessingTransformTabMenuImageView"/>
+
+        <ImageView
+            bind:bindingWidth="@{PictureTransformMenuVM.MENU_ITEM_WIDTH}"
+            bind:bindingHeight="@{PictureTransformMenuVM.MENU_ITEM_WIDTH}"
+
+            bind:bindingLeftMargin="@{PictureTransformMenuVM.MENU_ITEM_MARGIN}"
+            bind:bindingRightMargin="@{PictureTransformMenuVM.MENU_ITEM_MARGIN}"
+            bind:bindingTopMargin="@{PictureTransformMenuVM.MENU_ITEM_MARGIN}"
+            bind:bindingBottomMargin="@{PictureTransformMenuVM.MENU_ITEM_MARGIN}"
+
+            android:src="@drawable/picture_transform_cut"
+            android:onClick="@{() -> viewModel.clickPictureCut()}"
+            android:id="@+id/picture_transform_cut_image_view"
             style="@style/PictureProcessingTransformTabMenuImageView"/>
 
     </LinearLayout>

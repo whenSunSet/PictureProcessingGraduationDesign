@@ -3,15 +3,17 @@ package com.example.whensunset.pictureprocessinggraduationdesign.viewModel.inclu
 import android.databinding.ObservableField;
 
 import com.example.whensunset.pictureprocessinggraduationdesign.base.BaseVM;
-import com.example.whensunset.pictureprocessinggraduationdesign.dataBindingUtil.BindingUtils;
+import com.example.whensunset.pictureprocessinggraduationdesign.base.MyUtil;
+import com.example.whensunset.pictureprocessinggraduationdesign.base.ObserverParamMap;
 import com.example.whensunset.pictureprocessinggraduationdesign.pictureProcessing.FlipMyConsumer;
 import com.example.whensunset.pictureprocessinggraduationdesign.pictureProcessing.RotateMyConsumer;
 import com.example.whensunset.pictureprocessinggraduationdesign.pictureProcessing.StringConsumerChain;
 
 import org.opencv.core.Mat;
 
-import java.util.HashMap;
-import java.util.Map;
+import io.reactivex.functions.Consumer;
+
+import static com.example.whensunset.pictureprocessinggraduationdesign.staticParam.ObserverMapKey.PictureTransformMenuVM_mat;
 
 /**
  * Created by whensunset on 2018/3/6.
@@ -21,13 +23,15 @@ public class PictureTransformMenuVM extends BaseVM {
     public static final int MENU_ITEM_MARGIN = 4;
     public static final int MENU_PADDING = 10;
 
-    public static final int MENU_ITEM_WIDTH = (BindingUtils.getDisplayWidthDp() - 2 * MENU_PADDING - 4 * 2 * MENU_ITEM_MARGIN) / 4;
+    public static final int MENU_ITEM_WIDTH = (MyUtil.getDisplayWidthDp() - 2 * MENU_PADDING - 4 * 2 * MENU_ITEM_MARGIN) / 4;
     public static final int MENU_HEIGHT = MENU_ITEM_WIDTH + 2 * MENU_PADDING + 2 * MENU_ITEM_MARGIN;
 
-    public final ObservableField<? super Object> mClickPictureCutListener = new ObservableField<>();
+    private static double ROTATE_ANGLE =  90;
+
     public final ObservableField<? super Object> mClickPictureRotateListener = new ObservableField<>();
     public final ObservableField<? super Object> mClickPictureHorizontalFlipListener = new ObservableField<>();
     public final ObservableField<? super Object> mClickPictureVerticalFlipListener = new ObservableField<>();
+    public final ObservableField<? super Object> mClickPictureCutListener = new ObservableField<>();
 
     private StringConsumerChain mStringConsumerChain = StringConsumerChain.getInstance();
 
@@ -35,42 +39,37 @@ public class PictureTransformMenuVM extends BaseVM {
 
     }
 
-    public void clickPictureCut() {
-//        mClickPictureCutListener.notifyChange();
-    }
-
     public void clickPictureRotate() {
-        RotateMyConsumer rotateMyConsumer = new RotateMyConsumer(90.0);
+        RotateMyConsumer rotateMyConsumer = new RotateMyConsumer(ROTATE_ANGLE);
 
         mStringConsumerChain
                 .rxRunNextConvenient(rotateMyConsumer)
-                .subscribe(mat -> {
-                    mClickPictureRotateListener.set(getMap("mat" , mat));
-                });
+                .subscribe(subscribeAction(mClickPictureRotateListener));
     }
 
     public void clickPictureHorizontalFlip() {
         FlipMyConsumer flipMyConsumer = new FlipMyConsumer(FlipMyConsumer.HORIZONTAL);
+
         mStringConsumerChain
                 .rxRunNextConvenient(flipMyConsumer)
-                .subscribe(mat -> {
-                    mClickPictureHorizontalFlipListener.set(getMap("mat" , mat));
-                });
+                .subscribe(subscribeAction(mClickPictureHorizontalFlipListener));
     }
 
     public void clickPictureVerticalFlip() {
         FlipMyConsumer flipMyConsumer = new FlipMyConsumer(FlipMyConsumer.VERTICAL);
+
         mStringConsumerChain
                 .rxRunNextConvenient(flipMyConsumer)
-                .subscribe(mat -> {
-                    mClickPictureVerticalFlipListener.set(getMap("mat" , mat));
-                });
+                .subscribe(subscribeAction(mClickPictureVerticalFlipListener));
     }
 
-    private <K , V> Map<K , V> getMap(K k , V v) {
-        Map<K , V> map = new HashMap<>();
-        map.put(k , v);
-        return map
+    public void clickPictureCut() {
+    }
+
+    private Consumer<? super Mat> subscribeAction(ObservableField<? super Object> listener) {
+        return (Consumer<Mat>) mat -> {
+            listener.set(ObserverParamMap.staticSet(PictureTransformMenuVM_mat, mat));
+        };
     }
 
 }

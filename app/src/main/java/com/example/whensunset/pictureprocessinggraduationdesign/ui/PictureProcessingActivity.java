@@ -1,15 +1,14 @@
 package com.example.whensunset.pictureprocessinggraduationdesign.ui;
 
 import android.databinding.DataBindingUtil;
-import android.databinding.Observable;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
-import android.widget.Toast;
 
 import com.example.whensunset.pictureprocessinggraduationdesign.R;
+import com.example.whensunset.pictureprocessinggraduationdesign.base.BaseActivity;
+import com.example.whensunset.pictureprocessinggraduationdesign.pictureProcessing.StringConsumerChain;
 import com.example.whensunset.pictureprocessinggraduationdesign.viewModel.PictureProcessingActivityVM;
 
-public class PictureProcessingActivity extends AppCompatActivity {
+public class PictureProcessingActivity extends BaseActivity {
     private com.example.whensunset.pictureprocessinggraduationdesign.ui.PictureProcessingActivityBinding mPictureProcessingActivityBinding;
     private PictureProcessingActivityVM mPictureProcessingActivityVM;
 
@@ -20,30 +19,22 @@ public class PictureProcessingActivity extends AppCompatActivity {
         mPictureProcessingActivityVM = new PictureProcessingActivityVM(getIntent().getStringExtra("imageUri"));
         mPictureProcessingActivityBinding.setViewModel(mPictureProcessingActivityVM);
 
-        mPictureProcessingActivityVM.mPictureTransformMenuVM.mClickPictureCutListener.addOnPropertyChangedCallback(new Observable.OnPropertyChangedCallback() {
-            @Override
-            public void onPropertyChanged(Observable observable, int i) {
-                Toast.makeText(PictureProcessingActivity.this, "", Toast.LENGTH_SHORT).show();
-            }
-        });
+        uiActionInit();
+    }
+
+    public void uiActionInit() {
+        // 监听最外层VM的toast显示
+        mPictureProcessingActivityVM.mShowToast.addOnPropertyChangedCallback(showToast());
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-
-        mPictureProcessingActivityBinding.pictureTransformMenu.pictureTransformCutImageView.post(new Runnable() {
-            @Override
-            public void run() {
-                Toast.makeText(PictureProcessingActivity.this, "", Toast.LENGTH_SHORT).show();
-            }
-        });
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-//        mPictureProcessingActivityVM.mImageBitMap.get().recycle();
+        StringConsumerChain.getInstance().destroy();
     }
-
 }

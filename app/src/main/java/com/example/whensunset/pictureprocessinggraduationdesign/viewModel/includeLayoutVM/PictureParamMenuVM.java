@@ -3,7 +3,7 @@ package com.example.whensunset.pictureprocessinggraduationdesign.viewModel.inclu
 import android.databinding.ObservableField;
 
 import com.example.whensunset.pictureprocessinggraduationdesign.base.BaseVM;
-import com.example.whensunset.pictureprocessinggraduationdesign.dataBindingUtil.BindingUtils;
+import com.example.whensunset.pictureprocessinggraduationdesign.base.MyUtil;
 import com.example.whensunset.pictureprocessinggraduationdesign.viewModel.PictureProcessingActivityVM;
 
 
@@ -15,8 +15,8 @@ public class PictureParamMenuVM extends BaseVM {
     public static final int MENU_HEIGHT = PictureProcessingActivityVM.MENU_MAX_HEIGHT;
     public static final int MENU_ITEM_MARGIN = 2;
 
-    public static final int MENU_PADDING = (5 * MENU_HEIGHT - BindingUtils.getDisplayWidthDp()) / 8;
-    public static final int MENU_ITEM_WIDTH = (BindingUtils.getDisplayWidthDp() - MENU_HEIGHT) / 4 - 2 * MENU_ITEM_MARGIN;
+    public static final int MENU_PADDING = (5 * MENU_HEIGHT - MyUtil.getDisplayWidthDp()) / 8;
+    public static final int MENU_ITEM_WIDTH = (MyUtil.getDisplayWidthDp() - MENU_HEIGHT) / 4 - 2 * MENU_ITEM_MARGIN;
 
     public final ObservableField<? super Object> mClickPictureWhiteBalanceListener = new ObservableField<>();
     public final ObservableField<? super Object> mClickPictureBrightnessListener = new ObservableField<>();

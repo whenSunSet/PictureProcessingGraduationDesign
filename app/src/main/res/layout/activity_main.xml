@@ -5,11 +5,10 @@
     app:ignore="NamespaceTypo">
 
     <data class = 'com.example.whensunset.pictureprocessinggraduationdesign.ui.MainActivityBinding'>
-        <import type="android.view.ViewGroup.LayoutParams"/>
         <import type="com.example.whensunset.pictureprocessinggraduationdesign.dataBindingUtil.LayoutManager"/>
         <import type="com.example.whensunset.pictureprocessinggraduationdesign.dataBindingUtil.ItemDecoration"/>
         <import type="android.view.View"/>
-        <import type="com.example.whensunset.pictureprocessinggraduationdesign.dataBindingUtil.BindingUtils"/>
+        <import type="com.example.whensunset.pictureprocessinggraduationdesign.base.MyUtil"/>
 
         <variable name="viewModel" type="com.example.whensunset.pictureprocessinggraduationdesign.viewModel.MainActivityVM"/>
     </data>
@@ -22,7 +21,7 @@
 
         <android.support.design.widget.AppBarLayout
             android:layout_width="match_parent"
-            android:layout_height="50dp"
+            android:layout_height="30dp"
             android:theme="@style/AppTheme.AppBarOverlay">
 
             <android.support.v7.widget.Toolbar
@@ -49,11 +48,12 @@
             android:layout_height="match_parent"
             android:id="@+id/picture_recycle_view"
             bind:layoutManager="@{LayoutManager.grid(3)}"
-            bind:itemView="@{viewModel.mPictureItemManager.mViewSelector}"
             bind:itemDecor="@{ItemDecoration.defaultItemDecoration()}"
+
+            bind:itemView="@{viewModel.mPictureItemManager.mViewSelector}"
             bind:items="@{viewModel.mPictureItemManager.mDataItemList}"
-            bind:itemWidth="@{LayoutParams.MATCH_PARENT}"
-            bind:itemHeight="@{BindingUtils.getDisplayWidth() / 3}">
+            bind:itemWidth="@{viewModel.mPictureItemManager.mItemWidth}"
+            bind:itemHeight="@{viewModel.mPictureItemManager.mItemHeight}">
         </android.support.v7.widget.RecyclerView>
 
     </LinearLayout>

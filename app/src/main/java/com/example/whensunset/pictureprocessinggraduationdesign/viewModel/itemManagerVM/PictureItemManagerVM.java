@@ -1,19 +1,23 @@
 package com.example.whensunset.pictureprocessinggraduationdesign.viewModel.itemManagerVM;
 
 import android.databinding.ObservableField;
+import android.view.ViewGroup;
 
 import com.example.whensunset.pictureprocessinggraduationdesign.BR;
 import com.example.whensunset.pictureprocessinggraduationdesign.R;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.BaseItemManagerVM;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.BaseItemVM;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.IImageUriFetch;
+import com.example.whensunset.pictureprocessinggraduationdesign.base.MyUtil;
+import com.example.whensunset.pictureprocessinggraduationdesign.base.ObserverParamMap;
 import com.example.whensunset.pictureprocessinggraduationdesign.impl.SystemImageUriFetch;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import io.reactivex.Flowable;
+
+import static com.example.whensunset.pictureprocessinggraduationdesign.staticParam.ObserverMapKey.PictureItemManagerVM_mImageUri;
+import static com.example.whensunset.pictureprocessinggraduationdesign.staticParam.ObserverMapKey.PictureItemManagerVM_mPosition;
 
 /**
  * Created by whensunset on 2018/3/5.
@@ -22,6 +26,9 @@ import io.reactivex.Flowable;
 public class PictureItemManagerVM extends BaseItemManagerVM<PictureItemManagerVM.PictureItemVM> {
     public static final int ITEM_PICTURE_RESIZE_WIDTH = 100;
     public static final int ITEM_PICTURE_RESIZE_HEIGHT = 100;
+
+    public final int mItemHeight = MyUtil.getDisplayWidth() / 3;
+    public final int mItemWidth = ViewGroup.LayoutParams.MATCH_PARENT;
 
     public final IImageUriFetch mIImageUriFetch;
 
@@ -53,10 +60,10 @@ public class PictureItemManagerVM extends BaseItemManagerVM<PictureItemManagerVM
         }
 
         public void clickPicture() {
-            Map<String , Object> valueMap = new HashMap<>();
-            valueMap.put("mPosition" , mPosition);
-            valueMap.put("mImageUri" , mImageUri.get());
-            mClickedItemListener.set(valueMap);
+            ObserverParamMap observerParamMap = ObserverParamMap
+                    .staticSet(PictureItemManagerVM_mPosition , mPosition)
+                    .set(PictureItemManagerVM_mImageUri , mImageUri.get());
+            mClickedItemListener.set(observerParamMap);
         }
     }
 }

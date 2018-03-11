@@ -1,10 +1,11 @@
 package com.example.whensunset.pictureprocessinggraduationdesign.pictureProcessing;
 
 import android.text.TextUtils;
-import android.util.Log;
 
-import com.example.whensunset.pictureprocessinggraduationdesign.base.ConsumerChain;
-import com.example.whensunset.pictureprocessinggraduationdesign.dataBindingUtil.BindingUtils;
+import com.example.whensunset.pictureprocessinggraduationdesign.impl.ConsumerChain;
+import com.example.whensunset.pictureprocessinggraduationdesign.base.MyLog;
+import com.example.whensunset.pictureprocessinggraduationdesign.base.MyUtil;
+import com.example.whensunset.pictureprocessinggraduationdesign.impl.BaseMyConsumer;
 
 import org.opencv.core.Mat;
 import org.opencv.core.Rect;
@@ -19,6 +20,8 @@ import static org.opencv.imgcodecs.Imgcodecs.IMREAD_COLOR;
  */
 
 public class StringConsumerChain extends ConsumerChain<String> {
+    public static final String TAG = "何时夕:StringConsumerChain";
+
     private static StringConsumerChain INSTANCE;
 
     public static StringConsumerChain getInstance() {
@@ -37,19 +40,35 @@ public class StringConsumerChain extends ConsumerChain<String> {
 
     @Override
     protected Mat getStartResult(String path) {
+        MyLog.d(TAG, "getStartResult", "path:", path);
+
         if (TextUtils.isEmpty(path)) {
-            Log.d("何时夕:StringConsumerChain", ("需要处理的图片路径为null startParam：" + path));
-            return null;
+            throw new RuntimeException("需要处理的图片路径为空");
         }
 
         File imageFile = new File(path);
         if (!imageFile.exists()) {
-            Log.d("何时夕:StringConsumerChain", ("需要处理的图片不存在 startParam：" + path));
-            return null;
+            throw new RuntimeException("需要处理的图片不存在");
         }
-        int[] imageInfo = BindingUtils.getImageWidthHeight(path);
-        mFirstCutMyConsumer.setRect(new Rect(0 , 0 , imageInfo[0] , imageInfo[1]));
-        return Imgcodecs.imread(path , IMREAD_COLOR);
+
+        int[] imageInfo = MyUtil.getImageWidthHeight(path);
+        Mat firstMat = Imgcodecs.imread(path , IMREAD_COLOR);
+
+        if (firstMat == null) {
+            throw new RuntimeException("初始化 Chain 图片失败，图片Mat为null");
+        }
+
+        Rect rect = new Rect(0 , 0 , imageInfo[0] , imageInfo[1]);
+        BaseMyConsumer firstCutMyConsumer = new CutMyConsumer(rect) {
+            @Override
+            protected Mat onNewResultImpl(Mat oldResult) {
+                return firstMat;
+            }
+        };
+        addConsumer(firstCutMyConsumer);
+
+        MyLog.d(TAG, "getStartResult", "firstMat:rect" , firstMat , rect);
+        return firstMat;
     }
 
 }

@@ -1,8 +1,7 @@
 package com.example.whensunset.pictureprocessinggraduationdesign.impl;
 
-import android.util.Log;
-
 import com.example.whensunset.pictureprocessinggraduationdesign.base.MyConsumer;
+import com.example.whensunset.pictureprocessinggraduationdesign.base.MyLog;
 
 import org.opencv.core.Mat;
 
@@ -11,6 +10,8 @@ import org.opencv.core.Mat;
  */
 
 public abstract class BaseMyConsumer implements MyConsumer<Mat , Mat> {
+    public static final String TAG = "何时夕:BaseMyConsumer";
+
     protected boolean isSaveNowResult = false;
     private Mat mNowResult;
 
@@ -54,13 +55,17 @@ public abstract class BaseMyConsumer implements MyConsumer<Mat , Mat> {
         this.mNowResult = nowResult;
     }
 
+    public abstract void copy(BaseMyConsumer baseMyConsumer);
+
     protected abstract Mat onNewResultImpl(Mat oldResult);
 
     protected abstract void onFailureImpl(Throwable t);
 
     protected abstract void onCancellationImpl();
 
+
     protected void onUnhandledException(Exception e) {
-        Log.d("何时夕:BaseMyConsumer" + this.getClass() , ("Consumer 抛出异常:" + e.getMessage() + " " + e.toString()));
+        MyLog.d(TAG, "onUnhandledException", "class:e.getMessage():e.toString():" , this.getClass().getName() , e.getMessage() , e.toString());
     }
+
 }

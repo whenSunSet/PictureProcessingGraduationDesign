@@ -5,12 +5,12 @@ import android.util.Log;
 
 import com.example.whensunset.pictureprocessinggraduationdesign.base.BaseItemManagerVM;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.BaseItemVM;
+import com.example.whensunset.pictureprocessinggraduationdesign.base.ObserverParamMap;
 import com.example.whensunset.pictureprocessinggraduationdesign.impl.SystemImageUriFetch;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import io.reactivex.Flowable;
+
+import static com.example.whensunset.pictureprocessinggraduationdesign.staticParam.ObserverMapKey.DirectorySpinnerItemManagerVM_directoryName;
 
 /**
  * Created by whensunset on 2018/3/5.
@@ -24,10 +24,32 @@ public class DirectorySpinnerItemManagerVM extends BaseItemManagerVM<DirectorySp
     }
 
     public void onItemSelected(int position) {
-        Map<String , Object> valueMap = new HashMap<>();
-        valueMap.put("mDirectoryName" , mDataItemList.get(position).mDirectoryName.get());
-        mClickedItemListener.set(valueMap);
-        Log.d("何时夕:DirectorySpinner", ("position:" + position + ",valueMap:" + valueMap));
+        if (position < 0) {
+            mShowToast.set("被选择的目录position不能小于0");
+            return;
+        }
+
+        if (mDataItemList == null || mDataItemList.size() <= position) {
+            mShowToast.set("被选择的目录position不能大于等于目录总数");
+            return;
+        }
+
+        DirectorySpinnerItemVM directorySpinnerItemVM = mDataItemList.get(position);
+        if (directorySpinnerItemVM == null) {
+            mShowToast.set("被选择的目录不可为null");
+            return;
+        }
+
+        String directoryName = directorySpinnerItemVM.mDirectoryName.get();
+        if (directoryName == null) {
+            mShowToast.set("被选择的目录名字不可为null");
+            return;
+        }
+
+        ObserverParamMap observerParamMap = ObserverParamMap.staticSet(DirectorySpinnerItemManagerVM_directoryName , directoryName);
+        mClickedItemListener.set(observerParamMap);
+
+        Log.d("何时夕:DirectorySpinner", ("position:" + position + ",observerParamMap:" + observerParamMap));
     }
 
     public static class DirectorySpinnerItemVM extends BaseItemVM {

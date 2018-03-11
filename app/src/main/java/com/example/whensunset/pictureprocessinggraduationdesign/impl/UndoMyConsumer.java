@@ -1,6 +1,4 @@
-package com.example.whensunset.pictureprocessinggraduationdesign.pictureProcessing;
-
-import com.example.whensunset.pictureprocessinggraduationdesign.impl.BaseMyConsumer;
+package com.example.whensunset.pictureprocessinggraduationdesign.impl;
 
 import org.opencv.core.Mat;
 

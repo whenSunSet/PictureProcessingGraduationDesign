@@ -1,4 +1,6 @@
-package com.example.whensunset.pictureprocessinggraduationdesign.pictureProcessing;
+package com.example.whensunset.pictureprocessinggraduationdesign.impl;
+
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Created by whensunset on 2018/3/8.
@@ -61,5 +63,25 @@ public abstract class LinkedMyConsumer extends UndoMyConsumer {
         }
 
         return nowLinkedMyConsumer;
+    }
+
+    /**
+     * {@link ConsumerChain removeAfterUndoRedoPointConsumer}
+     * 中调用，其中只会出现 previousConsumer，nextConsumer 为 null,null 和 非null,null 这两种情况
+     * @param linkedMyConsumer 不可为null
+     */
+    public static void remove(@NotNull LinkedMyConsumer linkedMyConsumer) {
+        LinkedMyConsumer previousConsumer = linkedMyConsumer.mPreviousConsumer;
+        LinkedMyConsumer nextConsumer = linkedMyConsumer.mNextConsumer;
+
+        if (previousConsumer != null) {
+            previousConsumer.mNextConsumer = nextConsumer;
+            linkedMyConsumer.mPreviousConsumer = null;
+        }
+
+        if (nextConsumer != null) {
+            nextConsumer.mPreviousConsumer = previousConsumer;
+            linkedMyConsumer.mNextConsumer = null;
+        }
     }
 }

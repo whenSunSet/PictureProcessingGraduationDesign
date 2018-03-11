@@ -3,10 +3,10 @@ package com.example.whensunset.pictureprocessinggraduationdesign.impl;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.MediaStore;
-import android.util.Log;
 
 import com.example.whensunset.pictureprocessinggraduationdesign.PictureProcessingApplication;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.IImageUriFetch;
+import com.example.whensunset.pictureprocessinggraduationdesign.base.MyLog;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -21,9 +21,11 @@ import io.reactivex.Flowable;
  */
 
 public class SystemImageUriFetch implements IImageUriFetch {
+    public static final String TAG = "何时夕:SystemImageUriFetch";
+
     public static SystemImageUriFetch mSystemImageUriFetch;
 
-    private Map<String , List<ImageInfo>> mImageInfoMap = new LinkedHashMap<>();
+    private Map<String, List<ImageInfo>> mImageInfoMap = new LinkedHashMap<>();
     private final List<ImageInfo> mImageInfoList = new ArrayList<>();
 
     public static SystemImageUriFetch getInstance() {
@@ -44,13 +46,15 @@ public class SystemImageUriFetch implements IImageUriFetch {
     @Override
     public List<String> getALlImageUriListFromTag(Object tag) {
         List<ImageInfo> imageInfoList = mImageInfoMap.get(tag);
-        return getRangeImageUriListFromList(imageInfoList , 0 , imageInfoList == null ? 0 :imageInfoList.size());
+        MyLog.d(TAG, "getALlImageUriListFromTag", "tag:imageInfoList:", tag , imageInfoList);
+        return getRangeImageUriListFromList(imageInfoList , 0 , imageInfoList == null ? 0 : imageInfoList.size());
     }
 
     @Override
-    public List<String> getRangeImageUriListFromTag(Object tag , int start , int end) {
+    public List<String> getRangeImageUriListFromTag(Object tag, int start, int end) {
         List<ImageInfo> imageInfoList = mImageInfoMap.get(tag);
-        return getRangeImageUriListFromList(imageInfoList , start , end);
+        MyLog.d(TAG, "getRangeImageUriListFromTag", "tag:start:end:", tag , start , end);
+        return getRangeImageUriListFromList(imageInfoList, start, end);
     }
 
     @Override
@@ -60,16 +64,16 @@ public class SystemImageUriFetch implements IImageUriFetch {
 
     @Override
     public List<String> getAllImageUriList() {
-        return getRangeImageUriList(0 , mImageInfoList.size());
+        return getRangeImageUriList(0, mImageInfoList.size());
     }
 
     @Override
     public List<String> getRangeImageUriList(int start, int end) {
-        return getRangeImageUriListFromList(mImageInfoList, start , end);
+        return getRangeImageUriListFromList(mImageInfoList, start, end);
 
     }
 
-    private List<String> getRangeImageUriListFromList(List<ImageInfo> imageInfoList , int start , int end) {
+    private List<String> getRangeImageUriListFromList(List<ImageInfo> imageInfoList, int start, int end) {
         List<String> imageUriList = new ArrayList<>();
         Flowable.fromIterable(imageInfoList)
                 .take(end)
@@ -81,7 +85,7 @@ public class SystemImageUriFetch implements IImageUriFetch {
 
     @Override
     public void freshImageInfo() {
-        String[] projection = { MediaStore.Images.ImageColumns.DATA
+        String[] projection = {MediaStore.Images.ImageColumns.DATA
                 , MediaStore.Images.ImageColumns.SIZE
                 , MediaStore.Images.ImageColumns.DISPLAY_NAME
                 , MediaStore.Images.ImageColumns.TITLE
@@ -93,19 +97,20 @@ public class SystemImageUriFetch implements IImageUriFetch {
         Cursor cursor = PictureProcessingApplication
                 .getAppContext()
                 .getContentResolver()
-                .query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI , projection ,null , null ,null);
+                .query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection, null, null, null);
+
         if (cursor == null) {
-            Log.d("何时夕:SystemImageUriFetch", "cursor为null，数据清空");
+            MyLog.d(TAG, "freshImageInfo", "cursor为null，数据清空");
             mImageInfoList.clear();
             return;
         }
 
         cursor.moveToFirst();
-        mImageInfoMap.put("所有图片" , mImageInfoList);
+        mImageInfoMap.put("所有图片", mImageInfoList);
         while (cursor.moveToNext()) {
             ImageInfo imageInfo = new ImageInfo(cursor);
             String imageName = imageInfo.data.substring(imageInfo.data.lastIndexOf("/") + 1);
-            String imageDirectory = imageInfo.data.substring(0 , imageInfo.data.lastIndexOf("/"));
+            String imageDirectory = imageInfo.data.substring(0, imageInfo.data.lastIndexOf("/"));
             imageInfo.setImageName(imageName);
             imageInfo.setImageDirectory(imageDirectory);
             mImageInfoList.add(imageInfo);
@@ -115,10 +120,10 @@ public class SystemImageUriFetch implements IImageUriFetch {
             } else {
                 List<ImageInfo> imageInfoList = new ArrayList<>();
                 imageInfoList.add(imageInfo);
-                mImageInfoMap.put(imageDirectory , imageInfoList);
+                mImageInfoMap.put(imageDirectory, imageInfoList);
             }
 
-            Log.d("何时夕:SystemImageUriFetch" , "构造图片信息：" + imageInfo.toString());
+            MyLog.d(TAG, "freshImageInfo", "imageInfo:", imageInfo.toString());
         }
 
         cursor.close();
