@@ -13,6 +13,7 @@ import org.opencv.core.Mat;
 
 import io.reactivex.functions.Consumer;
 
+import static com.example.whensunset.pictureprocessinggraduationdesign.pictureProcessing.RotateMyConsumer.ROTATE_ANGLE_90;
 import static com.example.whensunset.pictureprocessinggraduationdesign.staticParam.ObserverMapKey.PictureTransformMenuVM_mat;
 
 /**
@@ -20,27 +21,27 @@ import static com.example.whensunset.pictureprocessinggraduationdesign.staticPar
  */
 
 public class PictureTransformMenuVM extends BaseVM {
+    public static final String TAG = "何时夕:PictureTransformMenuVM";
+
     public static final int MENU_ITEM_MARGIN = 4;
     public static final int MENU_PADDING = 10;
-
     public static final int MENU_ITEM_WIDTH = (MyUtil.getDisplayWidthDp() - 2 * MENU_PADDING - 4 * 2 * MENU_ITEM_MARGIN) / 4;
     public static final int MENU_HEIGHT = MENU_ITEM_WIDTH + 2 * MENU_PADDING + 2 * MENU_ITEM_MARGIN;
 
-    private static double ROTATE_ANGLE =  90;
 
     public final ObservableField<? super Object> mClickPictureRotateListener = new ObservableField<>();
     public final ObservableField<? super Object> mClickPictureHorizontalFlipListener = new ObservableField<>();
     public final ObservableField<? super Object> mClickPictureVerticalFlipListener = new ObservableField<>();
     public final ObservableField<? super Object> mClickPictureCutListener = new ObservableField<>();
 
+
     private StringConsumerChain mStringConsumerChain = StringConsumerChain.getInstance();
 
     public PictureTransformMenuVM() {
-
     }
 
     public void clickPictureRotate() {
-        RotateMyConsumer rotateMyConsumer = new RotateMyConsumer(ROTATE_ANGLE);
+        RotateMyConsumer rotateMyConsumer = new RotateMyConsumer(ROTATE_ANGLE_90);
 
         mStringConsumerChain
                 .rxRunNextConvenient(rotateMyConsumer)

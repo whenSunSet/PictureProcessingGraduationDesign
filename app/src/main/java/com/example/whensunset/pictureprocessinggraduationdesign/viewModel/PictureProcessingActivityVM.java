@@ -40,6 +40,7 @@ public class PictureProcessingActivityVM extends BaseVM {
     public final ObservableField<Integer> mSelectTab = new ObservableField<>(0);
     public final ObservableField<Boolean> mCanUndo = new ObservableField<>(false);
     public final ObservableField<Boolean> mCanRedo = new ObservableField<>(false);
+    public final ObservableField<Boolean> isInCut = new ObservableField<>(false);
 
     public final ObservableField<? super Object> mClickPictureFilterListener = new ObservableField<>();
     public final ObservableField<? super Object> mClickPictureTransformListener = new ObservableField<>();
@@ -56,13 +57,13 @@ public class PictureProcessingActivityVM extends BaseVM {
     private StringConsumerChain mStringConsumerChain = StringConsumerChain.getInstance();
     private String mImagePath;
     private String mImageUri;
-    private boolean isInCut = false;
 
     public PictureProcessingActivityVM(String imageUri) {
-        mPictureTransformMenuVM = new PictureTransformMenuVM();
-        mPictureParamMenuVM = new PictureParamMenuVM();
         mImageUri = imageUri;
         mImagePath = Uri.parse(imageUri).getPath();
+
+        mPictureTransformMenuVM = new PictureTransformMenuVM();
+        mPictureParamMenuVM = new PictureParamMenuVM();
 
         mStringConsumerChain.init(mImagePath);
         mStringConsumerChain
@@ -72,7 +73,7 @@ public class PictureProcessingActivityVM extends BaseVM {
         //监听 图片变换 的操作以更新图片
         pictureTransformAction();
 
-        MyLog.d(TAG, "PictureProcessingActivityVM", "imageUri:" , imageUri);
+        MyLog.d(TAG, "PictureProcessingActivityVM", "imageUri:", imageUri );
     }
 
     private void pictureTransformAction() {
@@ -89,30 +90,42 @@ public class PictureProcessingActivityVM extends BaseVM {
         // 监听剪裁比例变化
         mPictureTransformMenuVM.mClickPictureCutListener.addOnPropertyChangedCallback(showMat());
 
+        MyLog.d(TAG, "pictureTransformAction", "状态:", "监听图像变换代码初始化完毕");
     }
 
     public void clickPictureFilterTab() {
-        runCut();
+        mClickPictureFilterListener.notifyChange();
         mSelectTab.set(SELECT_PICTURE_FILTER);
+
+        MyLog.d(TAG, "clickPictureFilterTab", "状态:", "进入滤镜列表");
     }
 
     public void clickPictureTransformTab() {
-        isInCut = true;
+        isInCut.set(true);
         mSelectTab.set(SELECT_PICTURE_TRANSFORM);
+
+        MyLog.d(TAG, "clickPictureTransformTab", "状态:", "进入图像转换");
     }
 
     public void clickPictureParamTab() {
-        runCut();
+        mClickPictureParamListener.notifyChange();
         mSelectTab.set(SELECT_PICTURE_PARAM);
+
+        MyLog.d(TAG, "clickPictureParamTab", "状态:", "进入图像参数变化");
     }
 
     public void clickPictureFrameTab() {
-        runCut();
+        mClickPictureFrameListener.notifyChange();
         mSelectTab.set(SELECT_PICTURE_FRAME);
+
+        MyLog.d(TAG, "clickPictureFrameTab", "状态:", "进入图像边框添加列表");
     }
 
     public void clickPictureTextTab() {
+        mClickPictureTextListener.notifyChange();
         mSelectTab.set(SELECT_PICTURE_TEXT);
+
+        MyLog.d(TAG, "clickPictureFrameTab", "状态:", "进入图像文字添加");
     }
 
 
@@ -120,22 +133,38 @@ public class PictureProcessingActivityVM extends BaseVM {
         mStringConsumerChain
                 .rxUndoConvenient()
                 .subscribe(this::showMat);
+
+        MyLog.d(TAG, "clickUndo", "状态:nowCutRect:", "undo完毕" , nowCutRect);
     }
 
     public void clickRedo() {
         mStringConsumerChain
                 .rxRedoConvenient()
                 .subscribe(this::showMat);
+
+        MyLog.d(TAG, "clickRedo", "状态:nowCutRect", "redo完毕" , nowCutRect);
     }
 
-    private void runCut() {
-        if (isInCut) {
-            CutMyConsumer cutMyConsumer = new CutMyConsumer(new Rect(0 , 0 , 200 , 200));
+    private Rect nowCutRect = new Rect();
+    public void runCut(Rect cutRect) {
+        MyLog.d(TAG, "runCut", "状态:cutRect", "进入图片剪裁" , cutRect);
+
+        if (isInCut.get() && isImageSizeChanged(cutRect)) {
+            nowCutRect = cutRect;
+            CutMyConsumer cutMyConsumer = new CutMyConsumer(nowCutRect);
             mStringConsumerChain
                     .rxRunNextConvenient(cutMyConsumer)
                     .subscribe(this::showMat);
+
+            MyLog.d(TAG, "runCut", "状态:nowCutRect:", "进行图片剪裁，并且剪裁完毕" , nowCutRect);
         }
-        isInCut = false;
+        isInCut.set(false);
+    }
+    private boolean isImageSizeChanged(Rect cutRect) {
+        if ((nowCutRect.width - cutRect.width) <= 2 && (nowCutRect.height - cutRect.height) <= 2) {
+            return false;
+        }
+        return true;
     }
 
     private MyExceptionOnPropertyChangedCallback showMat() {
@@ -148,12 +177,14 @@ public class PictureProcessingActivityVM extends BaseVM {
     }
 
     private void showMat(Mat mat) {
+        MyLog.d(TAG, "showMat", "状态:mat:", "进行图片展示" , mat);
         if (mat == null) {
             throw new RuntimeException("被展示的mat为null");
         }
 
         mCanUndo.set(mStringConsumerChain.canUndo());
         mCanRedo.set(mStringConsumerChain.canRedo());
+        nowCutRect = mStringConsumerChain.getNowRect();
 
         Bitmap oldBitmap = mImageBitMap.get();
         if (oldBitmap != null) {
@@ -166,6 +197,6 @@ public class PictureProcessingActivityVM extends BaseVM {
         Utils.matToBitmap(mat , newBitMap);
         mImageBitMap.set(newBitMap);
 
-        MyLog.d(TAG, "showMat", "mat:", mat);
+        MyLog.d(TAG, "showMat", "状态:mCanUndo:mCanRedo:nowCutRect:", "图片展示完毕" , mCanUndo.get() , mCanRedo.get() , nowCutRect);
     }
 }

@@ -27,7 +27,7 @@ public class FlipMyConsumer extends UndoMyConsumer {
 
     @Override
     protected Mat onNewResultImpl(Mat oldResult) {
-        MyLog.d(TAG, "onNewResultImpl", "oldResult:" , oldResult);
+        MyLog.d(TAG, "onNewResultImpl", "状态:oldResult:mFlipCode:" , "运行" , oldResult , mFlipCode);
 
         if (oldResult == null) {
             throw new IllegalArgumentException("被翻转的Mat 不可为null");
@@ -35,7 +35,8 @@ public class FlipMyConsumer extends UndoMyConsumer {
 
         Mat newResult = new Mat();
         flip(oldResult.nativeObj , newResult.nativeObj , mFlipCode);
-        MyLog.d(TAG, "onNewResultImpl", "mFlipCode:" , mFlipCode);
+
+        MyLog.d(TAG, "onNewResultImpl", "状态:newResult:" , "运行完毕" , newResult);
         return newResult;
     }
 
@@ -51,10 +52,10 @@ public class FlipMyConsumer extends UndoMyConsumer {
 
     @Override
     public void copy(BaseMyConsumer baseMyConsumer) {
-        MyLog.d(TAG, "copy", "beCopyConsumer:" , baseMyConsumer);
+        MyLog.d(TAG, "copy", "状态:beCopyConsumer:" , "拷贝" ,  baseMyConsumer);
 
         if (baseMyConsumer == null) {
-            MyLog.d(TAG, "copy", "传入的被拷贝的 consumer 为null");
+            MyLog.d(TAG, "copy", "状态:" , "传入的被拷贝的 consumer 为null");
             return;
         }
 

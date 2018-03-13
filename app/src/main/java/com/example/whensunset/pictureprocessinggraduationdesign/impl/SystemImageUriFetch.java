@@ -46,14 +46,14 @@ public class SystemImageUriFetch implements IImageUriFetch {
     @Override
     public List<String> getALlImageUriListFromTag(Object tag) {
         List<ImageInfo> imageInfoList = mImageInfoMap.get(tag);
-        MyLog.d(TAG, "getALlImageUriListFromTag", "tag:imageInfoList:", tag , imageInfoList);
+        MyLog.d(TAG, "getALlImageUriListFromTag", "状态:tag:imageInfoList:", "根据tag获取全部的uri" , tag , imageInfoList);
         return getRangeImageUriListFromList(imageInfoList , 0 , imageInfoList == null ? 0 : imageInfoList.size());
     }
 
     @Override
     public List<String> getRangeImageUriListFromTag(Object tag, int start, int end) {
         List<ImageInfo> imageInfoList = mImageInfoMap.get(tag);
-        MyLog.d(TAG, "getRangeImageUriListFromTag", "tag:start:end:", tag , start , end);
+        MyLog.d(TAG, "getRangeImageUriListFromTag", "状态:tag:start:end:", "根据tag获取部分uri" , tag , start , end);
         return getRangeImageUriListFromList(imageInfoList, start, end);
     }
 
@@ -100,7 +100,7 @@ public class SystemImageUriFetch implements IImageUriFetch {
                 .query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection, null, null, null);
 
         if (cursor == null) {
-            MyLog.d(TAG, "freshImageInfo", "cursor为null，数据清空");
+            MyLog.d(TAG, "freshImageInfo", "状态:" , "cursor为null，数据清空");
             mImageInfoList.clear();
             return;
         }
@@ -123,7 +123,7 @@ public class SystemImageUriFetch implements IImageUriFetch {
                 mImageInfoMap.put(imageDirectory, imageInfoList);
             }
 
-            MyLog.d(TAG, "freshImageInfo", "imageInfo:", imageInfo.toString());
+            MyLog.d(TAG, "freshImageInfo", "状态:imageInfo:", "获取图片信息完毕" , imageInfo.toString());
         }
 
         cursor.close();

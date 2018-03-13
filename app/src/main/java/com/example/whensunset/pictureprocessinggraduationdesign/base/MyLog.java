@@ -11,11 +11,11 @@ public class MyLog {
 
     public static void d(String tag , String method , String message , Object... objects) {
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(method).append(":");
+        stringBuilder.append(method).append(":   ");
 
         if (message.contains(":") && objects!= null &&objects.length != 0) {
             String[] strings = message.split(":");
-            for (int i = 0; i < strings.length; i++) {
+            for (int i = 0; i < Math.min(strings.length , objects.length); i++) {
                 String name = strings[i];
                 String dis = (objects[i] == null ? "null" : objects[i].toString());
                 stringBuilder.append(name).append(":").append(dis).append(" , ");

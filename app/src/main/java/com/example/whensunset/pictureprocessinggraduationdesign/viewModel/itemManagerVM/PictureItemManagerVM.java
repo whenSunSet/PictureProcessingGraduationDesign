@@ -24,6 +24,8 @@ import static com.example.whensunset.pictureprocessinggraduationdesign.staticPar
  */
 
 public class PictureItemManagerVM extends BaseItemManagerVM<PictureItemManagerVM.PictureItemVM> {
+    public static final String TAG = "何时夕:PictureItemManagerVM";
+
     public static final int ITEM_PICTURE_RESIZE_WIDTH = 100;
     public static final int ITEM_PICTURE_RESIZE_HEIGHT = 100;
 

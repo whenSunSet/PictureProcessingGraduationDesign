@@ -809,9 +809,18 @@ public class PinchImageView extends ImageView  {
         }
     });
 
+    protected boolean isOpenPinchImage = true;
+
+    public void setOpenPinchImage(boolean openPinchImage) {
+        isOpenPinchImage = openPinchImage;
+    }
+
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        super.onTouchEvent(event);
+        if (!isOpenPinchImage) {
+            return super.onTouchEvent(event);
+        }
+
         int action = event.getAction() & MotionEvent.ACTION_MASK;
         //最后一个点抬起或者取消，结束所有模式
         if(action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {

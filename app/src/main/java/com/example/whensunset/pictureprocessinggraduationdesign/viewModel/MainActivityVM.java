@@ -9,6 +9,8 @@ import com.example.whensunset.pictureprocessinggraduationdesign.viewModel.itemMa
  */
 
 public class MainActivityVM extends BaseVM {
+    public static final String TAG = "何时夕:MainActivityVM";
+
     public final PictureItemManagerVM mPictureItemManager;
     public final DirectorySpinnerItemManagerVM mDirectorySpinnerItemManagerVM;
 

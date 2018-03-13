@@ -10,6 +10,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
+import com.example.whensunset.pictureprocessinggraduationdesign.base.MyLog;
+import com.example.whensunset.pictureprocessinggraduationdesign.mete.CutView;
 import com.facebook.drawee.backends.pipeline.Fresco;
 import com.facebook.drawee.backends.pipeline.PipelineDraweeController;
 import com.facebook.drawee.view.SimpleDraweeView;
@@ -23,6 +25,8 @@ import java.util.List;
  * Created by Administrator on 2016/12/6 0006.
  */
 public class BindingAdapters {
+    public static String TAG = "何时夕:BindingAdapters";
+
     @BindingAdapter(value = {"itemView", "items","itemAnimator","itemDecor","itemHeight","itemWidth"}, requireAll = false)
     public static <T> void setAdapter(final RecyclerView recyclerView, ItemViewArg<T> arg, final List<T> items, RecyclerView.ItemAnimator animator, RecyclerView.ItemDecoration decor , int itemHeight , int itemWidth) {
         if (arg == null) {
@@ -59,6 +63,17 @@ public class BindingAdapters {
         viewParams.leftMargin = viewLeftMargin;
         viewParams.rightMargin = viewRightMargin;
         view.setLayoutParams(viewParams);
+    }
+
+    @BindingAdapter("isInCut")
+    public static void setIsInCut(CutView cutView , boolean isInCut) {
+        MyLog.d(TAG, "buildLimitView", "状态:isInCut:", "进入设置cutView的限制" , isInCut);
+
+        cutView.setInCut(isInCut);
+        cutView.setInit(isInCut);
+        cutView.post(() -> {
+            cutView.invalidate();
+        });
     }
 
     @BindingAdapter(value = {"resizeWidth" , "resizeHeight" , "imageUri"} , requireAll = false)

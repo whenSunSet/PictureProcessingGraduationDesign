@@ -1,5 +1,7 @@
 package com.example.whensunset.pictureprocessinggraduationdesign.impl;
 
+import android.util.Log;
+
 import com.example.whensunset.pictureprocessinggraduationdesign.base.MyConsumer;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.MyLog;
 
@@ -66,6 +68,7 @@ public abstract class BaseMyConsumer implements MyConsumer<Mat , Mat> {
 
     protected void onUnhandledException(Exception e) {
         MyLog.d(TAG, "onUnhandledException", "class:e.getMessage():e.toString():" , this.getClass().getName() , e.getMessage() , e.toString());
+        Log.d("何时夕:BaseMyConsumer" + this.getClass() , ("Consumer 抛出异常:" + e.getMessage() + " " + e.toString()));
     }
 
 }

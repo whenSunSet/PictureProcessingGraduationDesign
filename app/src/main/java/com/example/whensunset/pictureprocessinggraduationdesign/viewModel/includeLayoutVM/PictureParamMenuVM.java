@@ -12,6 +12,8 @@ import com.example.whensunset.pictureprocessinggraduationdesign.viewModel.Pictur
  */
 
 public class PictureParamMenuVM extends BaseVM {
+    public static final String TAG = "何时夕:PictureParamMenuVM";
+
     public static final int MENU_HEIGHT = PictureProcessingActivityVM.MENU_MAX_HEIGHT;
     public static final int MENU_ITEM_MARGIN = 2;
 

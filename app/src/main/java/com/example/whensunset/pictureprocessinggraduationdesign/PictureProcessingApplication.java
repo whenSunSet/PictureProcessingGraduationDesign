@@ -10,6 +10,8 @@ import com.facebook.imagepipeline.core.ImagePipelineConfig;
  * Created by whensunset on 2018/3/2.
  */
 public class PictureProcessingApplication extends Application {
+    public static final String TAG = "何时夕:PictureProcessingApplication";
+
     private static Context appContext;
     @Override
     public void onCreate() {

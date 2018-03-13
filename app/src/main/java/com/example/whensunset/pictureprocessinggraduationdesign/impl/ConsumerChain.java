@@ -2,9 +2,11 @@ package com.example.whensunset.pictureprocessinggraduationdesign.impl;
 
 import com.example.whensunset.pictureprocessinggraduationdesign.base.Chain;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.MyLog;
+import com.example.whensunset.pictureprocessinggraduationdesign.pictureProcessing.CutMyConsumer;
 
 import org.jetbrains.annotations.NotNull;
 import org.opencv.core.Mat;
+import org.opencv.core.Rect;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,6 +31,7 @@ public abstract class ConsumerChain<T> implements Chain<T , Mat> {
     private Mat mFirstMat;// 初始的图像
     private Mat mPreviousMat;// 当前图像的前一个图像
     private Mat mNowMat;// 当前的图像
+    private Rect nowRect;
 
     private boolean isStarted;// 同一个 Chain 可以重新调用restart重新启动
     private boolean isInited;// 同一个 Chain 只能初始化一次
@@ -41,7 +44,7 @@ public abstract class ConsumerChain<T> implements Chain<T , Mat> {
         mNowMat = null;
         isStarted = false;
         isInited = false;
-        MyLog.d(TAG, "ConsumerChain", "mConsumerPoint:", mConsumerPoint);
+        MyLog.d(TAG, "ConsumerChain", "状态:mConsumerPoint:", "初始化" , mConsumerPoint);
     }
 
     /**
@@ -58,7 +61,8 @@ public abstract class ConsumerChain<T> implements Chain<T , Mat> {
         mPreviousMat = null;
         mNowMat = mFirstMat;
         isInited = true;
-        MyLog.d(TAG, "init", "startParam:", startParam);
+        nowRect = new Rect(0 , 0 , mFirstMat.width() , mFirstMat.height());
+        MyLog.d(TAG, "init", "状态:startParam:", "初始化" , startParam);
     }
 
     /**
@@ -68,7 +72,7 @@ public abstract class ConsumerChain<T> implements Chain<T , Mat> {
      */
     @Override
     public Mat runStart(@NotNull BaseMyConsumer... consumers) {
-        MyLog.d(TAG, "runStart", "consumers:", Arrays.toString(consumers));
+        MyLog.d(TAG, "runStart", "状态:consumers:", "开始运行" ,  Arrays.toString(consumers));
 
         if (!isInited) {
             throw new RuntimeException("该 Chain 还未初始化");
@@ -79,7 +83,7 @@ public abstract class ConsumerChain<T> implements Chain<T , Mat> {
         }
 
         if (consumers.length == 0) {
-            MyLog.d(TAG, "runStart", "传入的 consumer 为空");
+            MyLog.d(TAG, "runStart", "状态:" , "传入的 consumer 为空");
             return mNowMat;
         }
 
@@ -99,12 +103,12 @@ public abstract class ConsumerChain<T> implements Chain<T , Mat> {
     @Override
     public Mat runNext(BaseMyConsumer baseMyConsumer) {
 
-        MyLog.d(TAG, "runStart", "consumer:", baseMyConsumer);
+        MyLog.d(TAG, "runStart", "状态:", "运行下一个" , baseMyConsumer);
 
         checkState();
 
         if (baseMyConsumer == null) {
-            MyLog.d(TAG, "runNext", "传入的 consumer 为null");
+            MyLog.d(TAG, "runNext", "状态:" , "传入的 consumer 为空");
             return mNowMat;
         }
 
@@ -121,7 +125,7 @@ public abstract class ConsumerChain<T> implements Chain<T , Mat> {
      */
     @Override
     public Mat runNow(BaseMyConsumer baseMyConsumer) {
-        MyLog.d(TAG, "runNow", "consumer:", baseMyConsumer);
+        MyLog.d(TAG, "runNow", "状态:consumer:", "重新运行当前的" , baseMyConsumer);
 
         checkState();
 
@@ -142,7 +146,7 @@ public abstract class ConsumerChain<T> implements Chain<T , Mat> {
      */
     @Override
     public Mat undo() {
-        MyLog.d(TAG, "undo", "mConsumerPoint:currentConsumer:" , mConsumerPoint , mConsumerList.get(mConsumerPoint));
+        MyLog.d(TAG, "undo", "状态:mConsumerPoint:currentConsumer:" , "进入undo" , mConsumerPoint , mConsumerList.get(mConsumerPoint));
 
         checkState();
 
@@ -161,12 +165,16 @@ public abstract class ConsumerChain<T> implements Chain<T , Mat> {
             int start = 1 , end = mConsumerPoint - 1;
             List<BaseMyConsumer> subList = mConsumerList.subList(start , end);
             mPreviousMat = runConsumers(subList , mFirstMat);
-            MyLog.d(TAG, "undo", "subList:", subList);
+            MyLog.d(TAG, "undo", "状态:subList:", "当前mConsumerPoint大于2" , subList);
         }
 
         mConsumerPoint--;
 
-        MyLog.d(TAG, "undo", "mConsumerPoint:mNowMat:mPreviousMat", mConsumerPoint , mNowMat , mPreviousMat);
+        if (mConsumerList.get(mConsumerPoint) instanceof CutMyConsumer) {
+            nowRect = ((CutMyConsumer) mConsumerList.get(mConsumerPoint)).getRect();
+        }
+
+        MyLog.d(TAG, "undo", "状态:mConsumerPoint:mNowMat:mPreviousMat", "undo完毕" , mConsumerPoint , mNowMat , mPreviousMat);
         return mNowMat;
     }
 
@@ -176,7 +184,7 @@ public abstract class ConsumerChain<T> implements Chain<T , Mat> {
      */
     @Override
     public Mat redo() {
-        MyLog.d(TAG, "redo", "mConsumerPoint:nextConsumer:" , mConsumerPoint , mConsumerList.get(mConsumerPoint + 1));
+        MyLog.d(TAG, "redo", "状态:mConsumerPoint:nextConsumer:" , "进入redo" , mConsumerPoint , mConsumerList.get(mConsumerPoint + 1));
 
         checkState();
 
@@ -186,9 +194,9 @@ public abstract class ConsumerChain<T> implements Chain<T , Mat> {
 
         mConsumerPoint++;
         mPreviousMat = mNowMat;
-        mNowMat = mConsumerList.get(mConsumerPoint).onNewResult(mNowMat);
+        mNowMat = runConsumers(Collections.singletonList(mConsumerList.get(mConsumerPoint)), mNowMat);
 
-        MyLog.d(TAG, "redo", "mConsumerPoint:mNowMat:mPreviousMat", mConsumerPoint , mNowMat , mPreviousMat);
+        MyLog.d(TAG, "redo", "状态:mConsumerPoint:mNowMat:mPreviousMat", "redo完成" , mConsumerPoint , mNowMat , mPreviousMat);
         return mNowMat;
     }
 
@@ -213,13 +221,13 @@ public abstract class ConsumerChain<T> implements Chain<T , Mat> {
      * @return
      */
     private Mat runConsumers(@NotNull List<BaseMyConsumer> consumers , @NotNull Mat mat) {
-        MyLog.d(TAG, "runConsumers", "consumers:mat:", consumers , mat);
+        MyLog.d(TAG, "runConsumers", "状态:consumers:mat:", "运行一系列consumer" , consumers , mat);
         Mat nowMat = mat;
         for (int i = 0; i < consumers.size(); i++) {
             BaseMyConsumer consumer = consumers.get(i);
 
             if (consumer == null) {
-                MyLog.d(TAG, "runConsumers", "consumer 为null，略过该消费者");
+                MyLog.d(TAG, "runConsumers", "状态:" , "consumer 为null，略过该消费者");
                 continue;
             }
 
@@ -228,6 +236,10 @@ public abstract class ConsumerChain<T> implements Chain<T , Mat> {
                 nowMat = null;
             } else  {
                 nowMat = consumer.onNewResult(nowMat);
+            }
+
+            if (consumer instanceof CutMyConsumer) {
+                nowRect = ((CutMyConsumer) consumer).getRect();
             }
         }
         return nowMat;
@@ -243,19 +255,19 @@ public abstract class ConsumerChain<T> implements Chain<T , Mat> {
      * @param consumers
      */
     private void addConsumers(@NotNull BaseMyConsumer[] consumers) {
-        MyLog.d(TAG, "addConsumers", "consumers:mConsumerPoint:", Arrays.toString(consumers) , mConsumerPoint);
+        MyLog.d(TAG, "addConsumers", "状态:consumers:mConsumerPoint:", "添加consumer" , Arrays.toString(consumers) , mConsumerPoint);
         removeAfterUndoRedoPointConsumer();
 
         for (BaseMyConsumer b : consumers) {
             if (b != null) {
                 mConsumerList.add(b);
             } else {
-                MyLog.d(TAG, "addConsumers", "consumer:", "为null");
+                MyLog.d(TAG, "addConsumers", "状态:", "被添加的consumer为null，跳过");
             }
         }
 
         mConsumerPoint = mConsumerList.size() - 1;
-        MyLog.d(TAG, "addConsumers", "mConsumerPoint:", mConsumerPoint);
+        MyLog.d(TAG, "addConsumers", "状态:mConsumerPoint:", "添加consumer完毕" , mConsumerPoint);
     }
 
     /**
@@ -264,7 +276,7 @@ public abstract class ConsumerChain<T> implements Chain<T , Mat> {
      */
     private void removeAfterUndoRedoPointConsumer() {
         if ((mConsumerPoint + 1) == mConsumerList.size()) {
-            MyLog.d(TAG, "removeAfterUndoRedoPointConsumer", "当前不处于undo状态，不需要移除消费者");
+            MyLog.d(TAG, "removeAfterUndoRedoPointConsumer", "状态:" , "当前不处于undo状态，不需要移除消费者");
             return;
         }
 
@@ -278,7 +290,7 @@ public abstract class ConsumerChain<T> implements Chain<T , Mat> {
                     // 如果当前的消费者是链表消费者，那么也要将其从链表中移除，移除顺序是 从链表的末尾向前移除
                     LinkedMyConsumer.remove((LinkedMyConsumer) nowConsumer);
                 }
-                MyLog.d(TAG, "removeAfterUndoRedoPointConsumer", "nowConsumer:i:",nowConsumer , i);
+                MyLog.d(TAG, "removeAfterUndoRedoPointConsumer", "状态:nowConsumer:i:" , "移除一个consumer" , nowConsumer , i);
                 iteratorBaseMyConsumer.remove();
             }
             nowConsumer = iteratorBaseMyConsumer.next();
@@ -306,7 +318,7 @@ public abstract class ConsumerChain<T> implements Chain<T , Mat> {
         isStarted = false;
         isInited = false;
 
-        MyLog.d(TAG, "destroy", "mConsumerPoint" , mConsumerPoint);
+        MyLog.d(TAG, "destroy", "状态:mConsumerPoint" , "销毁" , mConsumerPoint);
     }
 
     public Flowable<Mat> rxRunStartConvenient(BaseMyConsumer... consumers) {
@@ -363,6 +375,10 @@ public abstract class ConsumerChain<T> implements Chain<T , Mat> {
 
     public List<BaseMyConsumer> getConsumerList() {
         return mConsumerList;
+    }
+
+    public Rect getNowRect() {
+        return nowRect;
     }
 
     protected abstract Mat getStartResult(T startParam);

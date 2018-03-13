@@ -13,6 +13,11 @@ import org.opencv.core.Mat;
 public class RotateMyConsumer extends UndoMyConsumer {
     public static final String TAG = "何时夕:RotateMyConsumer";
 
+    public static final double ROTATE_ANGLE_90 = 90.0;
+    public static final double ROTATE_ANGLE_180 = 180.0;
+    public static final double ROTATE_ANGLE_270 = 270.0;
+    public static final double ROTATE_ANGLE_360 = 360.0;
+
     private boolean isClockwise = false;
     private double mAngle = 0;
     private double mScale = 1.0;
@@ -29,7 +34,8 @@ public class RotateMyConsumer extends UndoMyConsumer {
 
     @Override
     protected Mat onNewResultImpl(Mat oldResult) {
-        MyLog.d(TAG, "onNewResultImpl", "oldResult:" , oldResult);
+        MyLog.d(TAG, "onNewResultImpl", "状态:oldResult:" , "运行" , oldResult);
+
         if (oldResult == null) {
             throw new IllegalArgumentException("被旋转的Mat 不可为null");
         }
@@ -45,7 +51,7 @@ public class RotateMyConsumer extends UndoMyConsumer {
         Mat newResult = new Mat();
         rotate(oldResult.nativeObj , newResult.nativeObj , mAngle , mScale);
 
-        MyLog.d(TAG, "onNewResultImpl", "newResult:mAngle:mScale:" , newResult , mAngle , mScale );
+        MyLog.d(TAG, "onNewResultImpl", "状态:newResult:mAngle:mScale:" , "运行完毕" , newResult , mAngle , mScale );
         return newResult;
     }
 
@@ -61,10 +67,10 @@ public class RotateMyConsumer extends UndoMyConsumer {
 
     @Override
     public void copy(BaseMyConsumer baseMyConsumer) {
-        MyLog.d(TAG, "copy", "beCopyConsumer:" , baseMyConsumer);
+        MyLog.d(TAG, "copy", "状态:beCopyConsumer:" , "拷贝" ,  baseMyConsumer);
 
         if (baseMyConsumer == null) {
-            MyLog.d(TAG, "copy", "传入的被拷贝的 consumer 为null");
+            MyLog.d(TAG, "copy", "状态:" , "传入的被拷贝的 consumer 为null");
             return;
         }
 

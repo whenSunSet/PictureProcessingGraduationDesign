@@ -17,6 +17,8 @@ import static com.example.whensunset.pictureprocessinggraduationdesign.staticPar
  */
 
 public class DirectorySpinnerItemManagerVM extends BaseItemManagerVM<DirectorySpinnerItemManagerVM.DirectorySpinnerItemVM> {
+    public static final String TAG = "何时夕:DirectorySpinnerItemManagerVM";
+
     public DirectorySpinnerItemManagerVM() {
         Flowable.fromIterable(SystemImageUriFetch.getInstance().getAllTag())
                 .map(o -> (String)o)

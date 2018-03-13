@@ -40,7 +40,7 @@ public class StringConsumerChain extends ConsumerChain<String> {
 
     @Override
     protected Mat getStartResult(String path) {
-        MyLog.d(TAG, "getStartResult", "path:", path);
+        MyLog.d(TAG, "getStartResult", "状态:path:", "获取图片" , path);
 
         if (TextUtils.isEmpty(path)) {
             throw new RuntimeException("需要处理的图片路径为空");
@@ -67,7 +67,7 @@ public class StringConsumerChain extends ConsumerChain<String> {
         };
         addConsumer(firstCutMyConsumer);
 
-        MyLog.d(TAG, "getStartResult", "firstMat:rect" , firstMat , rect);
+        MyLog.d(TAG, "getStartResult", "状态:firstMat:rect" , "获取图片结束" , firstMat , rect);
         return firstMat;
     }
 

@@ -4,10 +4,10 @@ import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.databinding.Observable;
 import android.os.Bundle;
-import android.util.Log;
 
 import com.example.whensunset.pictureprocessinggraduationdesign.R;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.BaseActivity;
+import com.example.whensunset.pictureprocessinggraduationdesign.base.MyLog;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.ObserverParamMap;
 import com.example.whensunset.pictureprocessinggraduationdesign.dataBindingUtil.MyExceptionOnPropertyChangedCallback;
 import com.example.whensunset.pictureprocessinggraduationdesign.viewModel.MainActivityVM;
@@ -20,6 +20,8 @@ import static com.example.whensunset.pictureprocessinggraduationdesign.staticPar
 import static com.example.whensunset.pictureprocessinggraduationdesign.staticParam.ObserverMapKey.PictureItemManagerVM_mImageUri;
 
 public class MainActivity extends BaseActivity {
+    public static final String TAG = "何时夕:MainActivity";
+
     private com.example.whensunset.pictureprocessinggraduationdesign.ui.MainActivityBinding mMainActivityBinding;
     private MainActivityVM mMainActivityVM;
 
@@ -47,7 +49,7 @@ public class MainActivity extends BaseActivity {
                 intent.putExtra("imageUri" , imageUri);
                 MainActivity.this.startActivity(intent);
 
-                Log.d("何时夕:MainActivity", ("点击了图片：imageUri:" + imageUri));
+                MyLog.d(TAG, "onPropertyChanged", "状态:imageUri:", "监听列表中item的点击事件" , imageUri);
             }
         } , e -> showToast(e.getMessage())));
 
@@ -58,7 +60,7 @@ public class MainActivity extends BaseActivity {
                 String directoryName = ObserverParamMap.staticGetValue(observable, DirectorySpinnerItemManagerVM_directoryName);
                 mMainActivityVM.mPictureItemManager.freshPictureList(directoryName);
 
-                Log.d("何时夕:MainActivity", ("切换了目录：directoryName:" + directoryName));
+                MyLog.d(TAG, "onPropertyChanged", "状态:directoryName:", "监听bar上面的目录切换事件" , directoryName);
             }
         }, e -> showToast(e.getMessage())));
 

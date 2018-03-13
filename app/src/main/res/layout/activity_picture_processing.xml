@@ -61,14 +61,22 @@
 
         </android.support.design.widget.AppBarLayout>
 
-        <com.example.whensunset.pictureprocessinggraduationdesign.mete.PinchImageView
-            android:id="@+id/pic"
-            android:background="@color/moreGray"
+        <FrameLayout
             android:layout_below="@id/toolbar"
             android:layout_above="@+id/selectMenu"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            bind:bitmap="@{viewModel.mImageBitMap}"/>
+            android:layout_height="match_parent">
+
+            <com.example.whensunset.pictureprocessinggraduationdesign.mete.CutView
+                android:id="@+id/pic"
+                android:background="@color/moreGray"
+                android:layout_height="match_parent"
+                android:layout_width="match_parent"
+                bind:isInCut="@{viewModel.isInCut}"
+                bind:bitmap="@{viewModel.mImageBitMap}"/>
+
+        </FrameLayout>
+
 
         <FrameLayout
             android:id="@+id/selectMenu"
