@@ -8,6 +8,7 @@ public interface ObserverMapKey {
     String SHOW_TOAST_MESSAGE = "message";
 
     String PictureTransformMenuVM_mat = "mat";
+    String PictureParamMenuVM_mat = "mat";
 
     String PictureItemManagerVM_mPosition = "mPosition";
     String PictureItemManagerVM_mImageUri = "mImageUri";

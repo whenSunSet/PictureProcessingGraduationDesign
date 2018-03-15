@@ -57,7 +57,13 @@ public abstract class BaseMyConsumer implements MyConsumer<Mat , Mat> {
         this.mNowResult = nowResult;
     }
 
-    public abstract void copy(BaseMyConsumer baseMyConsumer);
+    public void copy(BaseMyConsumer baseMyConsumer) {
+        MyLog.d(TAG, "copy", "状态:beCopyConsumer:" , "拷贝" ,  baseMyConsumer);
+
+        if (baseMyConsumer == null) {
+            throw new RuntimeException("传入的被拷贝的 consumer 为null");
+        }
+    }
 
     protected abstract Mat onNewResultImpl(Mat oldResult);
 

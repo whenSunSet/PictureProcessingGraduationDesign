@@ -52,14 +52,8 @@ public class CutMyConsumer extends LinkedMyConsumer {
 
     @Override
     public void copy(BaseMyConsumer baseMyConsumer) {
-        MyLog.d(TAG, "copy", "状态:beCopyConsumer:" , "拷贝" ,  baseMyConsumer);
-
-        if (baseMyConsumer == null) {
-            MyLog.d(TAG, "copy", "状态:" , "传入的被拷贝的 consumer 为null");
-            return;
-        }
-
-        if (!(baseMyConsumer instanceof CutMyConsumer)) {
+        super.copy(baseMyConsumer);
+        if (!(baseMyConsumer instanceof  CutMyConsumer)) {
             throw new RuntimeException("被拷贝的 consumer 需要和拷贝的 consumer 类型一致");
         }
 

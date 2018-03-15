@@ -4,6 +4,6 @@
     <dimen name="picture_simple_drawee_round_size">2dp</dimen>
     <dimen name="picture_process_tab_padding">4dp</dimen>
 
-    <dimen name="picture_process_transform_tab_menu_padding">30dp</dimen>
-    <dimen name="picture_process_param_tab_menu_padding">22dp</dimen>
+    <dimen name="picture_process_transform_tab_menu_padding">25dp</dimen>
+    <dimen name="picture_process_param_tab_menu_padding">25dp</dimen>
 </resources>

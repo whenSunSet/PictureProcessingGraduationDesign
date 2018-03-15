@@ -1,17 +1,13 @@
 package com.example.whensunset.pictureprocessinggraduationdesign.viewModel.includeLayoutVM;
 
-import android.databinding.ObservableField;
-
 import com.example.whensunset.pictureprocessinggraduationdesign.base.BaseVM;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.MyUtil;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.ObserverParamMap;
+import com.example.whensunset.pictureprocessinggraduationdesign.impl.BaseMyConsumer;
+import com.example.whensunset.pictureprocessinggraduationdesign.impl.WhiteBalanceMyConsumer;
 import com.example.whensunset.pictureprocessinggraduationdesign.pictureProcessing.FlipMyConsumer;
 import com.example.whensunset.pictureprocessinggraduationdesign.pictureProcessing.RotateMyConsumer;
 import com.example.whensunset.pictureprocessinggraduationdesign.pictureProcessing.StringConsumerChain;
-
-import org.opencv.core.Mat;
-
-import io.reactivex.functions.Consumer;
 
 import static com.example.whensunset.pictureprocessinggraduationdesign.pictureProcessing.RotateMyConsumer.ROTATE_ANGLE_90;
 import static com.example.whensunset.pictureprocessinggraduationdesign.staticParam.ObserverMapKey.PictureTransformMenuVM_mat;
@@ -23,54 +19,52 @@ import static com.example.whensunset.pictureprocessinggraduationdesign.staticPar
 public class PictureTransformMenuVM extends BaseVM {
     public static final String TAG = "何时夕:PictureTransformMenuVM";
 
-    public static final int MENU_ITEM_MARGIN = 4;
     public static final int MENU_PADDING = 10;
-    public static final int MENU_ITEM_WIDTH = (MyUtil.getDisplayWidthDp() - 2 * MENU_PADDING - 4 * 2 * MENU_ITEM_MARGIN) / 4;
-    public static final int MENU_HEIGHT = MENU_ITEM_WIDTH + 2 * MENU_PADDING + 2 * MENU_ITEM_MARGIN;
+    public static final int MENU_ITEM_SIZE = 5;
+    public static final int MENU_ITEM_MARGIN = 2;
+    public static final int MENU_ITEM_WIDTH = (MyUtil.getDisplayWidthDp() - 2 * MENU_PADDING - (MENU_ITEM_SIZE - 1) * 2 * MENU_ITEM_MARGIN) / MENU_ITEM_SIZE;
+    public static final int MENU_HEIGHT = MENU_ITEM_WIDTH + 2 * MENU_PADDING;
 
-
-    public final ObservableField<? super Object> mClickPictureRotateListener = new ObservableField<>();
-    public final ObservableField<? super Object> mClickPictureHorizontalFlipListener = new ObservableField<>();
-    public final ObservableField<? super Object> mClickPictureVerticalFlipListener = new ObservableField<>();
-    public final ObservableField<? super Object> mClickPictureCutListener = new ObservableField<>();
-
+    public static final int SELECT_PICTURE_ROTATE = 0;
+    public static final int SELECT_PICTURE_HORIZONTAL_FLIP = 1;
+    public static final int SELECT_PICTURE_VERTICAL_FLIP = 2;
+    public static final int SELECT_PICTURE_WHITE_BALANCE = 3;
+    public static final int SELECT_PICTURE_CUT = 4;
 
     private StringConsumerChain mStringConsumerChain = StringConsumerChain.getInstance();
 
     public PictureTransformMenuVM() {
+        super(5);
     }
 
-    public void clickPictureRotate() {
-        RotateMyConsumer rotateMyConsumer = new RotateMyConsumer(ROTATE_ANGLE_90);
+    @Override
+    public void onClick(int position) {
+        super.onClick(position);
 
+        BaseMyConsumer consumer = null;
+
+        switch (position) {
+            case SELECT_PICTURE_ROTATE:
+                showToast(MENU_ITEM_WIDTH + "");
+                consumer = new RotateMyConsumer(ROTATE_ANGLE_90);
+                break;
+            case SELECT_PICTURE_HORIZONTAL_FLIP:
+                consumer = new FlipMyConsumer(FlipMyConsumer.HORIZONTAL);
+                break;
+            case SELECT_PICTURE_VERTICAL_FLIP:
+                consumer = new FlipMyConsumer(FlipMyConsumer.VERTICAL);
+                break;
+            case SELECT_PICTURE_WHITE_BALANCE:
+                consumer = new WhiteBalanceMyConsumer();
+                break;
+            case SELECT_PICTURE_CUT:
+                break;
+        }
         mStringConsumerChain
-                .rxRunNextConvenient(rotateMyConsumer)
-                .subscribe(subscribeAction(mClickPictureRotateListener));
-    }
-
-    public void clickPictureHorizontalFlip() {
-        FlipMyConsumer flipMyConsumer = new FlipMyConsumer(FlipMyConsumer.HORIZONTAL);
-
-        mStringConsumerChain
-                .rxRunNextConvenient(flipMyConsumer)
-                .subscribe(subscribeAction(mClickPictureHorizontalFlipListener));
-    }
-
-    public void clickPictureVerticalFlip() {
-        FlipMyConsumer flipMyConsumer = new FlipMyConsumer(FlipMyConsumer.VERTICAL);
-
-        mStringConsumerChain
-                .rxRunNextConvenient(flipMyConsumer)
-                .subscribe(subscribeAction(mClickPictureVerticalFlipListener));
-    }
-
-    public void clickPictureCut() {
-    }
-
-    private Consumer<? super Mat> subscribeAction(ObservableField<? super Object> listener) {
-        return (Consumer<Mat>) mat -> {
-            listener.set(ObserverParamMap.staticSet(PictureTransformMenuVM_mat, mat));
-        };
+                .rxRunNextConvenient(consumer)
+                .subscribe(mat -> {
+                    getListener(position).set(ObserverParamMap.staticSet(PictureTransformMenuVM_mat, mat));
+                });
     }
 
 }

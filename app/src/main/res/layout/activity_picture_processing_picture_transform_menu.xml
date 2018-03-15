@@ -9,76 +9,128 @@
 
     </data>
 
-    <LinearLayout
-        bind:bindingLeftPadding="@{PictureTransformMenuVM.MENU_PADDING}"
-        bind:bindingRightMargin="@{PictureTransformMenuVM.MENU_PADDING}"
-        bind:bindingTopPadding="@{PictureTransformMenuVM.MENU_PADDING}"
-        bind:bindingBottomPadding="@{PictureTransformMenuVM.MENU_PADDING}"
+    <FrameLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
 
-        bind:bindingHeight="@{PictureTransformMenuVM.MENU_HEIGHT}"
+        <LinearLayout
+            bind:bindingLeftPadding="@{PictureTransformMenuVM.MENU_PADDING}"
+            bind:bindingRightMargin="@{PictureTransformMenuVM.MENU_PADDING}"
+            bind:bindingTopPadding="@{PictureTransformMenuVM.MENU_PADDING + 8}"
+            bind:bindingBottomPadding="@{PictureTransformMenuVM.MENU_PADDING + 8}"
 
-        android:orientation="horizontal"
-        android:layout_height="wrap_content"
-        android:layout_width="match_parent">
+            bind:bindingHeight="@{PictureTransformMenuVM.MENU_HEIGHT + 16}"
 
-        <ImageView
-            bind:bindingWidth="@{PictureTransformMenuVM.MENU_ITEM_WIDTH}"
-            bind:bindingHeight="@{PictureTransformMenuVM.MENU_ITEM_WIDTH}"
+            android:orientation="horizontal"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent">
 
-            bind:bindingLeftMargin="@{PictureTransformMenuVM.MENU_ITEM_MARGIN}"
-            bind:bindingRightMargin="@{PictureTransformMenuVM.MENU_ITEM_MARGIN}"
-            bind:bindingTopMargin="@{PictureTransformMenuVM.MENU_ITEM_MARGIN}"
-            bind:bindingBottomMargin="@{PictureTransformMenuVM.MENU_ITEM_MARGIN}"
+            <ImageView
+                bind:bindingWidth="@{PictureTransformMenuVM.MENU_ITEM_WIDTH}"
+                bind:bindingHeight="@{PictureTransformMenuVM.MENU_ITEM_WIDTH}"
 
-            android:onClick="@{() -> viewModel.clickPictureRotate()}"
-            android:src="@drawable/picture_transform_rotate"
-            android:id="@+id/picture_transform_rotate_image_view"
-            style="@style/PictureProcessingTransformTabMenuImageView"/>
+                bind:bindingRightMargin="@{PictureTransformMenuVM.MENU_ITEM_MARGIN}"
 
-        <ImageView
-            bind:bindingWidth="@{PictureTransformMenuVM.MENU_ITEM_WIDTH}"
-            bind:bindingHeight="@{PictureTransformMenuVM.MENU_ITEM_WIDTH}"
+                android:onClick="@{() -> viewModel.onClick(PictureTransformMenuVM.SELECT_PICTURE_ROTATE)}"
+                android:src="@drawable/picture_transform_rotate"
+                android:id="@+id/picture_transform_rotate_image_view"
+                style="@style/PictureProcessingTransformTabMenuImageView"/>
 
-            bind:bindingLeftMargin="@{PictureTransformMenuVM.MENU_ITEM_MARGIN}"
-            bind:bindingRightMargin="@{PictureTransformMenuVM.MENU_ITEM_MARGIN}"
-            bind:bindingTopMargin="@{PictureTransformMenuVM.MENU_ITEM_MARGIN}"
-            bind:bindingBottomMargin="@{PictureTransformMenuVM.MENU_ITEM_MARGIN}"
+            <ImageView
+                bind:bindingWidth="@{PictureTransformMenuVM.MENU_ITEM_WIDTH}"
+                bind:bindingHeight="@{PictureTransformMenuVM.MENU_ITEM_WIDTH}"
 
-            android:onClick="@{() -> viewModel.clickPictureHorizontalFlip()}"
-            android:src="@drawable/picture_transform_horizontal_flip"
-            android:id="@+id/picture_transform_horizontal_flip_image_view"
-            style="@style/PictureProcessingTransformTabMenuImageView"/>
+                bind:bindingLeftMargin="@{PictureTransformMenuVM.MENU_ITEM_MARGIN}"
+                bind:bindingRightMargin="@{PictureTransformMenuVM.MENU_ITEM_MARGIN}"
 
-        <ImageView
-            bind:bindingWidth="@{PictureTransformMenuVM.MENU_ITEM_WIDTH}"
-            bind:bindingHeight="@{PictureTransformMenuVM.MENU_ITEM_WIDTH}"
+                android:onClick="@{() -> viewModel.onClick(PictureTransformMenuVM.SELECT_PICTURE_HORIZONTAL_FLIP)}"
+                android:src="@drawable/picture_transform_horizontal_flip"
+                android:id="@+id/picture_transform_horizontal_flip_image_view"
+                style="@style/PictureProcessingTransformTabMenuImageView"/>
 
-            bind:bindingLeftMargin="@{PictureTransformMenuVM.MENU_ITEM_MARGIN}"
-            bind:bindingRightMargin="@{PictureTransformMenuVM.MENU_ITEM_MARGIN}"
-            bind:bindingTopMargin="@{PictureTransformMenuVM.MENU_ITEM_MARGIN}"
-            bind:bindingBottomMargin="@{PictureTransformMenuVM.MENU_ITEM_MARGIN}"
+            <ImageView
+                bind:bindingWidth="@{PictureTransformMenuVM.MENU_ITEM_WIDTH}"
+                bind:bindingHeight="@{PictureTransformMenuVM.MENU_ITEM_WIDTH}"
 
-            android:onClick="@{() -> viewModel.clickPictureVerticalFlip()}"
-            android:src="@drawable/picture_transform_vertical_flip"
-            android:id="@+id/picture_transform_vertical_flip_image_view"
-            style="@style/PictureProcessingTransformTabMenuImageView"/>
+                bind:bindingLeftMargin="@{PictureTransformMenuVM.MENU_ITEM_MARGIN}"
+                bind:bindingRightMargin="@{PictureTransformMenuVM.MENU_ITEM_MARGIN}"
 
-        <ImageView
-            bind:bindingWidth="@{PictureTransformMenuVM.MENU_ITEM_WIDTH}"
-            bind:bindingHeight="@{PictureTransformMenuVM.MENU_ITEM_WIDTH}"
+                android:onClick="@{() -> viewModel.onClick(PictureTransformMenuVM.SELECT_PICTURE_VERTICAL_FLIP)}"
+                android:src="@drawable/picture_transform_vertical_flip"
+                android:id="@+id/picture_transform_vertical_flip_image_view"
+                style="@style/PictureProcessingTransformTabMenuImageView"/>
 
-            bind:bindingLeftMargin="@{PictureTransformMenuVM.MENU_ITEM_MARGIN}"
-            bind:bindingRightMargin="@{PictureTransformMenuVM.MENU_ITEM_MARGIN}"
-            bind:bindingTopMargin="@{PictureTransformMenuVM.MENU_ITEM_MARGIN}"
-            bind:bindingBottomMargin="@{PictureTransformMenuVM.MENU_ITEM_MARGIN}"
+            <ImageView
+                bind:bindingWidth="@{PictureTransformMenuVM.MENU_ITEM_WIDTH}"
+                bind:bindingHeight="@{PictureTransformMenuVM.MENU_ITEM_WIDTH}"
 
-            android:src="@drawable/picture_transform_cut"
-            android:onClick="@{() -> viewModel.clickPictureCut()}"
-            android:id="@+id/picture_transform_cut_image_view"
-            style="@style/PictureProcessingTransformTabMenuImageView"/>
+                bind:bindingLeftMargin="@{PictureTransformMenuVM.MENU_ITEM_MARGIN}"
+                bind:bindingRightMargin="@{PictureTransformMenuVM.MENU_ITEM_MARGIN}"
 
-    </LinearLayout>
+                android:src="@drawable/picture_white_balance"
+                android:onClick="@{() -> viewModel.onClick(PictureTransformMenuVM.SELECT_PICTURE_WHITE_BALANCE)}"
+                android:id="@+id/picture_transform_white_balance_image_view"
+                style="@style/PictureProcessingTransformTabMenuImageView"/>
+
+            <ImageView
+                bind:bindingWidth="@{PictureTransformMenuVM.MENU_ITEM_WIDTH}"
+                bind:bindingHeight="@{PictureTransformMenuVM.MENU_ITEM_WIDTH}"
+
+                bind:bindingLeftMargin="@{PictureTransformMenuVM.MENU_ITEM_MARGIN}"
+
+                android:src="@drawable/picture_transform_cut"
+                android:onClick="@{() -> viewModel.onClick(PictureTransformMenuVM.SELECT_PICTURE_CUT)}"
+                android:id="@+id/picture_transform_cut_image_view"
+                style="@style/PictureProcessingTransformTabMenuImageView"/>
+
+        </LinearLayout>
 
 
+        <LinearLayout
+            bind:bindingLeftPadding="@{PictureTransformMenuVM.MENU_PADDING}"
+            bind:bindingRightMargin="@{PictureTransformMenuVM.MENU_PADDING}"
+            bind:bindingTopPadding="@{PictureTransformMenuVM.MENU_PADDING + 8}"
+            bind:bindingBottomPadding="@{PictureTransformMenuVM.MENU_PADDING + 8}"
 
+            bind:bindingHeight="@{PictureTransformMenuVM.MENU_HEIGHT + 16}"
+
+            android:orientation="horizontal"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent">
+            
+            <TextView
+                style="@style/PictureProcessingTransformTabMenuTextView"
+                bind:bindingRightMargin="@{PictureTransformMenuVM.MENU_ITEM_MARGIN}"
+
+                android:text="旋转"/>
+
+            <TextView
+                style="@style/PictureProcessingTransformTabMenuTextView"
+                bind:bindingRightMargin="@{PictureTransformMenuVM.MENU_ITEM_MARGIN}"
+                bind:bindingLeftMargin="@{PictureTransformMenuVM.MENU_ITEM_MARGIN}"
+
+                android:text="水平翻转"/>
+
+            <TextView
+                style="@style/PictureProcessingTransformTabMenuTextView"
+                bind:bindingRightMargin="@{PictureTransformMenuVM.MENU_ITEM_MARGIN}"
+                bind:bindingLeftMargin="@{PictureTransformMenuVM.MENU_ITEM_MARGIN}"
+
+                android:text="垂直翻转"/>
+
+            <TextView
+                style="@style/PictureProcessingTransformTabMenuTextView"
+                bind:bindingRightMargin="@{PictureTransformMenuVM.MENU_ITEM_MARGIN}"
+                bind:bindingLeftMargin="@{PictureTransformMenuVM.MENU_ITEM_MARGIN}"
+                android:text="自动白平衡"/>
+
+            <TextView
+                bind:bindingLeftMargin="@{PictureTransformMenuVM.MENU_ITEM_MARGIN}"
+
+                style="@style/PictureProcessingTransformTabMenuTextView"
+                android:text="剪裁比例"/>
+
+        </LinearLayout>
+
+    </FrameLayout>
 </layout>

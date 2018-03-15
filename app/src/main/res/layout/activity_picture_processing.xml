@@ -38,7 +38,7 @@
                    <ImageView
                        android:src="@{viewModel.mCanUndo ? @drawable/undo_white : @drawable/undo_gray}"
                        android:clickable="@{viewModel.mCanUndo}"
-                       android:onClick="@{() -> viewModel.clickUndo()}"
+                       android:onClick="@{() -> viewModel.onClick(viewModel.CLICK_UNDO)}"
                        android:layout_centerVertical="true"
                        android:id="@+id/undo"
                        android:layout_toLeftOf="@id/redo"
@@ -48,7 +48,7 @@
                    <ImageView
                        android:src="@{viewModel.mCanRedo ? @drawable/redo_white : @drawable/redo_gray}"
                        android:clickable="@{viewModel.mCanRedo}"
-                       android:onClick="@{() -> viewModel.clickRedo()}"
+                       android:onClick="@{() -> viewModel.onClick(viewModel.CLICK_REDO)}"
                        android:layout_centerVertical="true"
                        android:id="@+id/redo"
                        android:layout_width="40dp"
@@ -61,22 +61,17 @@
 
         </android.support.design.widget.AppBarLayout>
 
-        <FrameLayout
+        <com.example.whensunset.pictureprocessinggraduationdesign.mete.CutView
+            android:id="@+id/pic"
             android:layout_below="@id/toolbar"
             android:layout_above="@+id/selectMenu"
+            android:background="@color/moreGray"
+            android:layout_height="match_parent"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
 
-            <com.example.whensunset.pictureprocessinggraduationdesign.mete.CutView
-                android:id="@+id/pic"
-                android:background="@color/moreGray"
-                android:layout_height="match_parent"
-                android:layout_width="match_parent"
-                bind:isInCut="@{viewModel.isInCut}"
-                bind:bitmap="@{viewModel.mImageBitMap}"/>
-
-        </FrameLayout>
-
+            bind:onLimitRectChangedListener="@{viewModel}"
+            bind:isInCut="@{viewModel.isInCut}"
+            bind:bitmap="@{viewModel.mImageBitMap}"/>
 
         <FrameLayout
             android:id="@+id/selectMenu"
@@ -131,30 +126,30 @@
             <ImageView
                 android:id="@+id/picture_filter_image_view"
                 android:src="@{(viewModel.mSelectTab == PictureProcessingActivityVM.SELECT_PICTURE_FILTER) ? @drawable/picture_filter_blue : @drawable/picture_filter_white}"
-                android:onClick="@{() -> viewModel.clickPictureFilterTab()}"
+                android:onClick="@{() -> viewModel.onClick(PictureProcessingActivityVM.SELECT_PICTURE_FILTER)}"
                 style="@style/PictureProcessingTabImageView"/>
 
             <ImageView
                 android:src="@{(viewModel.mSelectTab == PictureProcessingActivityVM.SELECT_PICTURE_TRANSFORM) ? @drawable/picture_transform_blue : @drawable/picture_transform_white}"
                 android:id="@+id/picture_transform_image_view"
-                android:onClick="@{() -> viewModel.clickPictureTransformTab()}"
+                android:onClick="@{() -> viewModel.onClick(PictureProcessingActivityVM.SELECT_PICTURE_TRANSFORM)}"
                 style="@style/PictureProcessingTabImageView"/>
 
             <ImageView
                 android:src="@{(viewModel.mSelectTab == PictureProcessingActivityVM.SELECT_PICTURE_PARAM) ? @drawable/picture_param_blue : @drawable/picture_param_white}"
                 android:id="@+id/picture_param_image_view"
-                android:onClick="@{() -> viewModel.clickPictureParamTab()}"
+                android:onClick="@{() -> viewModel.onClick(PictureProcessingActivityVM.SELECT_PICTURE_PARAM)}"
                 style="@style/PictureProcessingTabImageView"/>
 
             <ImageView
                 android:src="@{(viewModel.mSelectTab == PictureProcessingActivityVM.SELECT_PICTURE_FRAME) ? @drawable/picture_frame_blue : @drawable/picture_frame_white}"
-                android:onClick="@{() -> viewModel.clickPictureFrameTab()}"
+                android:onClick="@{() -> viewModel.onClick(PictureProcessingActivityVM.SELECT_PICTURE_FRAME)}"
                 android:id="@+id/picture_frame_image_view"
                 style="@style/PictureProcessingTabImageView"/>
 
             <ImageView
                 android:src="@{(viewModel.mSelectTab == PictureProcessingActivityVM.SELECT_PICTURE_TEXT) ? @drawable/picture_text_blue : @drawable/picture_text_white}"
-                android:onClick="@{() -> viewModel.clickPictureTextTab()}"
+                android:onClick="@{() -> viewModel.onClick(PictureProcessingActivityVM.SELECT_PICTURE_TEXT)}"
                 android:id="@+id/picture_text_image_view"
                 style="@style/PictureProcessingTabImageView"/>
 

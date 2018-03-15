@@ -134,7 +134,7 @@ public abstract class ConsumerChain<T> implements Chain<T , Mat> {
         }
 
         BaseMyConsumer nowConsumer = mConsumerList.get(mConsumerPoint);
-        nowConsumer.copy(nowConsumer);
+        nowConsumer.copy(baseMyConsumer);
         mNowMat = runConsumers(Collections.singletonList(nowConsumer) , mPreviousMat);
 
         return mNowMat;
@@ -379,6 +379,10 @@ public abstract class ConsumerChain<T> implements Chain<T , Mat> {
 
     public Rect getNowRect() {
         return nowRect;
+    }
+
+    public int getConsumerPoint() {
+        return mConsumerPoint;
     }
 
     protected abstract Mat getStartResult(T startParam);

@@ -10,13 +10,16 @@ import android.widget.Toast;
 
 public abstract class BaseActivity extends AppCompatActivity {
 
-    protected Observable.OnPropertyChangedCallback showToast() {
-        return new Observable.OnPropertyChangedCallback() {
+    protected void showToast(BaseVM baseVM) {
+        if (baseVM == null) {
+            throw new RuntimeException("被监听的ViewModel不可为null");
+        }
+        baseVM.mShowToast.addOnPropertyChangedCallback(new Observable.OnPropertyChangedCallback() {
             @Override
             public void onPropertyChanged(Observable observable, int i) {
                 Toast.makeText(BaseActivity.this, ObserverParamMap.getToastMessage(observable) , Toast.LENGTH_SHORT).show();
             }
-        };
+        });
     }
 
     protected void showToast(String message) {

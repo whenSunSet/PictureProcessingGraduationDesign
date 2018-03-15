@@ -40,6 +40,10 @@ public class MainActivity extends BaseActivity {
     }
 
     public void uiActionInit() {
+        // 监听bar上面目录切换时候的toast显示
+        showToast(mMainActivityVM.mDirectorySpinnerItemManagerVM);
+
+
         // 监听列表中item的点击事件
         mMainActivityVM.mPictureItemManager.mClickedItemListener.addOnPropertyChangedCallback(new MyExceptionOnPropertyChangedCallback(new Observable.OnPropertyChangedCallback() {
             @Override
@@ -64,8 +68,6 @@ public class MainActivity extends BaseActivity {
             }
         }, e -> showToast(e.getMessage())));
 
-        // 监听bar上面目录切换时候的toast显示
-        mMainActivityVM.mDirectorySpinnerItemManagerVM.mShowToast.addOnPropertyChangedCallback(showToast());
     }
 
     @Override

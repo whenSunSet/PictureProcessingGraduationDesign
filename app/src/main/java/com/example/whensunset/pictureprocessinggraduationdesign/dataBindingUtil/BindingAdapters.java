@@ -76,6 +76,11 @@ public class BindingAdapters {
         });
     }
 
+    @BindingAdapter("onLimitRectChangedListener")
+    public static void setOnLimitRectChangedListener(CutView cutView , CutView.OnLimitRectChangedListener onLimitRectChangedListener) {
+        cutView.setOnLimitRectChangedListener(onLimitRectChangedListener);
+    }
+
     @BindingAdapter(value = {"resizeWidth" , "resizeHeight" , "imageUri"} , requireAll = false)
     public static void setImageResize(SimpleDraweeView simpleDraweeView , int resizeWidth , int resizeHeight , String imageUri) {
         if (resizeHeight == 0) {

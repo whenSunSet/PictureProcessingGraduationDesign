@@ -20,10 +20,11 @@ import com.example.whensunset.pictureprocessinggraduationdesign.base.MyLog;
 
 public class CutView extends PinchImageView {
     public static String TAG = "何时夕:CutView";
-    private static final int TOUCH_LINE_WIDTH = 40;
+    private static final int TOUCH_LINE_WIDTH = 80;
     private static final int MASK_ALPHA = 100;
     private static final int STROKE_WIDTH = 4;
 
+    private OnLimitRectChangedListener mOnLimitRectChangedListener;
     private Rect mLimitRect = new Rect();
     private Rect mLimitMaxRect = new Rect();
     private PointF mLastMovePointF = new PointF();
@@ -73,49 +74,55 @@ public class CutView extends PinchImageView {
         int detaY = (int) (event.getY() - mLastMovePointF.y);
         Rect nowLimitRect = new Rect(mLimitRect);
 
-        if (action == MotionEvent.ACTION_MOVE && isNearLine(x , y) && !isInMove) {
-            if (nowLine == 1){
+        if (action == MotionEvent.ACTION_MOVE) {
+
+            if (isNearLine(x , y) && !isInMove) {
+
+                if (nowLine == 1){
+                    nowLimitRect.left = nowLimitRect.left + detaX;
+                } else if (nowLine == 2) {
+                    nowLimitRect.top = nowLimitRect.top + detaY;
+                } else if (nowLine == 3) {
+                    nowLimitRect.right = nowLimitRect.right + detaX;
+                } else if (nowLine == 4) {
+                    nowLimitRect.bottom = nowLimitRect.bottom + detaY;
+                }
+
+                if (mLimitMaxRect.contains(nowLimitRect)) {
+                    mLimitRect.set(nowLimitRect);
+                }
+
+                isInResize = true;
+                postInvalidate();
+
+                MyLog.d(TAG, "onTouchEvent", "状态gggg:x:y:detaX:detaY:mLimitRect:nowLimitRect:mLimitMaxRect:nowLine:",
+                        "进入伸缩边框" , x , y , detaX , detaY , mLimitRect , nowLimitRect , mLimitMaxRect , nowLine);
+            } else if (!isNearLine(x , y) && mLimitRect.contains(x , y) && !isInResize) {
                 nowLimitRect.left = nowLimitRect.left + detaX;
-            } else if (nowLine == 2) {
-                nowLimitRect.top = nowLimitRect.top + detaY;
-            } else if (nowLine == 3) {
                 nowLimitRect.right = nowLimitRect.right + detaX;
-            } else if (nowLine == 4) {
+                if (mLimitMaxRect.left <= nowLimitRect.left && nowLimitRect.right <= mLimitMaxRect.right) {
+                    mLimitRect.left = nowLimitRect.left;
+                    mLimitRect.right = nowLimitRect.right;
+                }
+
+                nowLimitRect.top = nowLimitRect.top + detaY;
                 nowLimitRect.bottom = nowLimitRect.bottom + detaY;
-            }
-            if (mLimitMaxRect.contains(nowLimitRect)) {
-                mLimitRect.set(nowLimitRect);
-            }
+                if ((mLimitMaxRect.top <= nowLimitRect.top) && (nowLimitRect.bottom <= mLimitMaxRect.bottom)) {
+                    mLimitRect.top = nowLimitRect.top;
+                    mLimitRect.bottom = nowLimitRect.bottom;
+                }
 
-            mLastMovePointF.set(event.getX(), event.getY());
-            isInResize = true;
-            postInvalidate();
+                isInMove = true;
+                postInvalidate();
 
-            MyLog.d(TAG, "onTouchEvent", "状态gggg:x:y:detaX:detaY:mLimitRect:nowLimitRect:mLimitMaxRect:nowLine:",
-                    "进入伸缩边框" , x , y , detaX , detaY , mLimitRect , nowLimitRect , mLimitMaxRect , nowLine);
-        } else if (action == MotionEvent.ACTION_MOVE && !isNearLine(x , y) && mLimitRect.contains(x , y) && !isInResize) {
-            nowLimitRect.left = nowLimitRect.left + detaX;
-            nowLimitRect.right = nowLimitRect.right + detaX;
-            if (mLimitMaxRect.left <= nowLimitRect.left && nowLimitRect.right <= mLimitMaxRect.right) {
-                mLimitRect.left = nowLimitRect.left;
-                mLimitRect.right = nowLimitRect.right;
-            }
-
-            nowLimitRect.top = nowLimitRect.top + detaY;
-            nowLimitRect.bottom = nowLimitRect.bottom + detaY;
-            if ((mLimitMaxRect.top <= nowLimitRect.top) && (nowLimitRect.bottom <= mLimitMaxRect.bottom)) {
-                mLimitRect.top = nowLimitRect.top;
-                mLimitRect.bottom = nowLimitRect.bottom;
+                MyLog.d(TAG, "onTouchEvent", "状态gggg:x:y:detaX:detaY:mLimitRect:nowLimitRect:mLimitMaxRect:",
+                        "进入移动边框" , x , y , detaX , detaY , mLimitRect , nowLimitRect , mLimitMaxRect);
             }
 
             mLastMovePointF.set(event.getX(), event.getY());
-            isInMove = true;
-            postInvalidate();
+            if (mOnLimitRectChangedListener != null) mOnLimitRectChangedListener.onLimitRectChanged(getOpencvCutRect());
 
-            MyLog.d(TAG, "onTouchEvent", "状态gggg:x:y:detaX:detaY:mLimitRect:nowLimitRect:mLimitMaxRect:",
-                    "进入移动边框" , x , y , detaX , detaY , mLimitRect , nowLimitRect , mLimitMaxRect);
         }
-
 
         return true;
     }
@@ -160,7 +167,11 @@ public class CutView extends PinchImageView {
         isInit = init;
     }
 
-    public org.opencv.core.Rect getOpencvCutRect() {
+    public void setOnLimitRectChangedListener(OnLimitRectChangedListener onLimitRectChangedListener) {
+        mOnLimitRectChangedListener = onLimitRectChangedListener;
+    }
+
+    private org.opencv.core.Rect getOpencvCutRect() {
         Drawable imgDrawable = getDrawable();
         if (imgDrawable != null) {
             int dw = imgDrawable.getBounds().width();
@@ -268,6 +279,10 @@ public class CutView extends PinchImageView {
             MyLog.d(TAG, "getImgDisplaySize", "状态gggg:dw:dh:matrix:sx:sy:realImgShowWidth:realImgShowHeight:mLimitMaxRect:getMeasuredHeight():",
                     "进入获取imageView真实显示图片长宽方法" , dw , dh , m , sx , sy , realImgShowWidth , realImgShowHeight , mLimitMaxRect , getMeasuredHeight());
         }
+    }
+
+    public interface OnLimitRectChangedListener {
+        void onLimitRectChanged(org.opencv.core.Rect rect);
     }
 
 }
