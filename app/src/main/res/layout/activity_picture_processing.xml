@@ -61,17 +61,34 @@
 
         </android.support.design.widget.AppBarLayout>
 
-        <com.example.whensunset.pictureprocessinggraduationdesign.mete.CutView
-            android:id="@+id/pic"
+        <FrameLayout
             android:layout_below="@id/toolbar"
             android:layout_above="@+id/selectMenu"
-            android:background="@color/moreGray"
-            android:layout_height="match_parent"
             android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
-            bind:onLimitRectChangedListener="@{viewModel}"
-            bind:isInCut="@{viewModel.isInCut}"
-            bind:bitmap="@{viewModel.mImageBitMap}"/>
+            <com.example.whensunset.pictureprocessinggraduationdesign.mete.CutView
+                android:id="@+id/pic"
+                android:background="@color/moreGray"
+                android:layout_height="match_parent"
+                android:layout_width="match_parent"
+
+                bind:insertImagePath="@{viewModel.mPictureFrameMenuVM.mInsertImagePath}"
+                bind:onLimitRectChangedListener="@{viewModel.mPictureTransformMenuVM}"
+                bind:model="@{viewModel.mCutViewModel}"
+                bind:bitmap="@{viewModel.mImageBitMap}"/>
+
+            <TextView
+                android:visibility="@{(viewModel.mSelectTab == PictureProcessingActivityVM.SELECT_PICTURE_PARAM) ? View.VISIBLE : View.GONE}"
+                android:gravity="bottom"
+                android:layout_gravity="center"
+                android:textColor="@color/white"
+                android:text="@{@string/empty + viewModel.mPictureParamMenuVM.mSelectParam}"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent" />
+
+        </FrameLayout>
+
 
         <FrameLayout
             android:id="@+id/selectMenu"
@@ -79,7 +96,6 @@
             android:layout_above="@id/tab"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
-
 
             <include
                 layout="@layout/activity_picture_processing_picture_transform_menu"
@@ -95,14 +111,12 @@
                 android:id="@+id/picture_param_menu">
             </include>
 
-            <LinearLayout
+            <include
+                layout="@layout/activity_picture_processing_picture_frame_menu"
+                bind:viewModel="@{viewModel.mPictureFrameMenuVM}"
                 android:visibility="@{(viewModel.mSelectTab == PictureProcessingActivityVM.SELECT_PICTURE_FRAME) ? View.VISIBLE : View.GONE}"
-                android:id="@+id/picture_frame_menu"
-                android:orientation="horizontal"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-            </LinearLayout>
+                android:id="@+id/picture_frame_menu">
+            </include>
 
             <LinearLayout
                 android:visibility="@{(viewModel.mSelectTab == PictureProcessingActivityVM.SELECT_PICTURE_TEXT) ? View.VISIBLE : View.GONE}"

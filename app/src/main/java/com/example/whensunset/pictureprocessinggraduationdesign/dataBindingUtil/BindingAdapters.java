@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.SeekBar;
 
 import com.example.whensunset.pictureprocessinggraduationdesign.base.MyLog;
 import com.example.whensunset.pictureprocessinggraduationdesign.mete.CutView;
@@ -20,6 +21,9 @@ import com.facebook.imagepipeline.request.ImageRequest;
 import com.facebook.imagepipeline.request.ImageRequestBuilder;
 
 import java.util.List;
+
+import static com.example.whensunset.pictureprocessinggraduationdesign.mete.CutView.CUT_MODEL;
+import static com.example.whensunset.pictureprocessinggraduationdesign.mete.CutView.INSERT_IMAGE_MODEL;
 
 /**
  * Created by Administrator on 2016/12/6 0006.
@@ -37,10 +41,11 @@ public class BindingAdapters {
         if (animator!=null)recyclerView.setItemAnimator(animator);
         if (decor!=null)recyclerView.addItemDecoration(decor);
 
-        ViewGroup.LayoutParams itemParams = new ViewGroup.LayoutParams(itemWidth , itemHeight);
-        adapter.setItemLayoutParams(itemParams);
+        if (itemHeight != 0 || itemWidth != 0) {
+            ViewGroup.LayoutParams itemParams = new ViewGroup.LayoutParams(itemWidth , itemHeight);
+            adapter.setItemLayoutParams(itemParams);
+        }
         recyclerView.setAdapter(adapter);
-
     }
 
     @BindingAdapter("layoutManager")
@@ -65,15 +70,34 @@ public class BindingAdapters {
         view.setLayoutParams(viewParams);
     }
 
-    @BindingAdapter("isInCut")
-    public static void setIsInCut(CutView cutView , boolean isInCut) {
-        MyLog.d(TAG, "buildLimitView", "状态:isInCut:", "进入设置cutView的限制" , isInCut);
+    @BindingAdapter("model")
+    public static void setModel(CutView cutView , int model) {
+        MyLog.d(TAG, "setModel", "状态:model:", "重新设置cutview的 模式" , model);
 
-        cutView.setInCut(isInCut);
-        cutView.setInit(isInCut);
-        cutView.post(() -> {
-            cutView.invalidate();
-        });
+        cutView.setModel(model);
+        if (model == CUT_MODEL || model == INSERT_IMAGE_MODEL) {
+            MyLog.d(TAG, "setModel", "状态:", "重新进入了 transform 和 frame 需要重新初始化cutView的限制条件");
+            cutView.setInit(true);
+        }
+        cutView.post(cutView::invalidate);
+    }
+
+    @BindingAdapter("insertImagePath")
+    public static void setInsertImagePath(CutView cutView , String insertImagePath) {
+        MyLog.d(TAG, "setInsertImagePath", "状态:insertImagePath:", "进入设置Cut在frame下的 insertImagePath的设置" , insertImagePath);
+        cutView.setInsertImagePath(insertImagePath);
+    }
+
+    @BindingAdapter("progressMax")
+    public static void setProgressMax(SeekBar seekBar , int progressMax) {
+        MyLog.d(TAG, "setProgressMax", "状态:progressMax:", "进入设置progressBar的最大值" , progressMax);
+        seekBar.setMax(progressMax);
+    }
+
+    @BindingAdapter("selectPosition")
+    public static void setSelectPosition(RecyclerView recyclerView , int selectPosition) {
+        MyLog.d(TAG, "setSelectPosition", "状态:selectPosition:", "" , selectPosition);
+        recyclerView.smoothScrollToPosition(selectPosition);
     }
 
     @BindingAdapter("onLimitRectChangedListener")

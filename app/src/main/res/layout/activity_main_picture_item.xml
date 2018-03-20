@@ -20,12 +20,7 @@
             bind:imageUri="@{viewModel.mImageUri}"
             bind:resizeHeight="@{PictureItemManagerVM.ITEM_PICTURE_RESIZE_HEIGHT}"
             bind:resizeWidth="@{PictureItemManagerVM.ITEM_PICTURE_RESIZE_WIDTH}"
-            fresco:actualImageScaleType="centerCrop"
-            fresco:roundTopLeft="true"
-            fresco:roundTopRight="true"
-            fresco:roundBottomLeft="true"
-            fresco:roundBottomRight="true"
-            fresco:roundingBorderWidth="@dimen/picture_simple_drawee_round_size"/>
+            fresco:actualImageScaleType="centerCrop" />
 
     </FrameLayout>
 

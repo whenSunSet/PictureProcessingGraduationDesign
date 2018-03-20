@@ -65,6 +65,15 @@ public abstract class BaseMyConsumer implements MyConsumer<Mat , Mat> {
         }
     }
 
+    public boolean isNeedRun(BaseMyConsumer nextMyConsumer) {
+        MyLog.d(TAG, "isNeedRun", "状态:nextMyConsumer:this" , "判断是否需要运行该consumer" ,  nextMyConsumer , this);
+
+        if (nextMyConsumer == null) {
+            throw new RuntimeException("传入的 consumer 为null");
+        }
+        return true;
+    }
+
     protected abstract Mat onNewResultImpl(Mat oldResult);
 
     protected abstract void onFailureImpl(Throwable t);

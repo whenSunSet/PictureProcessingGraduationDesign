@@ -61,6 +61,25 @@ public class CutMyConsumer extends LinkedMyConsumer {
         this.mRect.set(new double[]{beCopyConsumer.mRect.x , beCopyConsumer.mRect.y , beCopyConsumer.mRect.width , beCopyConsumer.mRect.height});;
     }
 
+    @Override
+    public boolean isNeedRun(BaseMyConsumer nextMyConsumer) {
+        super.isNeedRun(nextMyConsumer);
+
+        if (!(nextMyConsumer instanceof CutMyConsumer)) {
+            MyLog.d(TAG, "isNeedRun", "状态:", "类型不同，需要运行");
+            return true;
+        }
+
+        Rect nextRect = ((CutMyConsumer) nextMyConsumer).mRect;
+        if (Math.abs(nextRect.width - mRect.width) >= 2 || Math.abs(nextRect.height - mRect.height) >= 2) {
+            MyLog.d(TAG, "isNeedRun", "状态:nextRect:mRect", "类型一致，而且长宽变化幅度都超过了2，需要运行" , nextRect , mRect);
+            return true;
+        }
+
+        MyLog.d(TAG, "isNeedRun", "状态:nextRect:mRect", "类型一致，而且长宽变化幅度都没有超过2，不需要运行" , nextRect , mRect);
+        return false;
+    }
+
     private native void cut(long in_mat_addr , long out_mat_addr , int x , int y , int width , int height);
 
     @Override

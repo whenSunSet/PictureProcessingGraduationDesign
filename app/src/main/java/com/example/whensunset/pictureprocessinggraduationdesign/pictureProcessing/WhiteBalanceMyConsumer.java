@@ -1,7 +1,7 @@
-package com.example.whensunset.pictureprocessinggraduationdesign.impl;
+package com.example.whensunset.pictureprocessinggraduationdesign.pictureProcessing;
 
 import com.example.whensunset.pictureprocessinggraduationdesign.base.MyLog;
-import com.example.whensunset.pictureprocessinggraduationdesign.pictureProcessing.CutMyConsumer;
+import com.example.whensunset.pictureprocessinggraduationdesign.impl.BaseMyConsumer;
 
 import org.opencv.core.Mat;
 

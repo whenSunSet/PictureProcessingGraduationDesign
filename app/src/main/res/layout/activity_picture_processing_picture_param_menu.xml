@@ -19,9 +19,8 @@
 
         <android.support.v7.widget.AppCompatSeekBar
             bind:bindingHeight="@{26}"
-
-            android:max="100"
-            android:onProgressChanged="@{(seekBar, progress, fromUser) -> viewModel.progressChanged(progress)}"
+            bind:progressMax="@{PictureParamMenuVM.PROGRESS_MAX}"
+            android:onProgressChanged="@{(seekBar, progress, fromUser) -> viewModel.onProgressChanged(progress)}"
             android:progress="@{viewModel.mSelectParam}"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />

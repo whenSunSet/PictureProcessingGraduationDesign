@@ -9,25 +9,27 @@ import com.example.whensunset.pictureprocessinggraduationdesign.base.BaseVM;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.MyLog;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.ObserverParamMap;
 import com.example.whensunset.pictureprocessinggraduationdesign.impl.BaseMyConsumer;
-import com.example.whensunset.pictureprocessinggraduationdesign.mete.CutView;
-import com.example.whensunset.pictureprocessinggraduationdesign.pictureProcessing.CutMyConsumer;
 import com.example.whensunset.pictureprocessinggraduationdesign.pictureProcessing.StringConsumerChain;
+import com.example.whensunset.pictureprocessinggraduationdesign.viewModel.includeLayoutVM.PictureFrameMenuVM;
 import com.example.whensunset.pictureprocessinggraduationdesign.viewModel.includeLayoutVM.PictureParamMenuVM;
 import com.example.whensunset.pictureprocessinggraduationdesign.viewModel.includeLayoutVM.PictureTransformMenuVM;
 
 import org.opencv.android.Utils;
 import org.opencv.core.Mat;
-import org.opencv.core.Rect;
 
 import io.reactivex.Flowable;
 import io.reactivex.functions.Function;
 
+import static com.example.whensunset.pictureprocessinggraduationdesign.mete.CutView.CUT_MODEL;
+import static com.example.whensunset.pictureprocessinggraduationdesign.mete.CutView.INSERT_IMAGE_MODEL;
+import static com.example.whensunset.pictureprocessinggraduationdesign.mete.CutView.SCALE_MODEL;
 import static com.example.whensunset.pictureprocessinggraduationdesign.staticParam.ObserverMapKey.PictureParamMenuVM_mat;
 import static com.example.whensunset.pictureprocessinggraduationdesign.staticParam.ObserverMapKey.PictureTransformMenuVM_mat;
 import static com.example.whensunset.pictureprocessinggraduationdesign.viewModel.includeLayoutVM.PictureParamMenuVM.SELECT_BRIGHTNESS;
 import static com.example.whensunset.pictureprocessinggraduationdesign.viewModel.includeLayoutVM.PictureParamMenuVM.SELECT_CONTRAST;
 import static com.example.whensunset.pictureprocessinggraduationdesign.viewModel.includeLayoutVM.PictureParamMenuVM.SELECT_SATURATION;
 import static com.example.whensunset.pictureprocessinggraduationdesign.viewModel.includeLayoutVM.PictureParamMenuVM.SELECT_TONAL;
+import static com.example.whensunset.pictureprocessinggraduationdesign.viewModel.includeLayoutVM.PictureTransformMenuVM.LEAVE_TRANSFORM_LISTENER;
 import static com.example.whensunset.pictureprocessinggraduationdesign.viewModel.includeLayoutVM.PictureTransformMenuVM.SELECT_PICTURE_CUT;
 import static com.example.whensunset.pictureprocessinggraduationdesign.viewModel.includeLayoutVM.PictureTransformMenuVM.SELECT_PICTURE_HORIZONTAL_FLIP;
 import static com.example.whensunset.pictureprocessinggraduationdesign.viewModel.includeLayoutVM.PictureTransformMenuVM.SELECT_PICTURE_ROTATE;
@@ -38,9 +40,10 @@ import static com.example.whensunset.pictureprocessinggraduationdesign.viewModel
  * Created by whensunset on 2018/3/5.
  */
 
-public class PictureProcessingActivityVM extends BaseVM implements CutView.OnLimitRectChangedListener{
+public class PictureProcessingActivityVM extends BaseVM {
     public static final String TAG = "何时夕:PictureProcessingActivityVM";
 
+    public static final int THROTTLE_MILLISECONDS = 200;
     public static final int MENU_MAX_HEIGHT = PictureTransformMenuVM.MENU_HEIGHT;
 
     public static final int SELECT_PICTURE_FILTER = 0;
@@ -53,18 +56,18 @@ public class PictureProcessingActivityVM extends BaseVM implements CutView.OnLim
 
     public final ObservableField<Bitmap> mImageBitMap = new ObservableField<>();
     public final ObservableField<Integer> mSelectTab = new ObservableField<>(0);
+    public final ObservableField<Integer> mCutViewModel = new ObservableField<>(SCALE_MODEL);
     public final ObservableField<Boolean> mCanUndo = new ObservableField<>(false);
     public final ObservableField<Boolean> mCanRedo = new ObservableField<>(false);
-    public final ObservableField<Boolean> isInCut = new ObservableField<>(false);
 
     public final PictureTransformMenuVM mPictureTransformMenuVM;
     public final PictureParamMenuVM mPictureParamMenuVM;
+    public final PictureFrameMenuVM mPictureFrameMenuVM;
+    private BaseVM mNowResumeChildVM = null;
 
     private StringConsumerChain mStringConsumerChain = StringConsumerChain.getInstance();
     private String mImagePath;
     private String mImageUri;
-    private int mNowSelectListenerPosition = 0;
-    private boolean isLeaveCut = false;
 
     public PictureProcessingActivityVM(String imageUri) {
         super(7);
@@ -73,6 +76,7 @@ public class PictureProcessingActivityVM extends BaseVM implements CutView.OnLim
 
         mPictureTransformMenuVM = new PictureTransformMenuVM();
         mPictureParamMenuVM = new PictureParamMenuVM();
+        mPictureFrameMenuVM = new PictureFrameMenuVM();
 
         mStringConsumerChain.init(mImagePath);
         mStringConsumerChain
@@ -80,14 +84,17 @@ public class PictureProcessingActivityVM extends BaseVM implements CutView.OnLim
                 .subscribe(this::showMat);
 
         initPictureAction();
+        initClickAction();
 
+        mNowResumeChildVM = mPictureTransformMenuVM;
+        mNowResumeChildVM.onResume();
         MyLog.d(TAG, "PictureProcessingActivityVM", "imageUri:", imageUri );
     }
 
     private void initPictureAction() {
 
         // 监听 图片变换 的操作以更新图片
-        Flowable.fromArray(SELECT_PICTURE_ROTATE , SELECT_PICTURE_HORIZONTAL_FLIP , SELECT_PICTURE_VERTICAL_FLIP , SELECT_PICTURE_WHITE_BALANCE , SELECT_PICTURE_CUT)
+        Flowable.fromArray(SELECT_PICTURE_ROTATE , SELECT_PICTURE_HORIZONTAL_FLIP , SELECT_PICTURE_VERTICAL_FLIP , SELECT_PICTURE_WHITE_BALANCE , SELECT_PICTURE_CUT , LEAVE_TRANSFORM_LISTENER)
                 .map((Function<Integer, ObservableField<? super Object>>) mPictureTransformMenuVM::getListener)
                 .subscribe(observableField -> observableField.addOnPropertyChangedCallback(new Observable.OnPropertyChangedCallback() {
                     @Override
@@ -107,68 +114,55 @@ public class PictureProcessingActivityVM extends BaseVM implements CutView.OnLim
                 }));
 
         MyLog.d(TAG, "initPictureAction", "状态:", "监听图像变化初始化完毕");
+
     }
 
     @Override
-    public void onClick(int position) {
-        super.onClick(position);
+    protected void initClickAction() {
+        getDefaultClickFlowable(THROTTLE_MILLISECONDS)
+                .filter(position -> {
+                    if (position == CLICK_UNDO) {
+                        clickUndo();
+                    } else if (position == CLICK_REDO) {
+                        clickRedo();
+                    }
+                    return (position != CLICK_REDO && position != CLICK_UNDO);
+                }).map(position -> {
+                        mNowResumeChildVM.onStop();
 
-        if (position != CLICK_REDO && position != CLICK_UNDO) {
-            mSelectTab.set(position);
+                        mSelectTab.set(position);
+                    return position;
+                }).subscribe(position -> {
+                    switch (position) {
+                        case SELECT_PICTURE_FILTER:
+                            mNowResumeChildVM = mPictureTransformMenuVM;
+                            mCutViewModel.set(SCALE_MODEL);
 
-            if (mNowSelectListenerPosition == SELECT_PICTURE_TRANSFORM && position != SELECT_PICTURE_TRANSFORM){
-                MyLog.d(TAG, "onClick", "状态:mNowSelectListenerPosition:position:",
-                        "离开transform，如果剪裁框有变化，那么接下来需要进行图片剪裁" , mNowSelectListenerPosition , position);
-                isLeaveCut = true;
-            }
+                            break;
+                        case SELECT_PICTURE_TRANSFORM:
+                            mNowResumeChildVM = mPictureTransformMenuVM;
+                            mCutViewModel.set(CUT_MODEL);
 
-            mNowSelectListenerPosition = position;
-        }
+                            break;
+                        case SELECT_PICTURE_PARAM:
+                            mNowResumeChildVM = mPictureParamMenuVM;
+                            mCutViewModel.set(SCALE_MODEL);
 
-        switch (position) {
-            case CLICK_UNDO:
-                clickUndo();
-                break;
-            case CLICK_REDO:
-                clickRedo();
-                break;
-            case SELECT_PICTURE_FILTER:
-                runCut();
-                getListener(position).notifyChange();
-                break;
-            case SELECT_PICTURE_TRANSFORM:
-                isInCut.set(true);
-                break;
-            case SELECT_PICTURE_PARAM:
-                runCut();
-                mPictureParamMenuVM.onResume();
-                getListener(position).notifyChange();
-                break;
-            case SELECT_PICTURE_FRAME:
-                runCut();
-                getListener(position).notifyChange();
-                break;
-            case SELECT_PICTURE_TEXT:
-                runCut();
-                getListener(position).notifyChange();
-                break;
-        }
+                            break;
+                        case SELECT_PICTURE_FRAME:
+                            mNowResumeChildVM = mPictureFrameMenuVM;
+                            mCutViewModel.set(INSERT_IMAGE_MODEL);
 
-    }
+                            break;
+                        case SELECT_PICTURE_TEXT:
+                            mNowResumeChildVM = mPictureTransformMenuVM;
+                            mCutViewModel.set(SCALE_MODEL);
 
-    private void runCut() {
-        if (isLeaveCut && isImageSizeChanged(nowCutRect , mStringConsumerChain.getNowRect())) {
-            CutMyConsumer cutMyConsumer = new CutMyConsumer(nowCutRect);
-            mStringConsumerChain
-                    .rxRunNextConvenient(cutMyConsumer)
-                    .subscribe(this::showMat);
-
-            isLeaveCut = false;
-
-            MyLog.d(TAG, "runCut", "状态:nowCutRect:mStringConsumerChain.getNowRect()",
-                    "离开了transform，而且剪裁框有了变化，所以进行了图片剪裁" , nowCutRect , mStringConsumerChain.getNowRect());
-        }
-        isInCut.set(false);
+                            break;
+                    }
+            mNowResumeChildVM.onResume();
+            getListener(position).notifyChange();
+        });
     }
 
     private void clickUndo() {
@@ -176,11 +170,11 @@ public class PictureProcessingActivityVM extends BaseVM implements CutView.OnLim
                 .rxUndoConvenient()
                 .subscribe(this::showMat);
 
-        if (mPictureParamMenuVM.getState() == BaseVM.RESUME) {
+        if (mPictureParamMenuVM.isResume()) {
             mPictureParamMenuVM.fresh();
         }
 
-        MyLog.d(TAG, "clickUndo", "状态:nowCutRect:", "undo完毕" , nowCutRect);
+        MyLog.d(TAG, "clickUndo", "状态:mPictureParamMenuVM.isResume():", "undo完毕" , mPictureParamMenuVM.isResume());
     }
 
     private void clickRedo() {
@@ -188,18 +182,11 @@ public class PictureProcessingActivityVM extends BaseVM implements CutView.OnLim
                 .rxRedoConvenient()
                 .subscribe(this::showMat);
 
-        if (mPictureParamMenuVM.getState() == BaseVM.RESUME) {
+        if (mPictureParamMenuVM.isResume()) {
             mPictureParamMenuVM.fresh();
         }
 
-        MyLog.d(TAG, "clickRedo", "状态:nowCutRect", "redo完毕" , nowCutRect);
-    }
-
-    private boolean isImageSizeChanged(Rect nowRect , Rect lastCut) {
-        if (Math.abs(lastCut.width - nowRect.width) <= 2 && Math.abs(lastCut.height - nowRect.height) <= 2) {
-            return false;
-        }
-        return true;
+        MyLog.d(TAG, "clickRedo", "状态:mPictureParamMenuVM.isResume():", "redo完毕" , mPictureParamMenuVM.isResume());
     }
 
     private void showMat(Mat mat) {
@@ -210,7 +197,6 @@ public class PictureProcessingActivityVM extends BaseVM implements CutView.OnLim
 
         mCanUndo.set(mStringConsumerChain.canUndo());
         mCanRedo.set(mStringConsumerChain.canRedo());
-        nowCutRect = mStringConsumerChain.getNowRect();
 
         Bitmap oldBitmap = mImageBitMap.get();
         if (oldBitmap != null) {
@@ -223,15 +209,7 @@ public class PictureProcessingActivityVM extends BaseVM implements CutView.OnLim
         Utils.matToBitmap(mat , newBitMap);
         mImageBitMap.set(newBitMap);
 
-        MyLog.d(TAG, "showMat", "状态:mCanUndo:mCanRedo:nowCutRect:", "图片展示完毕" , mCanUndo.get() , mCanRedo.get() , nowCutRect);
+        MyLog.d(TAG, "showMat", "状态:mCanUndo:mCanRedo:", "图片展示完毕" , mCanUndo.get() , mCanRedo.get());
     }
 
-    private Rect nowCutRect = new Rect();
-    @Override
-    public void onLimitRectChanged(Rect cutRect) {
-        if (isImageSizeChanged(cutRect , nowCutRect)) {
-            nowCutRect = cutRect;
-            MyLog.d(TAG, "onLimitRectChanged", "状态:cutRect", "图片限制框发生改变" , cutRect);
-        }
-    }
 }

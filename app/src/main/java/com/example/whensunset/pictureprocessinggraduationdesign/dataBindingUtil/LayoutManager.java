@@ -28,6 +28,14 @@ public class LayoutManager {
         };
     }
 
+    public static LayoutManagerFactory linearH() {
+        return new LayoutManagerFactory() {
+            @Override
+            public RecyclerView.LayoutManager create(RecyclerView recyclerView) {
+                return new LinearLayoutManager(recyclerView.getContext(), LinearLayoutManager.HORIZONTAL, false);
+            }
+        };
+    }
 
     public static LayoutManagerFactory linear(@Orientation final int orientation, final boolean reverseLayout) {
         return new LayoutManagerFactory() {

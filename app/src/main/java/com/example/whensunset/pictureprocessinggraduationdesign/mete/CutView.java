@@ -1,6 +1,8 @@
 package com.example.whensunset.pictureprocessinggraduationdesign.mete;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
@@ -9,6 +11,7 @@ import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.Nullable;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 
@@ -20,7 +23,11 @@ import com.example.whensunset.pictureprocessinggraduationdesign.base.MyLog;
 
 public class CutView extends PinchImageView {
     public static String TAG = "何时夕:CutView";
-    private static final int TOUCH_LINE_WIDTH = 80;
+    public static final int SCALE_MODEL = 0;
+    public static final int CUT_MODEL = 1;
+    public static final int INSERT_IMAGE_MODEL = 2;
+
+    private static final int TOUCH_LINE_WIDTH = 50;
     private static final int MASK_ALPHA = 100;
     private static final int STROKE_WIDTH = 4;
 
@@ -29,9 +36,10 @@ public class CutView extends PinchImageView {
     private Rect mLimitMaxRect = new Rect();
     private PointF mLastMovePointF = new PointF();
     private Paint mPaint = new Paint();
+    private String mInsertImagePath = null;
 
+    private int mModel = SCALE_MODEL;
     private int nowLine = -1;
-    private boolean isInCut = false;
     private boolean isInResize = false;
     private boolean isInMove = false;
     private boolean isInit = true;
@@ -49,21 +57,23 @@ public class CutView extends PinchImageView {
     }
 
     @Override
+    @SuppressLint("ClickableViewAccessibility")
     public boolean onTouchEvent(MotionEvent event) {
-        if (isOpenPinchImage) {
+
+        if (mModel == SCALE_MODEL) {
             return super.onTouchEvent(event);
         }
         super.onTouchEvent(event);
 
         int action = event.getAction() & MotionEvent.ACTION_MASK;
-        MyLog.d(TAG, "onTouchEvent", "tt:mLastMovePointF:mLimitRect:mLimitMaxRect:", "gggg" , mLastMovePointF , mLimitRect , mLimitMaxRect);
+        MyLog.d(TAG, "onTouchEvent", "tt:mLastMovePointF:mLimitRect:mLimitMaxRect:mModel:", "gggg", mLastMovePointF, mLimitRect, mLimitMaxRect , mModel);
 
         if (action == MotionEvent.ACTION_DOWN) {
-            MyLog.d(TAG, "onTouchEvent", "状态gggg:触摸状态:", "进入触摸事件方法" , "DOWN");
+            MyLog.d(TAG, "onTouchEvent", "状态gggg:触摸状态:", "进入触摸事件方法", "DOWN");
             mLastMovePointF.set(event.getX(), event.getY());
         } else if (action == MotionEvent.ACTION_UP) {
-            MyLog.d(TAG, "onTouchEvent", "状态gggg:触摸状态:", "进入触摸事件方法" , "UP");
-            mLastMovePointF.set(0 , 0);
+            MyLog.d(TAG, "onTouchEvent", "状态gggg:触摸状态:", "进入触摸事件方法", "UP");
+            mLastMovePointF.set(0, 0);
             isInResize = false;
             isInMove = false;
         }
@@ -76,9 +86,9 @@ public class CutView extends PinchImageView {
 
         if (action == MotionEvent.ACTION_MOVE) {
 
-            if (isNearLine(x , y) && !isInMove) {
+            if (isNearLine(x, y) && !isInMove) {
 
-                if (nowLine == 1){
+                if (nowLine == 1) {
                     nowLimitRect.left = nowLimitRect.left + detaX;
                 } else if (nowLine == 2) {
                     nowLimitRect.top = nowLimitRect.top + detaY;
@@ -96,8 +106,8 @@ public class CutView extends PinchImageView {
                 postInvalidate();
 
                 MyLog.d(TAG, "onTouchEvent", "状态gggg:x:y:detaX:detaY:mLimitRect:nowLimitRect:mLimitMaxRect:nowLine:",
-                        "进入伸缩边框" , x , y , detaX , detaY , mLimitRect , nowLimitRect , mLimitMaxRect , nowLine);
-            } else if (!isNearLine(x , y) && mLimitRect.contains(x , y) && !isInResize) {
+                        "进入伸缩边框", x, y, detaX, detaY, mLimitRect, nowLimitRect, mLimitMaxRect, nowLine);
+            } else if (!isNearLine(x, y) && mLimitRect.contains(x, y) && !isInResize) {
                 nowLimitRect.left = nowLimitRect.left + detaX;
                 nowLimitRect.right = nowLimitRect.right + detaX;
                 if (mLimitMaxRect.left <= nowLimitRect.left && nowLimitRect.right <= mLimitMaxRect.right) {
@@ -116,11 +126,12 @@ public class CutView extends PinchImageView {
                 postInvalidate();
 
                 MyLog.d(TAG, "onTouchEvent", "状态gggg:x:y:detaX:detaY:mLimitRect:nowLimitRect:mLimitMaxRect:",
-                        "进入移动边框" , x , y , detaX , detaY , mLimitRect , nowLimitRect , mLimitMaxRect);
+                        "进入移动边框", x, y, detaX, detaY, mLimitRect, nowLimitRect, mLimitMaxRect);
             }
 
             mLastMovePointF.set(event.getX(), event.getY());
-            if (mOnLimitRectChangedListener != null) mOnLimitRectChangedListener.onLimitRectChanged(getOpencvCutRect());
+            if (mOnLimitRectChangedListener != null)
+                mOnLimitRectChangedListener.onLimitRectChanged(getOpencvCutRect());
 
         }
 
@@ -155,16 +166,18 @@ public class CutView extends PinchImageView {
         return false;
     }
 
-    public void setInCut(boolean inCut) {
-        isInCut = inCut;
-    }
-
-    public Rect getLimitRect() {
-        return mLimitRect;
-    }
-
     public void setInit(boolean init) {
         isInit = init;
+    }
+
+    public void setModel(int model) {
+        mModel = model;
+        isOpenPinchImage = (mModel == SCALE_MODEL);
+    }
+
+    public void setInsertImagePath(String insertImageUri) {
+        mInsertImagePath = insertImageUri;
+        postInvalidate();
     }
 
     public void setOnLimitRectChangedListener(OnLimitRectChangedListener onLimitRectChangedListener) {
@@ -187,9 +200,9 @@ public class CutView extends PinchImageView {
             float sy = values[4];
 
             org.opencv.core.Rect rect = new org.opencv.core.Rect((int) (((float) mLimitRect.left - (float) mLimitMaxRect.left) / sx),
-                    (int) (((float) mLimitRect.top - (float) mLimitMaxRect.top) / sy), (int)((float)mLimitRect.width() / sx) , (int)((float)mLimitRect.height() / sx));
+                    (int) (((float) mLimitRect.top - (float) mLimitMaxRect.top) / sy), (int)((float)mLimitRect.width() / sx) , (int)((float)mLimitRect.height() / sy));
 
-            MyLog.d(TAG, "getOpencvCutRect", "状态gggg:dw:dh:m:sx:sy:rect", "返回opencv的Rect" , dw , dh , m , sx , sy , rect);
+            MyLog.d(TAG, "getOpencvCutRect", "状态gggg:dw:dh:m:sx:sy:rect:mLimitRect:mLimitMaxRect:", "返回opencv的Rect" , dw , dh , m , sx , sy , rect , mLimitRect , mLimitMaxRect);
             return rect;
         } else {
             throw new RuntimeException("CutView还没初始化");
@@ -201,54 +214,84 @@ public class CutView extends PinchImageView {
         super.onDraw(canvas);
         getImgDisplaySize();
 
-        // 每次进入 transform 的时候需要重新初始化
+        // 每次进入 transform 和 frame 的时候需要重新初始化
         if (isInit) {
             mLimitRect.set(mLimitMaxRect.left , mLimitMaxRect.top , mLimitMaxRect.right , mLimitMaxRect.bottom);
             isInit = false;
-            MyLog.d(TAG, "onDraw", "状态gggg:mLimitMaxRect", "重新初始化cutView" , mLimitMaxRect);
+            MyLog.d(TAG, "onDraw", "状态gggg:mLimitMaxRect", "重新初始化cutView的限制条件" , mLimitMaxRect);
         }
         drawMask(canvas);
     }
 
     private void drawMask(Canvas canvas) {
-        if (isInCut) {
-            int width = getMeasuredWidth();
-            int height = getMeasuredHeight();
+        MyLog.d(TAG, "drawMask", "状态gggg:mModel:mLimitRect:mLimitMaxRect:", "进入绘制蒙版" , mModel , mLimitRect , mLimitMaxRect);
 
-            mPaint.setColor(Color.BLACK);
-            mPaint.setStyle(Paint.Style.FILL);
-            mPaint.setAlpha(MASK_ALPHA);
-            isOpenPinchImage = false;
+        switch (mModel) {
+            case SCALE_MODEL:
+                isOpenPinchImage = true;
+                return;
+            case CUT_MODEL:
+                drawCutMask(canvas);
+                break;
+            case INSERT_IMAGE_MODEL:
+                drawInsertImageMask(canvas);
+                break;
+        }
+    }
 
-            if (mLimitMaxRect.contains(mLimitRect)) {
-                canvas.drawRect(0 , 0 , width , mLimitRect.top , mPaint);
-                canvas.drawRect(0 , mLimitRect.bottom , width , height , mPaint);
-                canvas.drawRect(0 , mLimitRect.top , mLimitRect.left , mLimitRect.bottom , mPaint);
-                canvas.drawRect(mLimitRect.right , mLimitRect.top , width , mLimitRect.bottom , mPaint);
-            } else {
-                canvas.drawRect(0 , 0 , width , mLimitMaxRect.top , mPaint);
-                canvas.drawRect(0 , mLimitMaxRect.bottom , width , height , mPaint);
-                canvas.drawRect(0 , mLimitMaxRect.top , mLimitMaxRect.left , mLimitMaxRect.bottom , mPaint);
-                canvas.drawRect(mLimitMaxRect.right , mLimitMaxRect.top , width , mLimitMaxRect.bottom , mPaint);
-                mLimitRect.set(mLimitMaxRect);
-            }
+    private void drawCutMask(Canvas canvas) {
+        int width = getMeasuredWidth();
+        int height = getMeasuredHeight();
+
+        mPaint.setColor(Color.BLACK);
+        mPaint.setStyle(Paint.Style.FILL);
+        mPaint.setAlpha(MASK_ALPHA);
+
+        if (mLimitMaxRect.contains(mLimitRect)) {
+            canvas.drawRect(0 , 0 , width , mLimitRect.top , mPaint);
+            canvas.drawRect(0 , mLimitRect.bottom , width , height , mPaint);
+            canvas.drawRect(0 , mLimitRect.top , mLimitRect.left , mLimitRect.bottom , mPaint);
+            canvas.drawRect(mLimitRect.right , mLimitRect.top , width , mLimitRect.bottom , mPaint);
+        } else {
+            canvas.drawRect(0 , 0 , width , mLimitMaxRect.top , mPaint);
+            canvas.drawRect(0 , mLimitMaxRect.bottom , width , height , mPaint);
+            canvas.drawRect(0 , mLimitMaxRect.top , mLimitMaxRect.left , mLimitMaxRect.bottom , mPaint);
+            canvas.drawRect(mLimitMaxRect.right , mLimitMaxRect.top , width , mLimitMaxRect.bottom , mPaint);
+            mLimitRect.set(mLimitMaxRect);
+        }
 
 
+        mPaint.setColor(Color.WHITE);
+        mPaint.setStrokeWidth(STROKE_WIDTH);
+        mPaint.setStyle(Paint.Style.STROKE);
+
+        if (mLimitMaxRect.contains(mLimitRect)) {
+            canvas.drawRect(mLimitRect , mPaint);
+        } else {
+            canvas.drawRect(mLimitMaxRect , mPaint);
+        }
+
+        MyLog.d(TAG, "drawCutMask", "状态:width:height:mLimitMaxRect:mLimitRect:", "进入绘制剪切图片界面的蒙板");
+    }
+
+    private void drawInsertImageMask(Canvas canvas) {
+        if (!TextUtils.isEmpty(mInsertImagePath)) {
             mPaint.setColor(Color.WHITE);
             mPaint.setStrokeWidth(STROKE_WIDTH);
             mPaint.setStyle(Paint.Style.STROKE);
 
             if (mLimitMaxRect.contains(mLimitRect)) {
                 canvas.drawRect(mLimitRect , mPaint);
+                canvas.drawBitmap(BitmapFactory.decodeFile(mInsertImagePath) , null , mLimitRect , mPaint);
+
             } else {
                 canvas.drawRect(mLimitMaxRect , mPaint);
+                canvas.drawBitmap(BitmapFactory.decodeFile(mInsertImagePath) , null , mLimitMaxRect , mPaint);
             }
 
-        } else {
-            setOpenPinchImage(true);
-        }
 
-        MyLog.d(TAG, "drawMask", "状态gggg:isInCut:mLimitRect:mLimitMaxRect:", "进入绘制蒙版" , isInCut , mLimitRect , mLimitMaxRect);
+        }
+        MyLog.d(TAG, "drawInsertImageMask", "状态:mInsertImagePath:mLimitMaxRect:mLimitRect:", "进入绘制插入图片界面的蒙板" , mInsertImagePath , mLimitMaxRect , mLimitRect);
     }
 
     private void getImgDisplaySize() {

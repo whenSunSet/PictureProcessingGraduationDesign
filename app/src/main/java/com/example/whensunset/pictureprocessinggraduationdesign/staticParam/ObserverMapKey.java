@@ -9,6 +9,9 @@ public interface ObserverMapKey {
 
     String PictureTransformMenuVM_mat = "mat";
     String PictureParamMenuVM_mat = "mat";
+    String PictureFrameItemVM_mat = "mat";
+    String PictureFrameItemVM_mPosition = "mPosition";
+    String PictureFrameItemVM_frameImagePath = "frameImagePath";
 
     String PictureItemManagerVM_mPosition = "mPosition";
     String PictureItemManagerVM_mImageUri = "mImageUri";

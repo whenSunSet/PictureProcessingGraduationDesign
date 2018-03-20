@@ -32,6 +32,10 @@ public class RotateMyConsumer extends UndoMyConsumer {
         mAngle = angle;
     }
 
+    public RotateMyConsumer(double angle , int times) {
+        this.mAngle = angle * times;
+    }
+
     @Override
     protected Mat onNewResultImpl(Mat oldResult) {
         MyLog.d(TAG, "onNewResultImpl", "状态:oldResult:" , "运行" , oldResult);

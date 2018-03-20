@@ -8,7 +8,6 @@
         <import type="com.example.whensunset.pictureprocessinggraduationdesign.dataBindingUtil.LayoutManager"/>
         <import type="com.example.whensunset.pictureprocessinggraduationdesign.dataBindingUtil.ItemDecoration"/>
         <import type="android.view.View"/>
-        <import type="com.example.whensunset.pictureprocessinggraduationdesign.base.MyUtil"/>
 
         <variable name="viewModel" type="com.example.whensunset.pictureprocessinggraduationdesign.viewModel.MainActivityVM"/>
     </data>

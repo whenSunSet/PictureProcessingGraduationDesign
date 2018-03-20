@@ -11,7 +11,6 @@ import org.opencv.core.Rect;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
 import io.reactivex.Flowable;
@@ -97,35 +96,40 @@ public abstract class ConsumerChain<T> implements Chain<T , Mat> {
 
     /**
      * 在 Chain 初始化 并且 开始运行之后 ， 继续运行单个 consumer ，传入的 consumer 可为null， 这样会返回当前的图像
-     * @param baseMyConsumer
+     * @param nextMyConsumer
      * @return
      */
     @Override
-    public Mat runNext(BaseMyConsumer baseMyConsumer) {
+    public Mat runNext(BaseMyConsumer nextMyConsumer) {
 
-        MyLog.d(TAG, "runStart", "状态:", "运行下一个" , baseMyConsumer);
+        MyLog.d(TAG, "runStart", "状态:", "运行下一个" , nextMyConsumer);
 
         checkState();
 
-        if (baseMyConsumer == null) {
+        if (nextMyConsumer == null) {
             MyLog.d(TAG, "runNext", "状态:" , "传入的 consumer 为空");
             return mNowMat;
         }
 
-        addConsumer(baseMyConsumer);
-        mPreviousMat = mNowMat;
-        mNowMat = runConsumers(Collections.singletonList(baseMyConsumer) , mNowMat);
+        BaseMyConsumer nowConsumer = getNowConsumer();
+        boolean isNeedRun = nowConsumer.isNeedRun(nextMyConsumer);
+        if (isNeedRun) {
+            addConsumer(nextMyConsumer);
+            mPreviousMat = mNowMat;
+            mNowMat = runConsumers(Collections.singletonList(nextMyConsumer) , mNowMat);
+        }
+        MyLog.d(TAG, "runNext", "状态:isNeedRun:nowConsumer:mNowMat:mPreviousMat:", ""  , isNeedRun , nowConsumer , mNowMat , mPreviousMat);
         return mNowMat;
     }
 
     /**
      * 修改当前 consumer 的参数 然后重新运行一遍，这里不会增加 consumer的数量 , 不能修改第一个 consumer的参数
-     * @param baseMyConsumer
+     * @param changeMyConsumer
      * @return
      */
     @Override
-    public Mat runNow(BaseMyConsumer baseMyConsumer) {
-        MyLog.d(TAG, "runNow", "状态:consumer:", "重新运行当前的" , baseMyConsumer);
+    public Mat runNow(BaseMyConsumer changeMyConsumer) {
+        MyLog.d(TAG, "runNow", "状态:consumer:", "重新运行当前的" , changeMyConsumer);
 
         checkState();
 
@@ -133,10 +137,13 @@ public abstract class ConsumerChain<T> implements Chain<T , Mat> {
             throw new RuntimeException("不能重新运行 第一个 consumer");
         }
 
-        BaseMyConsumer nowConsumer = mConsumerList.get(mConsumerPoint);
-        nowConsumer.copy(baseMyConsumer);
-        mNowMat = runConsumers(Collections.singletonList(nowConsumer) , mPreviousMat);
-
+        BaseMyConsumer nowConsumer = getNowConsumer();
+        boolean isNeedRun = nowConsumer.isNeedRun(changeMyConsumer);
+        if (isNeedRun) {
+            nowConsumer.copy(changeMyConsumer);
+            mNowMat = runConsumers(Collections.singletonList(nowConsumer) , mPreviousMat);
+        }
+        MyLog.d(TAG, "runNow", "状态:isNeedRun:nowConsumer:changeMyConsumer:mNowMat:mPreviousMat:", "" , isNeedRun , nowConsumer , changeMyConsumer , mNowMat , mPreviousMat);
         return mNowMat;
     }
 
@@ -169,12 +176,12 @@ public abstract class ConsumerChain<T> implements Chain<T , Mat> {
         }
 
         mConsumerPoint--;
-
-        if (mConsumerList.get(mConsumerPoint) instanceof CutMyConsumer) {
-            nowRect = ((CutMyConsumer) mConsumerList.get(mConsumerPoint)).getRect();
+        BaseMyConsumer nowConsumer = getNowConsumer();
+        if (nowConsumer instanceof CutMyConsumer) {
+            nowRect = ((CutMyConsumer) nowConsumer).getRect();
         }
 
-        MyLog.d(TAG, "undo", "状态:mConsumerPoint:mNowMat:mPreviousMat", "undo完毕" , mConsumerPoint , mNowMat , mPreviousMat);
+        MyLog.d(TAG, "undo", "状态:mConsumerPoint:mNowMat:mPreviousMat:nowConsumer:", "undo完毕" , mConsumerPoint , mNowMat , mPreviousMat , nowConsumer);
         return mNowMat;
     }
 
@@ -194,7 +201,7 @@ public abstract class ConsumerChain<T> implements Chain<T , Mat> {
 
         mConsumerPoint++;
         mPreviousMat = mNowMat;
-        mNowMat = runConsumers(Collections.singletonList(mConsumerList.get(mConsumerPoint)), mNowMat);
+        mNowMat = runConsumers(Collections.singletonList(getNowConsumer()), mNowMat);
 
         MyLog.d(TAG, "redo", "状态:mConsumerPoint:mNowMat:mPreviousMat", "redo完成" , mConsumerPoint , mNowMat , mPreviousMat);
         return mNowMat;
@@ -280,21 +287,23 @@ public abstract class ConsumerChain<T> implements Chain<T , Mat> {
             return;
         }
 
-        Iterator<BaseMyConsumer> iteratorBaseMyConsumer = mConsumerList.listIterator();
-        int i = 0;
-        BaseMyConsumer nowConsumer = null;
-        while (iteratorBaseMyConsumer.hasNext()) {
-            if (mConsumerPoint < i) {
-                // 只将消费者指针之后的消费者移除
-                if ( nowConsumer instanceof LinkedMyConsumer) {
-                    // 如果当前的消费者是链表消费者，那么也要将其从链表中移除，移除顺序是 从链表的末尾向前移除
-                    LinkedMyConsumer.remove((LinkedMyConsumer) nowConsumer);
-                }
-                MyLog.d(TAG, "removeAfterUndoRedoPointConsumer", "状态:nowConsumer:i:" , "移除一个consumer" , nowConsumer , i);
-                iteratorBaseMyConsumer.remove();
+        BaseMyConsumer nowConsumer = getNowConsumer();
+        int needRemove = 0;
+        for (int i = 0; i < mConsumerList.size(); i++) {
+            if (nowConsumer == mConsumerList.get(i)) {
+                needRemove = i + 1;
+                MyLog.d(TAG, "removeAfterUndoRedoPointConsumer", "状态:needRemove", "接下来的consumer都需要被remove" , needRemove);
+                break;
             }
-            nowConsumer = iteratorBaseMyConsumer.next();
-            i++;
+        }
+        if (nowConsumer instanceof LinkedMyConsumer) {
+            ((LinkedMyConsumer) nowConsumer).mNextConsumer = null;
+        }
+
+        int needRemoveSize = mConsumerList.size() - needRemove;
+        for (int i = 0; i < needRemoveSize; i++) {
+            MyLog.d(TAG, "removeAfterUndoRedoPointConsumer", "状态:needRemoveSize:i" , "移除一个consumer" , needRemoveSize , i);
+            mConsumerList.remove(needRemove);
         }
     }
 
@@ -383,6 +392,11 @@ public abstract class ConsumerChain<T> implements Chain<T , Mat> {
 
     public int getConsumerPoint() {
         return mConsumerPoint;
+    }
+
+    public BaseMyConsumer getNowConsumer() {
+        checkState();
+        return mConsumerList.get(mConsumerPoint);
     }
 
     protected abstract Mat getStartResult(T startParam);

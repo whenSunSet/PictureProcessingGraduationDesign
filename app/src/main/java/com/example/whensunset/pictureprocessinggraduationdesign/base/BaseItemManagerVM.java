@@ -19,6 +19,16 @@ public abstract class BaseItemManagerVM<T extends BaseItemVM> extends BaseVM {
         mViewSelector = selectItemView(viewModelId , viewItemLayoutId);
     }
 
+    public BaseItemManagerVM(int listenerSize, int viewModelId , int viewItemLayoutId) {
+        super(listenerSize);
+        mViewSelector = selectItemView(viewModelId , viewItemLayoutId);
+    }
+
+    public BaseItemManagerVM(int listenerSize) {
+        super(listenerSize);
+        mViewSelector = selectItemViewDefault();
+    }
+
     public BaseItemManagerVM() {
         mViewSelector = null;
     }
@@ -34,6 +44,10 @@ public abstract class BaseItemManagerVM<T extends BaseItemVM> extends BaseVM {
                 return viewCount;
             }
         };
+    }
+
+    protected ItemViewArg.ItemViewSelector<T> selectItemViewDefault() {
+        return null;
     }
 
     protected ItemViewArg.ItemViewSelector<T> selectItemView(int viewModelId , int viewItemLayoutId) {

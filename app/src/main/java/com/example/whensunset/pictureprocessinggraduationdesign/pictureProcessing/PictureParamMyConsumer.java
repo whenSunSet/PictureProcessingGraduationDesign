@@ -1,6 +1,7 @@
-package com.example.whensunset.pictureprocessinggraduationdesign.impl;
+package com.example.whensunset.pictureprocessinggraduationdesign.pictureProcessing;
 
 import com.example.whensunset.pictureprocessinggraduationdesign.base.MyLog;
+import com.example.whensunset.pictureprocessinggraduationdesign.impl.BaseMyConsumer;
 import com.example.whensunset.pictureprocessinggraduationdesign.viewModel.includeLayoutVM.PictureParamMenuVM;
 
 import org.opencv.core.Mat;
@@ -27,6 +28,11 @@ public class PictureParamMyConsumer extends BaseMyConsumer {
         mContrast = contrast;
         mSaturation = saturation;
         mTonal = tonal;
+
+        mParamList.add(mBrightness);
+        mParamList.add(mContrast);
+        mParamList.add(mSaturation);
+        mParamList.add(mTonal);
     }
 
     public PictureParamMyConsumer(List<Integer> paramList) {
@@ -63,6 +69,27 @@ public class PictureParamMyConsumer extends BaseMyConsumer {
     }
 
     @Override
+    public boolean isNeedRun(BaseMyConsumer nextMyConsumer) {
+        super.isNeedRun(nextMyConsumer);
+
+        if (!(nextMyConsumer instanceof PictureParamMyConsumer)) {
+            MyLog.d(TAG, "isNeedRun", "状态:", "类型不同，需要运行");
+            return true;
+        }
+
+        List<Integer> paramList = ((PictureParamMyConsumer) nextMyConsumer).mParamList;
+        for (int i = 0; i < paramList.size(); i++) {
+            if (Math.abs(paramList.get(i) - mParamList.get(i)) >= 1) {
+                MyLog.d(TAG, "isNeedRun", "状态:", "有一个参数变化的幅度超过了1，需要运行");
+                return true;
+            }
+        }
+
+        MyLog.d(TAG, "isNeedRun", "状态:", "类型一致，而且每个参数变化的幅度都没有超过1，不需要运行");
+        return false;
+    }
+
+    @Override
     protected Mat onNewResultImpl(Mat oldResult) {
         MyLog.d(TAG, "onNewResultImpl", "状态:oldResult:", "运行", oldResult);
 
@@ -72,11 +99,13 @@ public class PictureParamMyConsumer extends BaseMyConsumer {
 
         int realBrightness = (int) (((double) mBrightness - (double) DEFAULT_PARAM) * 5.1);
         int realContrast = (int) (((double) mContrast - (double) DEFAULT_PARAM) * 5.1);
+        int realSaturation = (int) (((double) mSaturation - (double) DEFAULT_PARAM) * 5.1);
+        int realTonal = (int) (((double) mTonal - (double) DEFAULT_PARAM) * 3.6);
         Mat newResult = new Mat();
-        pictureParamChange(oldResult.getNativeObjAddr(), newResult.getNativeObjAddr(), realBrightness, realContrast, mSaturation, mTonal);
+        pictureParamChange(oldResult.getNativeObjAddr(), newResult.getNativeObjAddr() , realBrightness , realContrast , realSaturation , realTonal);
 
-        MyLog.d(TAG, "onNewResultImpl", "状态:mBrightness:mContrast:mSaturation:mTonal:mParamList:newResult:",
-                "运行PictureParamMyConsumer" , mBrightness , mContrast , mSaturation , mTonal , mParamList , newResult);
+        MyLog.d(TAG, "onNewResultImpl", "状态:realBrightness:realContrast:realSaturation:realTonal:mParamList:newResult:",
+                "运行PictureParamMyConsumer" , realBrightness , realContrast , realSaturation , realTonal , mParamList , newResult);
         return newResult;
     }
 

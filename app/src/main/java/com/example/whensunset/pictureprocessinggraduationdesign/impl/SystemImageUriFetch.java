@@ -23,7 +23,7 @@ import io.reactivex.Flowable;
 public class SystemImageUriFetch implements IImageUriFetch {
     public static final String TAG = "何时夕:SystemImageUriFetch";
 
-    public static SystemImageUriFetch mSystemImageUriFetch;
+    private static SystemImageUriFetch mSystemImageUriFetch;
 
     private Map<String, List<ImageInfo>> mImageInfoMap = new LinkedHashMap<>();
     private final List<ImageInfo> mImageInfoList = new ArrayList<>();

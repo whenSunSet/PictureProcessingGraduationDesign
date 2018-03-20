@@ -14,6 +14,8 @@ extern Mat RGBToLab(Mat &m);
 #define CLIP_RANGE(value, min, max)  ( (value) > (max) ? (max) : (((value) < (min)) ? (min) : (value)) )
 #define COLOR_RANGE(value)  CLIP_RANGE(value, 0, 255)
 extern int adjustBrightnessContrast(InputArray src, OutputArray dst, int brightness, int contrast);
+extern void adjustHSL(Mat& img, Mat& aImg, int  hue, int saturation, int lightness);
+extern int imageCrop(InputArray src, OutputArray dst, Rect rect);
 extern "C"
 JNIEXPORT void JNICALL
 Java_com_example_whensunset_pictureprocessinggraduationdesign_pictureProcessing_CutMyConsumer_cut(
@@ -23,7 +25,7 @@ Java_com_example_whensunset_pictureprocessinggraduationdesign_pictureProcessing_
     Mat& oldMat = *(Mat *) in_mat_addr;
     Mat& newMat = *(Mat *) out_mat_addr;
     Rect rect(x , y , width , height);
-    oldMat(rect).copyTo(newMat);
+    imageCrop(oldMat , newMat , rect);
     return;
 }
 
@@ -59,7 +61,7 @@ Java_com_example_whensunset_pictureprocessinggraduationdesign_pictureProcessing_
     return;
 }extern "C"
 JNIEXPORT void JNICALL
-Java_com_example_whensunset_pictureprocessinggraduationdesign_impl_WhiteBalanceMyConsumer_whiteBalance(
+Java_com_example_whensunset_pictureprocessinggraduationdesign_pictureProcessing_WhiteBalanceMyConsumer_whiteBalance(
         JNIEnv *env, jobject instance, jlong in_mat_addr, jlong out_mat_addr) {
 
     Mat& oldMat = *(Mat *) in_mat_addr;
@@ -91,13 +93,41 @@ Java_com_example_whensunset_pictureprocessinggraduationdesign_impl_WhiteBalanceM
     return;
 }extern "C"
 JNIEXPORT void JNICALL
-Java_com_example_whensunset_pictureprocessinggraduationdesign_impl_PictureParamMyConsumer_pictureParamChange(
+Java_com_example_whensunset_pictureprocessinggraduationdesign_pictureProcessing_PictureParamMyConsumer_pictureParamChange(
         JNIEnv *env, jobject instance, jlong in_mat_addr, jlong out_mat_addr, jint brightness,
         jint contrast, jint saturation, jint tonal) {
     Mat& oldMat = *(Mat *) in_mat_addr;
+    Mat middleMat;
     Mat& newMat = *(Mat *) out_mat_addr;
 
-    adjustBrightnessContrast(oldMat , newMat , brightness , contrast);
+    adjustBrightnessContrast(oldMat , middleMat , brightness , contrast);
+    adjustHSL(middleMat , newMat , tonal , saturation , 0);
+}
+
+int imageCrop(InputArray src, OutputArray dst, Rect rect)
+{
+    Mat input = src.getMat();
+    if( input.empty() ) {
+        return -1;
+    }
+
+    //计算剪切区域：  剪切Rect与源图像所在Rect的交集
+    Rect srcRect(0, 0, input.cols, input.rows);
+    rect = rect & srcRect;
+    if ( rect.width <= 0  || rect.height <= 0 ) return -2;
+
+    //创建结果图像
+    dst.create(Size(rect.width, rect.height), src.type());
+    Mat output = dst.getMat();
+    if ( output.empty() ) return -1;
+
+    try {
+        //复制源图像的剪切区域 到结果图像
+        input(rect).copyTo( output );
+        return 0;
+    } catch (...) {
+        return -3;
+    }
 }
 
 /**
@@ -147,6 +177,77 @@ int adjustBrightnessContrast(InputArray src, OutputArray dst, int brightness, in
 
     LUT(input, lookupTable, output);
 
+
+
     return 0;
 }
+
+void adjustHSL(Mat& img, Mat& aImg, int  hue, int saturation, int lightness)
+{
+    if ( aImg.empty())
+        aImg.create(img.rows, img.cols, img.type());
+
+    Mat temp;
+    temp.create(img.rows, img.cols, img.type());
+
+    cvtColor(img, temp, CV_RGB2HSV);
+
+    int i, j;
+    Size size = img.size();
+    int chns = img.channels();
+
+    if (temp.isContinuous())
+    {
+        size.width *= size.height;
+        size.height = 1;
+    }
+
+    // 验证参数范围
+    if ( hue<-180 )
+        hue = -180;
+
+    if ( saturation<-255)
+        saturation = -255;
+
+    if ( lightness<-255 )
+        lightness = -255;
+
+    if ( hue>180)
+        hue = 180;
+
+    if ( saturation>255)
+        saturation = 255;
+
+    if ( lightness>255)
+        lightness = 255;
+
+
+    for (  i= 0; i<size.height; ++i)
+    {
+        unsigned char* src = static_cast<unsigned char*>(temp.data+temp.step*i);
+        for (  j=0; j<size.width; ++j)
+        {
+            float val = src[j*chns]+hue;
+            if ( val < 0) val = 0.0;
+            if ( val > 180 ) val = 180;
+            src[j*chns] = val;
+
+            val = src[j*chns+1] + saturation;
+            if ( val < 0) val = 0;
+            if ( val > 255 ) val = 255;
+            src[j*chns+1] = val;
+
+            val = src[j*chns+2] + lightness;
+            if ( val < 0) val = 0;
+            if ( val > 255 ) val = 255;
+            src[j*chns+2] = val;
+        }
+    }
+
+    cvtColor(temp, aImg, CV_HSV2RGB);
+    if ( temp.empty())
+        temp.release();
+
+}
+
 

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:bind="http://schemas.android.com/apk/res-auto"
+    xmlns:fresco="http://schemas.android.com/tools">
+
+    <data>
+        <variable name="viewModel" type="com.example.whensunset.pictureprocessinggraduationdesign.viewModel.includeLayoutVM.PictureFrameMenuVM.PictureFrameItemVM"/>
+        <import type="com.example.whensunset.pictureprocessinggraduationdesign.viewModel.includeLayoutVM.PictureFrameMenuVM"/>
+        <import type="com.example.whensunset.pictureprocessinggraduationdesign.viewModel.includeLayoutVM.PictureFrameMenuVM.PictureFrameItemVM"/>
+    </data>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <com.facebook.drawee.view.SimpleDraweeView
+            android:alpha="@{viewModel.isSelected ? 50 : 255}"
+            android:id="@+id/item_image_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:onClick="@{() -> viewModel.onClick(PictureFrameMenuVM.CLICK_IMAGE)}"
+            bind:imageUri="@{viewModel.mImageUri}"
+            bind:resizeHeight="@{PictureFrameItemVM.ITEM_PICTURE_RESIZE_WIDTH}"
+            bind:resizeWidth="@{PictureFrameItemVM.ITEM_PICTURE_RESIZE_WIDTH}"
+            fresco:actualImageScaleType="centerCrop"/>
+
+    </FrameLayout>
+
+
+</layout>
