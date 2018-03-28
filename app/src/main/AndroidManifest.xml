@@ -23,10 +23,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity
+            android:windowSoftInputMode="adjustPan"
             android:name=".ui.PictureProcessingActivity"
             android:label="@string/title_activity_picture_directory"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar" />
     </application>
 
 </manifest>

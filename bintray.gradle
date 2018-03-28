@@ -1,0 +1,90 @@
+apply plugin: 'com.jfrog.bintray'
+apply plugin: 'maven-publish'
+
+def projectName = "LogGradlePlugin"
+def mavenDesc = 'logs aop pligin'
+def baseUrl = 'https://github.com/whenSunSet/'
+def siteUrl = baseUrl
+def gitUrl = "${baseUrl}/PictureProcessingGraduationDesign"
+def issueUrl = "${baseUrl}/PictureProcessingGraduationDesign/issues"
+
+def licenseIds = ['Apache-2.0']
+def licenseNames = ['The Apache Software License, Version 2.0']
+def licenseUrls = ['http://www.apache.org/licenses/LICENSE-2.0.txt']
+def inception = '2016'
+
+def username = 'WhenSunset'
+
+install {
+    repositories {
+        mavenInstaller {
+            pom.project {
+                // Description
+                name projectName
+                description mavenDesc
+                url siteUrl
+
+                // Archive
+                groupId project.group
+                artifactId archivesBaseName
+                version project.version
+
+                // License
+                inceptionYear inception
+                licenses {
+                    licenseNames.eachWithIndex { ln, li ->
+                        license {
+                            name ln
+                            url licenseUrls[li]
+                        }
+                    }
+                }
+                developers {
+                    developer {
+                        name username
+                    }
+                }
+                scm {
+                    connection gitUrl
+                    developerConnection gitUrl
+                    url siteUrl
+                }
+            }
+        }
+    }
+}
+
+task sourcesJar(type: Jar) {
+    from sourceSets.main.allGroovy
+    classifier = 'sources'
+}
+
+
+task javadocJar(type: Jar, dependsOn: groovydoc) {
+    from groovydoc.destinationDir
+    classifier = 'javadoc'
+}
+
+artifacts {
+    archives javadocJar
+    archives sourcesJar
+}
+
+
+bintray {
+    user = "a1018998632"
+    key = "4c657ac08df99b81b2c3703c3223e7fb385ec4f8"
+    configurations = ['archives']
+    pkg {
+        repo = 'maven'
+        name = projectName
+        desc = mavenDesc
+        websiteUrl = siteUrl
+        issueTrackerUrl = issueUrl
+        vcsUrl = gitUrl
+        labels = ['gradle', 'plugin', 'time']
+        licenses = licenseIds
+        publish = true
+        publicDownloadNumbers = true
+    }
+}

@@ -1,12 +1,16 @@
 package com.example.whensunset.pictureprocessinggraduationdesign.pictureProcessing;
 
-import com.example.whensunset.pictureprocessinggraduationdesign.base.MyLog;
+import com.example.whensunset.pictureprocessinggraduationdesign.base.util.MyLog;
 import com.example.whensunset.pictureprocessinggraduationdesign.impl.BaseMyConsumer;
 
 import org.opencv.core.Mat;
 import org.opencv.core.Rect;
+import org.opencv.imgcodecs.Imgcodecs;
 
 import java.io.File;
+
+import static org.opencv.imgcodecs.Imgcodecs.CV_LOAD_IMAGE_COLOR;
+import static org.opencv.imgcodecs.Imgcodecs.CV_LOAD_IMAGE_UNCHANGED;
 
 /**
  * Created by whensunset on 2018/3/18.
@@ -80,8 +84,20 @@ public class PictureFrameMyConsumer extends BaseMyConsumer {
         if (oldResult == null) {
             throw new RuntimeException("被添加图形框的参数的Mat 不可为null");
         }
-        return oldResult;
+        Mat insertMat;
+        if (mFrameImagePath.contains(".png")) {
+            insertMat = Imgcodecs.imread(mFrameImagePath , CV_LOAD_IMAGE_UNCHANGED);
+        } else {
+            insertMat = Imgcodecs.imread(mFrameImagePath , CV_LOAD_IMAGE_COLOR);
+        }
+
+        Mat newMat = new Mat();
+        mixed(oldResult.getNativeObjAddr() , insertMat.getNativeObjAddr() , newMat.getNativeObjAddr() , mRect.x , mRect.y , mRect.width , mRect.height);
+        MyLog.d(TAG, "onNewResultImpl", "状态:insertMat:oldResult:newMat:mRect:mFrameImagePath:", "" , insertMat , oldResult , newMat , mRect , mFrameImagePath);
+        return newMat;
     }
+
+    private native void mixed(long in_mat_addr , long insert_mat_addr , long out_mat_addr , int x , int y , int width , int height);
 
     @Override
     protected void onFailureImpl(Throwable t) {

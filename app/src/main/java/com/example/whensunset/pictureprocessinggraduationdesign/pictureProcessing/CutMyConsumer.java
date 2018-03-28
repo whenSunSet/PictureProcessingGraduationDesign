@@ -1,6 +1,6 @@
 package com.example.whensunset.pictureprocessinggraduationdesign.pictureProcessing;
 
-import com.example.whensunset.pictureprocessinggraduationdesign.base.MyLog;
+import com.example.whensunset.pictureprocessinggraduationdesign.base.util.MyLog;
 import com.example.whensunset.pictureprocessinggraduationdesign.impl.BaseMyConsumer;
 import com.example.whensunset.pictureprocessinggraduationdesign.impl.LinkedMyConsumer;
 

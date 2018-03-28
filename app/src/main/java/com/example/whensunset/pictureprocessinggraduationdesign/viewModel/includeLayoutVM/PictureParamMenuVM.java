@@ -2,26 +2,23 @@ package com.example.whensunset.pictureprocessinggraduationdesign.viewModel.inclu
 
 import android.databinding.ObservableField;
 
-import com.example.whensunset.pictureprocessinggraduationdesign.base.BaseVM;
-import com.example.whensunset.pictureprocessinggraduationdesign.base.MyLog;
-import com.example.whensunset.pictureprocessinggraduationdesign.base.MyUtil;
-import com.example.whensunset.pictureprocessinggraduationdesign.base.ObserverParamMap;
-import com.example.whensunset.pictureprocessinggraduationdesign.base.ViewModelProgressChangeOnSubscribe;
+import com.example.whensunset.pictureprocessinggraduationdesign.base.util.MyLog;
+import com.example.whensunset.pictureprocessinggraduationdesign.base.util.MyUtil;
+import com.example.whensunset.pictureprocessinggraduationdesign.base.util.ObserverParamMap;
+import com.example.whensunset.pictureprocessinggraduationdesign.base.uiaction.ProgressChangedUIAction;
+import com.example.whensunset.pictureprocessinggraduationdesign.base.uiaction.UIActionManager;
+import com.example.whensunset.pictureprocessinggraduationdesign.base.viewmodel.ChildBaseVM;
 import com.example.whensunset.pictureprocessinggraduationdesign.impl.BaseMyConsumer;
 import com.example.whensunset.pictureprocessinggraduationdesign.pictureProcessing.PictureParamMyConsumer;
 import com.example.whensunset.pictureprocessinggraduationdesign.pictureProcessing.StringConsumerChain;
 
-import org.reactivestreams.Publisher;
-
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
-import io.reactivex.BackpressureStrategy;
-import io.reactivex.Flowable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.functions.Function;
 
+import static com.example.whensunset.pictureprocessinggraduationdesign.base.uiaction.UIActionManager.CLICK_ACTION;
+import static com.example.whensunset.pictureprocessinggraduationdesign.base.uiaction.UIActionManager.PROGRESS_CHANGED_ACTION;
 import static com.example.whensunset.pictureprocessinggraduationdesign.staticParam.ObserverMapKey.PictureParamMenuVM_mat;
 
 
@@ -29,24 +26,30 @@ import static com.example.whensunset.pictureprocessinggraduationdesign.staticPar
  * Created by whensunset on 2018/3/6.
  */
 
-public class PictureParamMenuVM extends BaseVM {
+public class PictureParamMenuVM extends ChildBaseVM{
     public static final String TAG = "何时夕:PictureParamMenuVM";
+    public static final int PROGRESS_CHANGE_THROTTLE_MILLISECONDS = 400;
 
     public static final int PROGRESS_MAX = 100;
-    public static final int LISTENER_SIZE = 4;
+    public static final int LISTENER_SIZE = 5;
 
     public static final int MENU_PADDING = 10;
     public static final int MENU_ITEM_SIZE = 4;
-    public static final int MENU_HEIGHT = PictureTransformMenuVM.MENU_HEIGHT - MENU_PADDING;
-    public static final int MENU_ITEM_WIDTH = MENU_HEIGHT - MENU_PADDING;
-    public static final int MENU_ITEM_MARGIN = (MyUtil.getDisplayWidthDp() - 2 * MENU_PADDING - MENU_ITEM_SIZE * MENU_ITEM_WIDTH) / (2 * (MENU_ITEM_SIZE - 1)) ;
+    public static final int SEEK_BAR_HEIGHT = 26;
+    public static final int MENU_ITEM_MARGIN = 15;
+    public static final int MENU_WIDTH = MyUtil.getDisplayWidthDp();
+    public static final int MENU_ITEM_WIDTH = (MENU_WIDTH - 2 * MENU_PADDING - (MENU_ITEM_SIZE - 1) * 2 * MENU_ITEM_MARGIN) / MENU_ITEM_SIZE;
+    public static final int MENU_ITEM_HEIGHT = MENU_ITEM_WIDTH;
+    public static final int MENU_HEIGHT = MENU_PADDING + MENU_ITEM_WIDTH + SEEK_BAR_HEIGHT;
 
     public static final int SELECT_BRIGHTNESS = 0;
     public static final int SELECT_CONTRAST = 1;
     public static final int SELECT_SATURATION = 2;
     public static final int SELECT_TONAL = 3;
+    public static final int PARAM_PROGRESS_CHANGE = 4;
 
     public final ObservableField<Integer> mSelectParam = new ObservableField<>(PROGRESS_MAX / 2);
+    public final ObservableField<Boolean> isInTonal = new ObservableField<>(false);
 
     private StringConsumerChain mStringConsumerChain = StringConsumerChain.getInstance();
     private final List<Integer> mParamList = new ArrayList<>();
@@ -55,33 +58,27 @@ public class PictureParamMenuVM extends BaseVM {
 
     public PictureParamMenuVM() {
         super(LISTENER_SIZE);
-        for (int i = 0; i < LISTENER_SIZE; i++) {
+        initDefaultUIActionManager();
+
+        for (int i = 0; i < 4; i++) {
             mParamList.add(PROGRESS_MAX / 2);
         }
-        initClickAction();
-        initProgressChangedAction();
+        initClick();
+        initProgressChanged();
         MyLog.d(TAG, "PictureParamMenuVM", "状态:", "初始化了PictureParamMenuVM");
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        isRunNow = false;
-        mSelectParam.set(PROGRESS_MAX / 2);
-        mNowSelectListenerPosition = SELECT_BRIGHTNESS;
-        for (int i = 0; i < LISTENER_SIZE; i++) {
-            mParamList.set(i , PROGRESS_MAX / 2);
-        }
-
-        MyLog.d(TAG, "onResume", "状态:", "重新进入PictureParamMenuVM，重新初始化了数据");
+    protected void initDefaultUIActionManager() {
+        mUIActionManager = new UIActionManager(this , CLICK_ACTION , PROGRESS_CHANGED_ACTION);
     }
 
-    @Override
-    protected void initClickAction() {
-        getDefaultClickFlowable()
+    private void initClick() {
+        getDefaultClickThrottleFlowable()
                 .subscribe(position -> {
                     mNowSelectListenerPosition = position;
                     mSelectParam.set(mParamList.get(mNowSelectListenerPosition));
+                    isInTonal.set(false);
 
                     switch (mNowSelectListenerPosition) {
                         case SELECT_BRIGHTNESS:
@@ -91,6 +88,7 @@ public class PictureParamMenuVM extends BaseVM {
                         case SELECT_SATURATION:
                             break;
                         case SELECT_TONAL:
+                            isInTonal.set(true);
                             break;
                     }
 
@@ -99,28 +97,24 @@ public class PictureParamMenuVM extends BaseVM {
                 });
     }
 
-    private void initProgressChangedAction() {
-        Flowable.create(new ViewModelProgressChangeOnSubscribe(this) , BackpressureStrategy.BUFFER)
-                .throttleFirst(100 , TimeUnit.MILLISECONDS)
-                .filter(baseVM -> (baseVM != null))
-                .filter(baseVM -> (getState() == RESUME))
-                .map(BaseVM::getProgress)
-                .map(progress -> {
+    private void initProgressChanged() {
+        mUIActionManager
+                .<ProgressChangedUIAction>getDefaultThrottleFlowable(PROGRESS_CHANGED_ACTION)
+                .filter(progressChangedUIAction -> {
+                    int progress = progressChangedUIAction.getProgress();
                     mParamList.set(mNowSelectListenerPosition , progress);
                     mSelectParam.set(progress);
-                    MyLog.d(TAG, "initProgressChangedAction", "状态:mParamList:mNowSelectListenerPosition:progress:",
-                            "某个图片参数变化了，构建PictureParamMyConsumer" , mParamList , mNowSelectListenerPosition , progress);
-                    return new PictureParamMyConsumer(mParamList);
-                }).filter(pictureParamMyConsumer -> {
-                    MyLog.d(TAG, "initProgressChangedAction", "状态:pictureParamMyConsumer:", "判断目前是否处于初始状态，如果处于就不运行consumer" , pictureParamMyConsumer);
-                    for (Integer param : pictureParamMyConsumer.getParamList()) {
+                    MyLog.d(TAG, "initProgressChangedAction", "状态:mParamList:mNowSelectListenerPosition:progress:progressChangedUIAction:",
+                            "某个图片参数变化了，构建PictureParamMyConsumer" , mParamList , mNowSelectListenerPosition , progress , progressChangedUIAction);
+                    for (Integer param : mParamList) {
                         if (Math.abs(param - (PROGRESS_MAX / 2)) >= 1){
                             return true;
                         }
                     }
                     return false;
-                }).flatMap((Function<PictureParamMyConsumer, Publisher<?>>) pictureParamMyConsumer -> {
-                    MyLog.d(TAG, "apply", "状态:pictureParamMyConsumer:isRunNow", "判断是否runNow" , pictureParamMyConsumer , isRunNow);
+                }).flatMap(progressChangedUIAction -> {
+                    MyLog.d(TAG, "apply", "状态:isRunNow", "判断是否runNow" , isRunNow);
+                    PictureParamMyConsumer pictureParamMyConsumer = new PictureParamMyConsumer(mParamList);
                     if (isRunNow) {
                         return mStringConsumerChain.rxRunNow(pictureParamMyConsumer);
                     } else {
@@ -130,13 +124,25 @@ public class PictureParamMenuVM extends BaseVM {
                 }).observeOn(AndroidSchedulers.mainThread())
                 .subscribe(mat -> {
                     MyLog.d(TAG, "initProgressChangedAction", "状态:mat", "修改图片参数之后，PictureParamMyConsumer运行完毕，接下来要将图片显示" , mat);
-                    getListener(mNowSelectListenerPosition).set(ObserverParamMap.staticSet(PictureParamMenuVM_mat, mat));
+                    mEventListenerList.get(PARAM_PROGRESS_CHANGE).set(ObserverParamMap.staticSet(PictureParamMenuVM_mat, mat));
                 });
+    }
+
+    @Override
+    public void resume() {
+        super.resume();
+        isRunNow = false;
+        mSelectParam.set(PROGRESS_MAX / 2);
+        mNowSelectListenerPosition = SELECT_BRIGHTNESS;
+        for (int i = 0; i < 4; i++) {
+            mParamList.set(i , PROGRESS_MAX / 2);
+        }
+
+        MyLog.d(TAG, "onResume", "状态:", "重新进入PictureParamMenuVM，重新初始化了数据");
     }
 
     public void fresh() {
         BaseMyConsumer consumer = mStringConsumerChain.getNowConsumer();
-
 
         if (consumer instanceof PictureParamMyConsumer) {
             PictureParamMyConsumer pictureParamMyConsumer = ((PictureParamMyConsumer) consumer);
@@ -160,7 +166,4 @@ public class PictureParamMenuVM extends BaseVM {
         }
     }
 
-    public int getNowSelectListenerPosition() {
-        return mNowSelectListenerPosition;
-    }
 }

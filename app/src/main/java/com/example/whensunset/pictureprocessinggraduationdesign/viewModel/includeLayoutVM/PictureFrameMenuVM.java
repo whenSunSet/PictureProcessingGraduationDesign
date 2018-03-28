@@ -1,6 +1,5 @@
 package com.example.whensunset.pictureprocessinggraduationdesign.viewModel.includeLayoutVM;
 
-import android.databinding.Observable;
 import android.databinding.ObservableField;
 import android.net.Uri;
 import android.text.TextUtils;
@@ -8,116 +7,129 @@ import android.text.TextUtils;
 import com.example.whensunset.pictureprocessinggraduationdesign.BR;
 import com.example.whensunset.pictureprocessinggraduationdesign.PictureProcessingApplication;
 import com.example.whensunset.pictureprocessinggraduationdesign.R;
-import com.example.whensunset.pictureprocessinggraduationdesign.base.BaseItemManagerVM;
-import com.example.whensunset.pictureprocessinggraduationdesign.base.BaseItemVM;
+import com.example.whensunset.pictureprocessinggraduationdesign.base.BaseSeekBarRecycleViewVM;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.IImageUriFetch;
-import com.example.whensunset.pictureprocessinggraduationdesign.base.MyLog;
-import com.example.whensunset.pictureprocessinggraduationdesign.base.MyUtil;
-import com.example.whensunset.pictureprocessinggraduationdesign.base.ObserverParamMap;
+import com.example.whensunset.pictureprocessinggraduationdesign.base.util.MyLog;
+import com.example.whensunset.pictureprocessinggraduationdesign.base.util.ObserverParamMap;
+import com.example.whensunset.pictureprocessinggraduationdesign.base.uiaction.ProgressChangedUIAction;
+import com.example.whensunset.pictureprocessinggraduationdesign.base.viewmodel.BaseVM;
+import com.example.whensunset.pictureprocessinggraduationdesign.base.viewmodel.ItemBaseVM;
 import com.example.whensunset.pictureprocessinggraduationdesign.impl.LocalFrameImageUriFetch;
+import com.example.whensunset.pictureprocessinggraduationdesign.mete.CutView;
 import com.example.whensunset.pictureprocessinggraduationdesign.pictureProcessing.PictureFrameMyConsumer;
 import com.example.whensunset.pictureprocessinggraduationdesign.pictureProcessing.StringConsumerChain;
+
+import org.opencv.core.Rect;
 
 import java.util.List;
 
 import io.reactivex.Flowable;
-import io.reactivex.functions.Function;
 
+import static com.example.whensunset.pictureprocessinggraduationdesign.base.uiaction.UIActionManager.PROGRESS_CHANGED_ACTION;
 import static com.example.whensunset.pictureprocessinggraduationdesign.staticParam.ObserverMapKey.PictureFrameItemVM_frameImagePath;
 import static com.example.whensunset.pictureprocessinggraduationdesign.staticParam.ObserverMapKey.PictureFrameItemVM_mPosition;
-import static com.example.whensunset.pictureprocessinggraduationdesign.staticParam.ObserverMapKey.PictureTransformMenuVM_mat;
+import static com.example.whensunset.pictureprocessinggraduationdesign.staticParam.ObserverMapKey.PictureFrameItemVM_mat;
 
 
 /**
  * Created by whensunset on 2018/3/6.
  */
 
-public class PictureFrameMenuVM extends BaseItemManagerVM<PictureFrameMenuVM.PictureFrameItemVM> {
+public class PictureFrameMenuVM extends BaseSeekBarRecycleViewVM<PictureFrameMenuVM.PictureFrameItemVM> implements CutView.OnLimitRectChangedListener{
     public static final String TAG = "何时夕:PictureFrameMenuVM";
 
-    public static final int MENU_PADDING = 18;
-    public static final int MENU_HEIGHT = PictureTransformMenuVM.MENU_ITEM_WIDTH;
-    public static final int CLICK_IMAGE = 0;
-    public static final int LEAVE_FRAME_LISTENER = 1;
-
-    public final int mItemHeight = MyUtil.dip2px(PictureTransformMenuVM.MENU_ITEM_WIDTH) ;
-    public final int mItemWidth = mItemHeight;
-
-    public final ObservableField<Integer> mSelectedPosition=new ObservableField<>(0);
     public final ObservableField<String> mInsertImagePath = new ObservableField<>();
-
     private final IImageUriFetch mLocalFrameImageUriFetch = LocalFrameImageUriFetch.getInstance();
     private StringConsumerChain mStringConsumerChain = StringConsumerChain.getInstance();
 
     public PictureFrameMenuVM() {
-        super(2 , BR.viewModel , R.layout.activity_picture_processing_picture_frame_item);
-        initListener();
-        showFrameImage();
+        super(3 , BR.viewModel , R.layout.activity_picture_processing_picture_frame_item);
+
+        initItemVM();
+        initClick();
+        initProgressChanged();
     }
 
-    private void initListener() {
-        // 监听 item 的点击，以切换选中的item
-        Flowable.fromArray(CLICK_IMAGE)
-                .map((Function<Integer, ObservableField<? super Object>>) this::getListener)
-                .subscribe(observableField -> observableField.addOnPropertyChangedCallback(new Observable.OnPropertyChangedCallback() {
-                    @Override
-                    public void onPropertyChanged(Observable observable, int i) {
-                        Integer selectPosition = ObserverParamMap.staticGetValue(observable , PictureFrameItemVM_mPosition);
-                        String frameImagePath = ObserverParamMap.staticGetValue(observable , PictureFrameItemVM_frameImagePath);
-                        if (!mSelectedPosition.get().equals(selectPosition)) {
-                            mDataItemList.get(mSelectedPosition.get()).isSelected.set(false);
-                            mSelectedPosition.set(selectPosition);
-                            mInsertImagePath.set(frameImagePath);
-                        }
-                        MyLog.d(TAG, "initListener", "状态:selectPosition:frameImagePath:", "" , selectPosition , frameImagePath);
-                    }
-                }));
-
-    }
-
-    private void showFrameImage() {
+    @Override
+    protected void initItemVM() {
         mDataItemList.clear();
 
-        PictureFrameItemVM firstPictureFrameItemVM = new PictureFrameItemVM(getClickListenerList() ,
-                "android.resource://" + PictureProcessingApplication.getAppContext().getPackageName() + "/" +R.drawable.picture_frame_add , true , 0);
+        PictureFrameItemVM firstPictureFrameItemVM = new PictureFrameItemVM(mEventListenerList ,
+                "android.resource://" + PictureProcessingApplication.getAppContext().getPackageName() + "/" +R.drawable.picture_frame_add , 0 , true);
         mDataItemList.add(firstPictureFrameItemVM);
 
         final int[] nowPosition = {1};
         Flowable.fromIterable(mLocalFrameImageUriFetch.getAllImageUriList())
-                .map(frameImageUri -> new PictureFrameMenuVM.PictureFrameItemVM(getClickListenerList() , frameImageUri , nowPosition[0]++))
+                .map(frameImageUri -> new PictureFrameMenuVM.PictureFrameItemVM(mEventListenerList , frameImageUri , nowPosition[0]++))
                 .subscribe(mDataItemList::add);
-        MyLog.d(TAG, "showFrameImage", "状态:mDataItemList", "" , mDataItemList);
+        MyLog.d(TAG, "initItemVM", "状态:mDataItemList", "" , mDataItemList);
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        mDataItemList.get(mSelectedPosition.get()).isSelected.set(false);
+    protected void initClick() {
+        BaseVM.initListener(this, (observable, i) -> {
+            String frameImagePath = ObserverParamMap.staticGetValue(observable , PictureFrameItemVM_frameImagePath);
+            Integer selectPosition = ObserverParamMap.staticGetValue(observable , PictureFrameItemVM_mPosition);
+            mInsertImagePath.set(frameImagePath);
+
+            if (mSelectedPosition.get() >= 0) {
+                mDataItemList.get(mSelectedPosition.get()).isSelected.set(false);
+            }
+            mDataItemList.get(selectPosition).isSelected.set(true);
+
+            mSelectedPosition.set(selectPosition);
+            MyLog.d(TAG, "initItemListener", "状态:selectPosition:frameImagePath:", "" , frameImagePath);
+        }, CLICK_ITEM);
+    }
+
+    @Override
+    protected void initProgressChanged() {
+        mUIActionManager
+                .<ProgressChangedUIAction>getDefaultThrottleFlowable(PROGRESS_CHANGED_ACTION)
+                .subscribe(progressChangedUIAction -> {
+                    MyLog.d(TAG, "initProgressChanged", "状态:", "滑动了");
+                });
+    }
+
+    @Override
+    public void resume() {
+        super.resume();
         mInsertImagePath.set("");
-        mSelectedPosition.set(0);
+        nowInsertImageRect = mStringConsumerChain.getNowRect();
     }
 
     @Override
-    public void onStop() {
-        super.onStop();
+    public void stop() {
+        super.stop();
         runInsertImage();
+        if (mSelectedPosition.get() >= 0) {
+            mDataItemList.get(mSelectedPosition.get()).isSelected.set(false);
+            mSelectedPosition.set(-1);
+        }
     }
-
 
     private void runInsertImage() {
         if (!TextUtils.isEmpty(mInsertImagePath.get())) {
-            PictureFrameMyConsumer consumer = new PictureFrameMyConsumer(mInsertImagePath.get() , null);
+            PictureFrameMyConsumer consumer = new PictureFrameMyConsumer(mInsertImagePath.get() , nowInsertImageRect);
             mStringConsumerChain
                     .rxRunNextConvenient(consumer)
-                    .subscribe(mat -> getListener(LEAVE_FRAME_LISTENER).set(ObserverParamMap.staticSet(PictureTransformMenuVM_mat, mat)));
-
+                    .subscribe(mat -> mEventListenerList.get(LEAVE_BSBRV_VM_LISTENER).set(ObserverParamMap.staticSet(PictureFrameItemVM_mat , mat)));
         }
 
         MyLog.d(TAG, "runInsertImage", "状态:mInsertImagePath:", "在离开frame的时候进行图片插入" , mInsertImagePath.get());
     }
 
-    public static class PictureFrameItemVM extends BaseItemVM {
-        public static final String TAG = "何时夕:PictureFrameItemVM";
+    private Rect nowInsertImageRect = new Rect();
+    @Override
+    public void onLimitRectChanged(Rect cutRect) {
+        if (isImageSizeChanged(cutRect , nowInsertImageRect)) {
+            nowInsertImageRect = cutRect;
+            MyLog.d(TAG, "onLimitRectChanged", "状态:cutRect", "图片限制框发生改变" , cutRect);
+        }
+    }
+
+    public static class PictureFrameItemVM extends ItemBaseVM {
+        public static final String TAG = "何时夕:PictureTextItemVM";
 
         public static final int ITEM_PICTURE_RESIZE_WIDTH = 80;
         public static final int ITEM_PICTURE_RESIZE_HEIGHT = 80;
@@ -125,25 +137,26 @@ public class PictureFrameMenuVM extends BaseItemManagerVM<PictureFrameMenuVM.Pic
         private boolean isAdd = false;
         private final Integer mPosition;
 
-        public final ObservableField<String> mImageUri=new ObservableField<>();
         public final ObservableField<Boolean> isSelected=new ObservableField<>();
+        public final ObservableField<String> mImageUri=new ObservableField<>();
 
-        public PictureFrameItemVM(List<ObservableField<? super Object>> clickItemListenerList , String imageUri , boolean isAdd , Integer position) {
+        public PictureFrameItemVM(List<ObservableField<? super Object>> clickItemListenerList , String imageUri , Integer position , boolean isAdd) {
             this(clickItemListenerList , imageUri , position);
             this.isAdd = isAdd;
         }
 
         public PictureFrameItemVM(List<ObservableField<? super Object>> clickItemListenerList , String imageUri , Integer position) {
-            super(clickItemListenerList);
+            super(clickItemListenerList , position);
+            initDefaultUIActionManager();
+
             mImageUri.set(imageUri);
             mPosition = position;
-            isAdd = false;
             isSelected.set(false);
-            initClickAction();
+            initClick();
         }
 
-        protected void initClickAction() {
-            getDefaultClickFlowable()
+        private void initClick() {
+            getDefaultClickThrottleFlowable()
                     .filter(position -> {
                         MyLog.d(TAG, "initClickAction", "状态:isAdd", "判断当前的item是否是 add" , isAdd);
                         return !isAdd;
@@ -154,7 +167,7 @@ public class PictureFrameMenuVM extends BaseItemManagerVM<PictureFrameMenuVM.Pic
                     }).subscribe(frameImagePath -> {
                         MyLog.d(TAG, "accept", "状态:frameImagePath:mPosition:", "结束了为图片添加图片框" , frameImagePath , mPosition);
                         isSelected.set(true);
-                        getListener(CLICK_IMAGE).set(ObserverParamMap
+                        mEventListenerList.get(CLICK_ITEM).set(ObserverParamMap
                                         .staticSet(PictureFrameItemVM_mPosition , mPosition)
                                         .set(PictureFrameItemVM_frameImagePath , frameImagePath));
                     });
@@ -163,9 +176,11 @@ public class PictureFrameMenuVM extends BaseItemManagerVM<PictureFrameMenuVM.Pic
         @Override
         public String toString() {
             return "PictureFrameItemVM{" +
-                    "isAdd=" + isAdd +
-                    ", mImageUri=" + mImageUri.get() +
                     ", mPosition=" + mPosition +
+                    ", isSelected=" + isSelected +
+                    ", isAdd=" + isAdd +
+                    ", mPosition=" + mPosition +
+                    ", mImageUri=" + mImageUri +
                     '}';
         }
     }

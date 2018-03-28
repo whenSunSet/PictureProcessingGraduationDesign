@@ -15,7 +15,7 @@ import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 
-import com.example.whensunset.pictureprocessinggraduationdesign.base.MyLog;
+import com.example.whensunset.pictureprocessinggraduationdesign.base.util.MyLog;
 
 /**
  * Created by whensunset on 2018/3/11.
@@ -26,12 +26,14 @@ public class CutView extends PinchImageView {
     public static final int SCALE_MODEL = 0;
     public static final int CUT_MODEL = 1;
     public static final int INSERT_IMAGE_MODEL = 2;
+    public static final int INSERT_TEXT_MODEL = 3;
 
-    private static final int TOUCH_LINE_WIDTH = 50;
+    private static final int TOUCH_LINE_WIDTH = 80;
     private static final int MASK_ALPHA = 100;
     private static final int STROKE_WIDTH = 4;
 
     private OnLimitRectChangedListener mOnLimitRectChangedListener;
+    private OnLimitMaxRectChangeListener mOnLimitMaxRectChangeListener;
     private Rect mLimitRect = new Rect();
     private Rect mLimitMaxRect = new Rect();
     private PointF mLastMovePointF = new PointF();
@@ -130,8 +132,9 @@ public class CutView extends PinchImageView {
             }
 
             mLastMovePointF.set(event.getX(), event.getY());
-            if (mOnLimitRectChangedListener != null)
+            if (mOnLimitRectChangedListener != null) {
                 mOnLimitRectChangedListener.onLimitRectChanged(getOpencvCutRect());
+            }
 
         }
 
@@ -184,25 +187,17 @@ public class CutView extends PinchImageView {
         mOnLimitRectChangedListener = onLimitRectChangedListener;
     }
 
+    public void setOnLimitMaxRectChangeListener(OnLimitMaxRectChangeListener onLimitMaxRectChangeListener) {
+        mOnLimitMaxRectChangeListener = onLimitMaxRectChangeListener;
+    }
+
     private org.opencv.core.Rect getOpencvCutRect() {
         Drawable imgDrawable = getDrawable();
         if (imgDrawable != null) {
-            int dw = imgDrawable.getBounds().width();
-            int dh = imgDrawable.getBounds().height();
+            org.opencv.core.Rect rect = new org.opencv.core.Rect((int) ((mLimitRect.left - mLimitMaxRect.left) / zoomCoefficientX),
+                    (int) ((mLimitRect.top - mLimitMaxRect.top) / zoomCoefficientY), (int)(mLimitRect.width() / zoomCoefficientX) , (int)(mLimitRect.height() / zoomCoefficientY));
 
-            //获得ImageView中Image的变换矩阵
-            Matrix m = getImageMatrix();
-            float[] values = new float[10];
-            m.getValues(values);
-
-            //Image在绘制过程中的变换矩阵，从中获得x和y方向的缩放系数
-            float sx = values[0];
-            float sy = values[4];
-
-            org.opencv.core.Rect rect = new org.opencv.core.Rect((int) (((float) mLimitRect.left - (float) mLimitMaxRect.left) / sx),
-                    (int) (((float) mLimitRect.top - (float) mLimitMaxRect.top) / sy), (int)((float)mLimitRect.width() / sx) , (int)((float)mLimitRect.height() / sy));
-
-            MyLog.d(TAG, "getOpencvCutRect", "状态gggg:dw:dh:m:sx:sy:rect:mLimitRect:mLimitMaxRect:", "返回opencv的Rect" , dw , dh , m , sx , sy , rect , mLimitRect , mLimitMaxRect);
+            MyLog.d(TAG, "getOpencvCutRect", "状态gggg:sx:sy:rect:mLimitRect:mLimitMaxRect:", "返回opencv的Rect" , zoomCoefficientX , zoomCoefficientY , rect , mLimitRect , mLimitMaxRect);
             return rect;
         } else {
             throw new RuntimeException("CutView还没初始化");
@@ -212,11 +207,15 @@ public class CutView extends PinchImageView {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
+        getZoomCoefficientXY();
         getImgDisplaySize();
 
-        // 每次进入 transform 和 frame 的时候需要重新初始化
+        // 每次进入 transform 和 frame 和 text 的时候需要重新初始化
         if (isInit) {
             mLimitRect.set(mLimitMaxRect.left , mLimitMaxRect.top , mLimitMaxRect.right , mLimitMaxRect.bottom);
+            if (mOnLimitMaxRectChangeListener != null) {
+                mOnLimitMaxRectChangeListener.onLimitMaxRectChanged(mLimitMaxRect , zoomCoefficientX);
+            }
             isInit = false;
             MyLog.d(TAG, "onDraw", "状态gggg:mLimitMaxRect", "重新初始化cutView的限制条件" , mLimitMaxRect);
         }
@@ -286,10 +285,8 @@ public class CutView extends PinchImageView {
 
             } else {
                 canvas.drawRect(mLimitMaxRect , mPaint);
-                canvas.drawBitmap(BitmapFactory.decodeFile(mInsertImagePath) , null , mLimitMaxRect , mPaint);
+                canvas.drawBitmap(BitmapFactory.decodeFile(mInsertImagePath) , null , mLimitRect , mPaint);
             }
-
-
         }
         MyLog.d(TAG, "drawInsertImageMask", "状态:mInsertImagePath:mLimitMaxRect:mLimitRect:", "进入绘制插入图片界面的蒙板" , mInsertImagePath , mLimitMaxRect , mLimitRect);
     }
@@ -301,31 +298,44 @@ public class CutView extends PinchImageView {
             int dw = imgDrawable.getBounds().width();
             int dh = imgDrawable.getBounds().height();
 
-            //获得ImageView中Image的变换矩阵
-            Matrix m = getImageMatrix();
-            float[] values = new float[10];
-            m.getValues(values);
-
-            //Image在绘制过程中的变换矩阵，从中获得x和y方向的缩放系数
-            float sx = values[0];
-            float sy = values[4];
-
             //计算Image在屏幕上实际绘制的宽高
-            int realImgShowWidth = (int) (dw * sx);
-            int realImgShowHeight = (int) (dh * sy);
+            int realImgShowWidth = (int) (dw * zoomCoefficientX);
+            int realImgShowHeight = (int) (dh * zoomCoefficientY);
 
             mLimitMaxRect.top =  (getMeasuredHeight() - realImgShowHeight) / 2;
             mLimitMaxRect.bottom = (getMeasuredHeight() + realImgShowHeight) / 2;
             mLimitMaxRect.left = (getMeasuredWidth() - realImgShowWidth) / 2;
             mLimitMaxRect.right = (getMeasuredWidth() + realImgShowWidth) / 2;
 
-            MyLog.d(TAG, "getImgDisplaySize", "状态gggg:dw:dh:matrix:sx:sy:realImgShowWidth:realImgShowHeight:mLimitMaxRect:getMeasuredHeight():",
-                    "进入获取imageView真实显示图片长宽方法" , dw , dh , m , sx , sy , realImgShowWidth , realImgShowHeight , mLimitMaxRect , getMeasuredHeight());
+            MyLog.d(TAG, "getImgDisplaySize", "状态gggg:dw:dh:sx:sy:realImgShowWidth:realImgShowHeight:mLimitMaxRect:getMeasuredHeight():",
+                    "进入获取imageView真实显示图片长宽方法" , dw , dh , zoomCoefficientX , zoomCoefficientY , realImgShowWidth , realImgShowHeight , mLimitMaxRect , getMeasuredHeight());
         }
+    }
+
+    private float zoomCoefficientX = 1 , zoomCoefficientY = 1;
+    private void getZoomCoefficientXY() {
+        //获得ImageView中Image的变换矩阵
+        Matrix m = getImageMatrix();
+        float[] values = new float[10];
+        m.getValues(values);
+
+        //Image在绘制过程中的变换矩阵，从中获得x和y方向的缩放系数
+        zoomCoefficientX = values[0];
+        zoomCoefficientY = values[4];
+
+        MyLog.d(TAG, "getZoomCoefficientXY", "状态:zoomCoefficientX:zoomCoefficientY:", "" , zoomCoefficientX , zoomCoefficientY);
     }
 
     public interface OnLimitRectChangedListener {
         void onLimitRectChanged(org.opencv.core.Rect rect);
+
+        default boolean isImageSizeChanged(org.opencv.core.Rect nowRect , org.opencv.core.Rect lastCut) {
+            return Math.abs(lastCut.width - nowRect.width) >= 2 || Math.abs(lastCut.height - nowRect.height) >= 2 || Math.abs(lastCut.x - nowRect.x) >= 2 || Math.abs(lastCut.y - nowRect.y) >= 2;
+        }
+    }
+
+    public interface OnLimitMaxRectChangeListener {
+        void onLimitMaxRectChanged(Rect rect , float zoomCoefficient);
     }
 
 }

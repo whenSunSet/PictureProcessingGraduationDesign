@@ -1,0 +1,12 @@
+apply plugin: 'groovy'
+apply plugin: 'maven'
+apply from: '../bintray.gradle'
+
+dependencies {
+    compile gradleApi()
+    compile localGroovy()
+}
+
+repositories {
+    mavenCentral()
+}

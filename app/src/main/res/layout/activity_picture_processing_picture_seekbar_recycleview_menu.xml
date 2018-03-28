@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:bind="http://schemas.android.com/apk/res-auto"
+    xmlns:fresco="http://schemas.android.com/tools">
+
+    <data>
+        <variable name="viewModel" type="com.example.whensunset.pictureprocessinggraduationdesign.base.BaseSeekBarRecycleViewVM"/>
+        <import type="com.example.whensunset.pictureprocessinggraduationdesign.dataBindingUtil.LayoutManager"/>
+        <import type="com.example.whensunset.pictureprocessinggraduationdesign.dataBindingUtil.ItemDecoration"/>
+        <import type="android.view.View"/>
+        <import type="com.example.whensunset.pictureprocessinggraduationdesign.base.BaseSeekBarRecycleViewVM"/>
+
+    </data>
+
+    <LinearLayout
+        bind:bindingBottomPadding="@{BaseSeekBarRecycleViewVM.MENU_PADDING}"
+        bind:bindingHeight="@{BaseSeekBarRecycleViewVM.MENU_HEIGHT}"
+        bind:bindingWidth="@{BaseSeekBarRecycleViewVM.MENU_WIDTH}"
+
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <android.support.v7.widget.AppCompatSeekBar
+            bind:bindingHeight="@{BaseSeekBarRecycleViewVM.SEEK_BAR_HEIGHT}"
+            bind:progressMax="@{BaseSeekBarRecycleViewVM.PROGRESS_MAX}"
+            android:progress="@{50}"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <android.support.v7.widget.RecyclerView
+            android:layout_gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/picture_recycle_view"
+
+            bind:bindingHeight="@{BaseSeekBarRecycleViewVM.MENU_ITEM_HEIGHT}"
+            bind:bindingWidth="@{BaseSeekBarRecycleViewVM.MENU_WIDTH}"
+            bind:itemWidth="@{BaseSeekBarRecycleViewVM.MENU_ITEM_HEIGHT}"
+            bind:itemHeight="@{BaseSeekBarRecycleViewVM.MENU_ITEM_WIDTH}"
+
+            bind:selectPosition="@{viewModel.mSelectedPosition}"
+            bind:layoutManager="@{LayoutManager.linearH()}"
+            bind:itemDecor="@{ItemDecoration.defaultItemDecoration()}"
+            bind:itemView="@{viewModel.mViewSelector}"
+            bind:items="@{viewModel.mDataItemList}">
+        </android.support.v7.widget.RecyclerView>
+
+    </LinearLayout>
+
+</layout>

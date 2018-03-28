@@ -1,7 +1,7 @@
 package com.example.whensunset.pictureprocessinggraduationdesign.impl;
 
 import com.example.whensunset.pictureprocessinggraduationdesign.base.Chain;
-import com.example.whensunset.pictureprocessinggraduationdesign.base.MyLog;
+import com.example.whensunset.pictureprocessinggraduationdesign.base.util.MyLog;
 import com.example.whensunset.pictureprocessinggraduationdesign.pictureProcessing.CutMyConsumer;
 
 import org.jetbrains.annotations.NotNull;
@@ -61,7 +61,7 @@ public abstract class ConsumerChain<T> implements Chain<T , Mat> {
         mNowMat = mFirstMat;
         isInited = true;
         nowRect = new Rect(0 , 0 , mFirstMat.width() , mFirstMat.height());
-        MyLog.d(TAG, "init", "状态:startParam:", "初始化" , startParam);
+        MyLog.d(TAG, "getBaseVM", "状态:startParam:", "初始化" , startParam);
     }
 
     /**

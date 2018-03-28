@@ -29,7 +29,6 @@ public class LocalFrameImageUriFetch implements IImageUriFetch {
     }
 
     private LocalFrameImageUriFetch() {
-
     }
 
     @Override
@@ -37,17 +36,8 @@ public class LocalFrameImageUriFetch implements IImageUriFetch {
 
         return Arrays.asList(Uri.fromFile(new File("/storage/emulated/0/DCIM/Camera/IMG_20180303_105510.jpg")).toString() ,
                 Uri.fromFile(new File("/storage/emulated/0/Download/e17ab12bd11a002bb7f43e0e22bc42cf.png")).toString() ,
-                Uri.fromFile(new File("/storage/emulated/0/Download/e17ab12bd11a002bb7f43e0e22bc42cf.png")).toString() ,
-                Uri.fromFile(new File("/storage/emulated/0/Download/e17ab12bd11a002bb7f43e0e22bc42cf.png")).toString() ,
-                Uri.fromFile(new File("/storage/emulated/0/Download/e17ab12bd11a002bb7f43e0e22bc42cf.png")).toString() ,
-                Uri.fromFile(new File("/storage/emulated/0/Download/20161227113243436.jpg")).toString() ,
-                Uri.fromFile(new File("/storage/emulated/0/Download/20161227113243436.jpg")).toString() ,
-                Uri.fromFile(new File("/storage/emulated/0/Download/20161227113243436.jpg")).toString() ,
-                Uri.fromFile(new File("/storage/emulated/0/Download/20161227113243436.jpg")).toString() ,
-                Uri.fromFile(new File("/storage/emulated/0/Download/20161227113243436.jpg")).toString() ,
-                Uri.fromFile(new File("/storage/emulated/0/Download/20161227113243436.jpg")).toString() ,
-                Uri.fromFile(new File("/storage/emulated/0/Download/20161227113243436.jpg")).toString() ,
-                Uri.fromFile(new File("/storage/emulated/0/Download/20161227113243436.jpg")).toString() );
+                Uri.fromFile(new File("/storage/emulated/0/DCIM/Camera/IMG_20180303_105510.jpg")).toString());
+
     }
 
     @Override

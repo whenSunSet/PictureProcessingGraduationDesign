@@ -3,6 +3,8 @@ package com.example.whensunset.pictureprocessinggraduationdesign;
 import android.app.Application;
 import android.content.Context;
 
+import com.example.whensunset.pictureprocessinggraduationdesign.impl.LocalTypefaceFetch;
+import com.example.whensunset.pictureprocessinggraduationdesign.impl.SystemTypefaceFetch;
 import com.facebook.drawee.backends.pipeline.Fresco;
 import com.facebook.imagepipeline.core.ImagePipelineConfig;
 
@@ -21,6 +23,8 @@ public class PictureProcessingApplication extends Application {
                 .setDownsampleEnabled(true)
                 .build();
         Fresco.initialize(this , config);
+        SystemTypefaceFetch.getInstance();
+        LocalTypefaceFetch.getInstance();
     }
     public static Context getAppContext() {
         return appContext;

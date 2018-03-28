@@ -6,7 +6,7 @@ import android.provider.MediaStore;
 
 import com.example.whensunset.pictureprocessinggraduationdesign.PictureProcessingApplication;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.IImageUriFetch;
-import com.example.whensunset.pictureprocessinggraduationdesign.base.MyLog;
+import com.example.whensunset.pictureprocessinggraduationdesign.base.util.MyLog;
 
 import java.io.File;
 import java.util.ArrayList;

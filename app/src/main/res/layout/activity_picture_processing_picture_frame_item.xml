@@ -18,7 +18,7 @@
             android:id="@+id/item_image_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:onClick="@{() -> viewModel.onClick(PictureFrameMenuVM.CLICK_IMAGE)}"
+            android:onClick="@{() -> viewModel.mUIActionManager.doClick(PictureFrameMenuVM.CLICK_ITEM)}"
             bind:imageUri="@{viewModel.mImageUri}"
             bind:resizeHeight="@{PictureFrameItemVM.ITEM_PICTURE_RESIZE_WIDTH}"
             bind:resizeWidth="@{PictureFrameItemVM.ITEM_PICTURE_RESIZE_WIDTH}"

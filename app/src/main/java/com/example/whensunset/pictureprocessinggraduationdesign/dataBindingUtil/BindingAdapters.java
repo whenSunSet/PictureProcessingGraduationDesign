@@ -10,9 +10,14 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
+import android.widget.TextView;
 
-import com.example.whensunset.pictureprocessinggraduationdesign.base.MyLog;
+import com.example.whensunset.pictureprocessinggraduationdesign.base.ITypefaceFetch;
+import com.example.whensunset.pictureprocessinggraduationdesign.base.util.MyLog;
+import com.example.whensunset.pictureprocessinggraduationdesign.base.util.MyUtil;
+import com.example.whensunset.pictureprocessinggraduationdesign.mete.ColorPickerView;
 import com.example.whensunset.pictureprocessinggraduationdesign.mete.CutView;
+import com.example.whensunset.pictureprocessinggraduationdesign.mete.MoveFrameLayout;
 import com.facebook.drawee.backends.pipeline.Fresco;
 import com.facebook.drawee.backends.pipeline.PipelineDraweeController;
 import com.facebook.drawee.view.SimpleDraweeView;
@@ -24,6 +29,7 @@ import java.util.List;
 
 import static com.example.whensunset.pictureprocessinggraduationdesign.mete.CutView.CUT_MODEL;
 import static com.example.whensunset.pictureprocessinggraduationdesign.mete.CutView.INSERT_IMAGE_MODEL;
+import static com.example.whensunset.pictureprocessinggraduationdesign.mete.CutView.INSERT_TEXT_MODEL;
 
 /**
  * Created by Administrator on 2016/12/6 0006.
@@ -42,9 +48,10 @@ public class BindingAdapters {
         if (decor!=null)recyclerView.addItemDecoration(decor);
 
         if (itemHeight != 0 || itemWidth != 0) {
-            ViewGroup.LayoutParams itemParams = new ViewGroup.LayoutParams(itemWidth , itemHeight);
+            ViewGroup.LayoutParams itemParams = new ViewGroup.LayoutParams(MyUtil.dip2px(itemWidth) , MyUtil.dip2px(itemHeight));
             adapter.setItemLayoutParams(itemParams);
         }
+        MyLog.d(TAG, "setAdapter", "状态:itemHeight:itemWidth:", "" , itemHeight , itemWidth);
         recyclerView.setAdapter(adapter);
     }
 
@@ -56,6 +63,26 @@ public class BindingAdapters {
     @BindingAdapter("bitmap")
     public static void setBitMap(ImageView view , Bitmap bitmap) {
         view.setImageBitmap(bitmap);
+    }
+
+    @BindingAdapter("typeface")
+    public static void setTypeface(TextView view , String typeface) {
+        if (typeface != null ) {
+            view.setTypeface(ITypefaceFetch.getTypefaceFromAll(typeface));
+            MyLog.d(TAG, "setTypeface", "状态:typeface", "" , typeface);
+        }
+    }
+
+    @BindingAdapter("textColor")
+    public static void setTextColor(TextView view , int textColor) {
+        view.setTextColor(textColor);
+        MyLog.d(TAG, "setTextColor", "状态:textColor", "" , textColor);
+    }
+
+    @BindingAdapter("isWb")
+    public static void setIsWB(ColorPickerView colorPickerView, Boolean isWB) {
+        colorPickerView.setWB(isWB);
+        MyLog.d(TAG, "setIsWB", "状态:isWB", "" , isWB);
     }
 
     @BindingAdapter(value = {"viewHeight","viewWidth" , "viewLeftMargin" , "viewRightMargin"}, requireAll = false)
@@ -75,8 +102,8 @@ public class BindingAdapters {
         MyLog.d(TAG, "setModel", "状态:model:", "重新设置cutview的 模式" , model);
 
         cutView.setModel(model);
-        if (model == CUT_MODEL || model == INSERT_IMAGE_MODEL) {
-            MyLog.d(TAG, "setModel", "状态:", "重新进入了 transform 和 frame 需要重新初始化cutView的限制条件");
+        if (model == CUT_MODEL || model == INSERT_IMAGE_MODEL || model == INSERT_TEXT_MODEL) {
+            MyLog.d(TAG, "setModel", "状态:", "重新进入了 transform 和 frame 和 text 需要重新初始化cutView的限制条件");
             cutView.setInit(true);
         }
         cutView.post(cutView::invalidate);
@@ -97,12 +124,24 @@ public class BindingAdapters {
     @BindingAdapter("selectPosition")
     public static void setSelectPosition(RecyclerView recyclerView , int selectPosition) {
         MyLog.d(TAG, "setSelectPosition", "状态:selectPosition:", "" , selectPosition);
-        recyclerView.smoothScrollToPosition(selectPosition);
+        if (selectPosition >= 0 ){
+            recyclerView.smoothScrollToPosition(selectPosition);
+        }
     }
 
     @BindingAdapter("onLimitRectChangedListener")
     public static void setOnLimitRectChangedListener(CutView cutView , CutView.OnLimitRectChangedListener onLimitRectChangedListener) {
         cutView.setOnLimitRectChangedListener(onLimitRectChangedListener);
+    }
+
+    @BindingAdapter("onLimitMaxRectChangedListener")
+    public static void setOnLimitMaxRectChangedListener(CutView cutView , CutView.OnLimitMaxRectChangeListener onLimitMaxRectChangeListener) {
+        cutView.setOnLimitMaxRectChangeListener(onLimitMaxRectChangeListener);
+    }
+
+    @BindingAdapter("onPlaceChangedListener")
+    public static void setOnPlaceChangedListener(MoveFrameLayout moveFrameLayout , MoveFrameLayout.OnPlaceChangedListener onPlaceChangedListener) {
+        moveFrameLayout.setOnPlaceChangedListener(onPlaceChangedListener);
     }
 
     @BindingAdapter(value = {"resizeWidth" , "resizeHeight" , "imageUri"} , requireAll = false)

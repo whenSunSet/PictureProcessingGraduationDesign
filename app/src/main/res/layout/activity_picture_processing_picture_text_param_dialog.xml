@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:bind="http://schemas.android.com/apk/res-auto"
+    xmlns:fresco="http://schemas.android.com/tools">
+
+    <data>
+        <variable name="viewModel" type="com.example.whensunset.pictureprocessinggraduationdesign.viewModel.includeLayoutVM.PictureTextParamDialogVM"/>
+        <import type="com.example.whensunset.pictureprocessinggraduationdesign.viewModel.includeLayoutVM.PictureTextParamDialogVM"/>
+    </data>
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:textSize="@{viewModel.mTextSize}"
+            bind:textColor="@{viewModel.mTextColor}"
+            bind:typeface="@{viewModel.mTypefaceName}"
+            android:text="@string/word"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
+            android:layout_width="100dp"
+            android:layout_height="100dp" />
+
+        <com.example.whensunset.pictureprocessinggraduationdesign.mete.ColorPickerView
+            android:onProgressChanged="@{(seekBar, progress, fromUser) -> viewModel.mUIActionManager.doProgressChanged(PictureTextParamDialogVM.TEXT_COLOR_RGB_CHANGED , progress)}"
+            android:max="@{PictureTextParamDialogVM.PROGRESS_MAX}"
+            android:progress="@{viewModel.mTextColorRGBProgress}"
+            android:layout_gravity="center"
+            android:layout_marginTop="10dp"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <com.example.whensunset.pictureprocessinggraduationdesign.mete.ColorPickerView
+            bind:isWb="@{true}"
+            android:onProgressChanged="@{(seekBar, progress, fromUser) -> viewModel.mUIActionManager.doProgressChanged(PictureTextParamDialogVM.TEXT_COLOR_WB_CHANGED , progress)}"
+            android:max="@{PictureTextParamDialogVM.PROGRESS_MAX}"
+            android:progress="@{viewModel.mTextColorWBProgress}"
+            android:layout_gravity="center"
+            android:layout_marginTop="10dp"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <android.support.v7.widget.AppCompatSeekBar
+            android:onProgressChanged="@{(seekBar, progress, fromUser) -> viewModel.mUIActionManager.doProgressChanged(PictureTextParamDialogVM.TEXT_SIZE_CHANGED , progress)}"
+            android:max="@{PictureTextParamDialogVM.PROGRESS_MAX}"
+            android:progress="@{viewModel.mTextSizeProgress}"
+            android:layout_gravity="center"
+            android:paddingStart="0dp"
+            android:paddingEnd="0dp"
+            android:layout_marginTop="10dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+    </LinearLayout>
+
+
+</layout>

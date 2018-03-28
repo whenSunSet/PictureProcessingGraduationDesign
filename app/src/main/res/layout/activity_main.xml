@@ -7,6 +7,8 @@
     <data class = 'com.example.whensunset.pictureprocessinggraduationdesign.ui.MainActivityBinding'>
         <import type="com.example.whensunset.pictureprocessinggraduationdesign.dataBindingUtil.LayoutManager"/>
         <import type="com.example.whensunset.pictureprocessinggraduationdesign.dataBindingUtil.ItemDecoration"/>
+        <import type="com.example.whensunset.pictureprocessinggraduationdesign.viewModel.itemManagerVM.PictureItemManagerVM"/>
+        <import type="com.example.whensunset.pictureprocessinggraduationdesign.viewModel.itemManagerVM.DirectorySpinnerItemManagerVM"/>
         <import type="android.view.View"/>
 
         <variable name="viewModel" type="com.example.whensunset.pictureprocessinggraduationdesign.viewModel.MainActivityVM"/>
@@ -32,7 +34,7 @@
 
                 <Spinner
                     android:entries="@{viewModel.mDirectorySpinnerItemManagerVM.mDataItemList}"
-                    android:onItemSelected="@{(parent, view, position, id) -> viewModel.mDirectorySpinnerItemManagerVM.onItemSelected(position)}"
+                    android:onItemSelected="@{(parent, view, position, id) -> viewModel.mDirectorySpinnerItemManagerVM.mUIActionManager.doItemSelected(DirectorySpinnerItemManagerVM.CLICK_ITEM , position)}"
                     android:id="@+id/directory_spinner"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent">
@@ -46,13 +48,14 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:id="@+id/picture_recycle_view"
+
+            bind:itemWidth="@{PictureItemManagerVM.MENU_ITEM_WIDTH}"
+            bind:itemHeight="@{PictureItemManagerVM.MENU_ITEM_HEIGHT}"
+
             bind:layoutManager="@{LayoutManager.grid(3)}"
             bind:itemDecor="@{ItemDecoration.defaultItemDecoration()}"
-
             bind:itemView="@{viewModel.mPictureItemManager.mViewSelector}"
-            bind:items="@{viewModel.mPictureItemManager.mDataItemList}"
-            bind:itemWidth="@{viewModel.mPictureItemManager.mItemWidth}"
-            bind:itemHeight="@{viewModel.mPictureItemManager.mItemHeight}">
+            bind:items="@{viewModel.mPictureItemManager.mDataItemList}">
         </android.support.v7.widget.RecyclerView>
 
     </LinearLayout>

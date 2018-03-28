@@ -3,7 +3,7 @@ package com.example.whensunset.pictureprocessinggraduationdesign.impl;
 import android.util.Log;
 
 import com.example.whensunset.pictureprocessinggraduationdesign.base.MyConsumer;
-import com.example.whensunset.pictureprocessinggraduationdesign.base.MyLog;
+import com.example.whensunset.pictureprocessinggraduationdesign.base.util.MyLog;
 
 import org.opencv.core.Mat;
 

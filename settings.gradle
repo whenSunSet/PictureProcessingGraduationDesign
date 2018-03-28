@@ -1,2 +1,2 @@
-include ':app', ':opencvlibrary'
+include ':app', ':opencvlibrary', ':loggradleplugin'
 include ':openCVLibrary340'

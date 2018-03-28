@@ -1,6 +1,6 @@
 package com.example.whensunset.pictureprocessinggraduationdesign.viewModel;
 
-import com.example.whensunset.pictureprocessinggraduationdesign.base.BaseVM;
+import com.example.whensunset.pictureprocessinggraduationdesign.base.viewmodel.BaseVM;
 import com.example.whensunset.pictureprocessinggraduationdesign.viewModel.itemManagerVM.DirectorySpinnerItemManagerVM;
 import com.example.whensunset.pictureprocessinggraduationdesign.viewModel.itemManagerVM.PictureItemManagerVM;
 

@@ -2,20 +2,20 @@ package com.example.whensunset.pictureprocessinggraduationdesign.ui;
 
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
-import android.databinding.Observable;
 import android.os.Bundle;
 
 import com.example.whensunset.pictureprocessinggraduationdesign.R;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.BaseActivity;
-import com.example.whensunset.pictureprocessinggraduationdesign.base.MyLog;
-import com.example.whensunset.pictureprocessinggraduationdesign.base.ObserverParamMap;
-import com.example.whensunset.pictureprocessinggraduationdesign.dataBindingUtil.MyExceptionOnPropertyChangedCallback;
+import com.example.whensunset.pictureprocessinggraduationdesign.base.util.MyLog;
+import com.example.whensunset.pictureprocessinggraduationdesign.base.util.ObserverParamMap;
+import com.example.whensunset.pictureprocessinggraduationdesign.base.viewmodel.BaseVM;
 import com.example.whensunset.pictureprocessinggraduationdesign.viewModel.MainActivityVM;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 
+import static com.example.whensunset.pictureprocessinggraduationdesign.base.viewmodel.ItemManagerBaseVM.CLICK_ITEM;
 import static com.example.whensunset.pictureprocessinggraduationdesign.staticParam.ObserverMapKey.DirectorySpinnerItemManagerVM_directoryName;
 import static com.example.whensunset.pictureprocessinggraduationdesign.staticParam.ObserverMapKey.PictureItemManagerVM_mImageUri;
 
@@ -43,30 +43,22 @@ public class MainActivity extends BaseActivity {
         // 监听bar上面目录切换时候的toast显示
         showToast(mMainActivityVM.mDirectorySpinnerItemManagerVM);
 
-
         // 监听列表中item的点击事件
-        mMainActivityVM.mPictureItemManager.mClickedItemListener.addOnPropertyChangedCallback(new MyExceptionOnPropertyChangedCallback(new Observable.OnPropertyChangedCallback() {
-            @Override
-            public void onPropertyChanged(Observable observable, int i) {
-                String imageUri = ObserverParamMap.staticGetValue(observable , PictureItemManagerVM_mImageUri);
-                Intent intent = new Intent(MainActivity.this , PictureProcessingActivity.class);
-                intent.putExtra("imageUri" , imageUri);
-                MainActivity.this.startActivity(intent);
+        BaseVM.initListener(mMainActivityVM.mPictureItemManager , (observable, i) -> {
+            String imageUri = ObserverParamMap.staticGetValue(observable , PictureItemManagerVM_mImageUri);
+            Intent intent = new Intent(MainActivity.this , PictureProcessingActivity.class);
+            intent.putExtra("imageUri" , imageUri);
+            MainActivity.this.startActivity(intent);
 
-                MyLog.d(TAG, "onPropertyChanged", "状态:imageUri:", "监听列表中item的点击事件" , imageUri);
-            }
-        } , e -> showToast(e.getMessage())));
+            MyLog.d(TAG, "onPropertyChanged", "状态:imageUri:", "监听列表中item的点击事件" , imageUri);
+        }, CLICK_ITEM);
 
         // 监听bar上面的目录切换事件
-        mMainActivityVM.mDirectorySpinnerItemManagerVM.mClickedItemListener.addOnPropertyChangedCallback(new MyExceptionOnPropertyChangedCallback(new Observable.OnPropertyChangedCallback() {
-            @Override
-            public void onPropertyChanged(Observable observable, int i) {
-                String directoryName = ObserverParamMap.staticGetValue(observable, DirectorySpinnerItemManagerVM_directoryName);
-                mMainActivityVM.mPictureItemManager.freshPictureList(directoryName);
-
-                MyLog.d(TAG, "onPropertyChanged", "状态:directoryName:", "监听bar上面的目录切换事件" , directoryName);
-            }
-        }, e -> showToast(e.getMessage())));
+        BaseVM.initListener(mMainActivityVM.mDirectorySpinnerItemManagerVM , (observable, i) -> {
+            String directoryName = ObserverParamMap.staticGetValue(observable, DirectorySpinnerItemManagerVM_directoryName);
+            mMainActivityVM.mPictureItemManager.freshPictureList(directoryName);
+            MyLog.d(TAG, "onPropertyChanged", "状态:directoryName:", "监听bar上面的目录切换事件" , directoryName);
+        }, CLICK_ITEM);
 
     }
 

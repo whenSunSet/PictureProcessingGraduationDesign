@@ -16,6 +16,8 @@ extern Mat RGBToLab(Mat &m);
 extern int adjustBrightnessContrast(InputArray src, OutputArray dst, int brightness, int contrast);
 extern void adjustHSL(Mat& img, Mat& aImg, int  hue, int saturation, int lightness);
 extern int imageCrop(InputArray src, OutputArray dst, Rect rect);
+extern int cvAdd4cMat_q(cv::Mat &dst, cv::Mat &scr, double scale);
+
 extern "C"
 JNIEXPORT void JNICALL
 Java_com_example_whensunset_pictureprocessinggraduationdesign_pictureProcessing_CutMyConsumer_cut(
@@ -59,7 +61,9 @@ Java_com_example_whensunset_pictureprocessinggraduationdesign_pictureProcessing_
 
     warpAffine(oldMat , newMat , rot, bbox.size());
     return;
-}extern "C"
+}
+
+extern "C"
 JNIEXPORT void JNICALL
 Java_com_example_whensunset_pictureprocessinggraduationdesign_pictureProcessing_WhiteBalanceMyConsumer_whiteBalance(
         JNIEnv *env, jobject instance, jlong in_mat_addr, jlong out_mat_addr) {
@@ -91,7 +95,9 @@ Java_com_example_whensunset_pictureprocessinggraduationdesign_pictureProcessing_
     //RGB三通道图像合并
     merge(imageRGB, newMat);
     return;
-}extern "C"
+}
+
+extern "C"
 JNIEXPORT void JNICALL
 Java_com_example_whensunset_pictureprocessinggraduationdesign_pictureProcessing_PictureParamMyConsumer_pictureParamChange(
         JNIEnv *env, jobject instance, jlong in_mat_addr, jlong out_mat_addr, jint brightness,
@@ -104,10 +110,62 @@ Java_com_example_whensunset_pictureprocessinggraduationdesign_pictureProcessing_
     adjustHSL(middleMat , newMat , tonal , saturation , 0);
 }
 
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_example_whensunset_pictureprocessinggraduationdesign_pictureProcessing_PictureFrameMyConsumer_mixed(
+        JNIEnv *env, jobject instance, jlong in_mat_addr, jlong insert_mat_addr , jlong out_mat_addr , jint x, jint y,
+        jint width, jint height) {
+    Mat& oldMat = *(Mat *) in_mat_addr;
+    Mat& insertMat = *(Mat *) insert_mat_addr;
+    Mat middleMat = Mat::zeros(height , width , CV_8UC3);
+    Mat& newMat = *(Mat *) out_mat_addr;
+
+    oldMat.copyTo(newMat);
+    resize(insertMat , middleMat , middleMat.size() , 0 , 0 , INTER_LINEAR);
+
+    Mat ROI = newMat(Rect(x , y , middleMat.cols , middleMat.rows));
+
+    if(middleMat.channels() == 3) {
+        middleMat.copyTo(ROI);
+    } else if(middleMat.channels() == 4) {
+        cvAdd4cMat_q(ROI , middleMat , 1.0);
+    }
+}
+
+int cvAdd4cMat_q(cv::Mat &dst, cv::Mat &scr, double scale)
+{
+    if (dst.channels() != 3 || scr.channels() != 4)
+    {
+        return true;
+    }
+    if (scale < 0.01)
+        return false;
+    std::vector<cv::Mat>scr_channels;
+    std::vector<cv::Mat>dstt_channels;
+    split(scr, scr_channels);
+    split(dst, dstt_channels);
+    CV_Assert(scr_channels.size() == 4 && dstt_channels.size() == 3);
+
+    if (scale < 1)
+    {
+        scr_channels[3] *= scale;
+        scale = 1;
+    }
+    for (int i = 0; i < 3; i++)
+    {
+        dstt_channels[i] = dstt_channels[i].mul(255.0 / scale - scr_channels[3], scale / 255.0);
+        dstt_channels[i] += scr_channels[i].mul(scr_channels[3], scale / 255.0);
+    }
+    merge(dstt_channels, dst);
+    return true;
+}
+
 int imageCrop(InputArray src, OutputArray dst, Rect rect)
 {
     Mat input = src.getMat();
     if( input.empty() ) {
+
+
         return -1;
     }
 
@@ -248,6 +306,9 @@ void adjustHSL(Mat& img, Mat& aImg, int  hue, int saturation, int lightness)
     if ( temp.empty())
         temp.release();
 
+}
+
+void resize(Mat& in , Mat& out , int width , int height) {
 }
 
 
