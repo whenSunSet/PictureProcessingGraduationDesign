@@ -8,7 +8,6 @@ import com.example.whensunset.pictureprocessinggraduationdesign.R;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.BaseActivity;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.util.MyLog;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.util.ObserverParamMap;
-import com.example.whensunset.pictureprocessinggraduationdesign.base.viewmodel.BaseVM;
 import com.example.whensunset.pictureprocessinggraduationdesign.viewModel.MainActivityVM;
 
 import org.opencv.android.BaseLoaderCallback;
@@ -36,29 +35,30 @@ public class MainActivity extends BaseActivity {
         mMainActivityVM = new MainActivityVM();
         mMainActivityBinding.setViewModel(mMainActivityVM);
 
-        uiActionInit();
+        registeredViewModelFiledsObserver();
     }
 
-    public void uiActionInit() {
+    @Override
+    protected void registeredViewModelFiledsObserver() {
         // 监听bar上面目录切换时候的toast显示
-        showToast(mMainActivityVM.mDirectorySpinnerItemManagerVM);
+        showToast(mMainActivityVM.getDirectorySpinnerItemManagerVM());
 
         // 监听列表中item的点击事件
-        BaseVM.initListener(mMainActivityVM.mPictureItemManager , (observable, i) -> {
+        initListener(mMainActivityVM.getPictureItemManagerVM() , (observable, i) -> {
             String imageUri = ObserverParamMap.staticGetValue(observable , PictureItemManagerVM_mImageUri);
             Intent intent = new Intent(MainActivity.this , PictureProcessingActivity.class);
             intent.putExtra("imageUri" , imageUri);
             MainActivity.this.startActivity(intent);
 
             MyLog.d(TAG, "onPropertyChanged", "状态:imageUri:", "监听列表中item的点击事件" , imageUri);
-        }, CLICK_ITEM);
+        } , CLICK_ITEM);
 
         // 监听bar上面的目录切换事件
-        BaseVM.initListener(mMainActivityVM.mDirectorySpinnerItemManagerVM , (observable, i) -> {
+        initListener(mMainActivityVM.getDirectorySpinnerItemManagerVM() , (observable, i) -> {
             String directoryName = ObserverParamMap.staticGetValue(observable, DirectorySpinnerItemManagerVM_directoryName);
-            mMainActivityVM.mPictureItemManager.freshPictureList(directoryName);
+            mMainActivityVM.getPictureItemManagerVM().freshPictureList(directoryName);
             MyLog.d(TAG, "onPropertyChanged", "状态:directoryName:", "监听bar上面的目录切换事件" , directoryName);
-        }, CLICK_ITEM);
+        } , CLICK_ITEM);
 
     }
 
@@ -70,6 +70,12 @@ public class MainActivity extends BaseActivity {
         } else {
             mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mMainActivityVM.onDestroy();
     }
 
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {

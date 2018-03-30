@@ -8,7 +8,6 @@ import com.example.whensunset.pictureprocessinggraduationdesign.base.IImageUriFe
 import com.example.whensunset.pictureprocessinggraduationdesign.base.util.MyLog;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.util.MyUtil;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.util.ObserverParamMap;
-import com.example.whensunset.pictureprocessinggraduationdesign.base.uiaction.ClickUIAction;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.viewmodel.ItemBaseVM;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.viewmodel.ItemManagerBaseVM;
 import com.example.whensunset.pictureprocessinggraduationdesign.impl.SystemImageUriFetch;
@@ -17,8 +16,6 @@ import java.util.List;
 
 import io.reactivex.Flowable;
 
-import static com.example.whensunset.pictureprocessinggraduationdesign.base.uiaction.UIActionManager.CLICK_ACTION;
-import static com.example.whensunset.pictureprocessinggraduationdesign.staticParam.ObserverMapKey.ItemBaseVM_mPosition;
 import static com.example.whensunset.pictureprocessinggraduationdesign.staticParam.ObserverMapKey.PictureItemManagerVM_mImageUri;
 
 /**
@@ -38,6 +35,7 @@ public class PictureItemManagerVM extends ItemManagerBaseVM<PictureItemManagerVM
     public PictureItemManagerVM() {
         super(1 ,BR.viewModel , R.layout.activity_main_picture_item);
         mIImageUriFetch = SystemImageUriFetch.getInstance();
+
         initItemVM();
     }
 
@@ -70,14 +68,12 @@ public class PictureItemManagerVM extends ItemManagerBaseVM<PictureItemManagerVM
         }
 
         private void initClick() {
-            mUIActionManager
-                    .<ClickUIAction>getDefaultThrottleFlowable( 3000 , CLICK_ACTION)
-                    .subscribe(clickUIAction -> {
-                        ObserverParamMap paramMap = ObserverParamMap.staticSet(ItemBaseVM_mPosition , mPosition);
-                        paramMap.set(PictureItemManagerVM_mImageUri , mImageUri.get());
-                        mEventListenerList.get(clickUIAction.getLastEventListenerPosition()).set(paramMap);
-                        MyLog.d(TAG, "onClick", "状态:clickUIAction:mPosition:mImageUri:"
-                                , clickUIAction , mPosition ,  mImageUri.get());
+            getDefaultClickThrottleFlowable(3000)
+                    .subscribe(LastEventListenerPosition -> {
+                        ObserverParamMap paramMap = getPositionParamMap()
+                                .set(PictureItemManagerVM_mImageUri , mImageUri.get());
+                        mEventListenerList.get(LastEventListenerPosition).set(paramMap);
+                        MyLog.d(TAG, "onClick", "状态:LastEventListenerPosition:ObserverParamMap:", LastEventListenerPosition , paramMap);
                     });
         }
     }

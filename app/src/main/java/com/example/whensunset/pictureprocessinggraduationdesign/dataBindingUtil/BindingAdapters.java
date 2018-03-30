@@ -18,12 +18,20 @@ import com.example.whensunset.pictureprocessinggraduationdesign.base.util.MyUtil
 import com.example.whensunset.pictureprocessinggraduationdesign.mete.ColorPickerView;
 import com.example.whensunset.pictureprocessinggraduationdesign.mete.CutView;
 import com.example.whensunset.pictureprocessinggraduationdesign.mete.MoveFrameLayout;
+import com.example.whensunset.pictureprocessinggraduationdesign.pictureProcessing.filteraction.FilterAction;
+import com.example.whensunset.pictureprocessinggraduationdesign.pictureProcessing.filteraction.NormalFilterAction;
 import com.facebook.drawee.backends.pipeline.Fresco;
 import com.facebook.drawee.backends.pipeline.PipelineDraweeController;
 import com.facebook.drawee.view.SimpleDraweeView;
 import com.facebook.imagepipeline.common.ResizeOptions;
+import com.facebook.imagepipeline.request.BasePostprocessor;
 import com.facebook.imagepipeline.request.ImageRequest;
 import com.facebook.imagepipeline.request.ImageRequestBuilder;
+import com.facebook.imagepipeline.request.Postprocessor;
+
+import org.opencv.android.Utils;
+import org.opencv.core.Mat;
+import org.opencv.imgcodecs.Imgcodecs;
 
 import java.util.List;
 
@@ -158,6 +166,48 @@ public class BindingAdapters {
                     .build();
             simpleDraweeView.setController(controller);
         }
+    }
+
+    @BindingAdapter(value = {"filterAction" , "sampleMatUri"} , requireAll = false)
+    public static void setFilterImage(SimpleDraweeView simpleDraweeView , FilterAction filterAction , String sampleMatUri) {
+        if (sampleMatUri == null) {
+            throw new RuntimeException("示例图片uri要放入");
+        }
+        String path = Uri.parse(sampleMatUri).getPath();
+        MyLog.d(TAG, "setFilterImage", "状态:filterAction:sampleMatUri:", "" , filterAction , sampleMatUri);
+        Postprocessor filterActionPostprocessor = new BasePostprocessor() {
+            @Override
+            public String getName() {
+                return "filterActionPostprocessor";
+            }
+
+            @Override
+            public void process(Bitmap bitmap) {
+                if (filterAction != NormalFilterAction.getInstance()) {
+                    Mat oldMat = new Mat();
+                    Mat newMat = new Mat();
+
+                    filterAction.filter(Imgcodecs.imread(path) , newMat);
+                    Utils.matToBitmap(newMat , bitmap);
+
+                    MyLog.d(TAG, "setFilterImage", "状态:oldMat:newMat:filterAction:", "在fresco内部使用滤镜处理图片" , oldMat , newMat , filterAction);
+
+                    oldMat.release();
+                    newMat.release();
+                }
+            }
+        };
+
+        ImageRequest request = ImageRequestBuilder.newBuilderWithSource(Uri.parse(sampleMatUri))
+                .setPostprocessor(filterActionPostprocessor)
+                .build();
+
+        PipelineDraweeController controller = (PipelineDraweeController)
+                Fresco.newDraweeControllerBuilder()
+                        .setImageRequest(request)
+                        .setOldController(simpleDraweeView.getController())
+                        .build();
+        simpleDraweeView.setController(controller);
     }
 
     @BindingConversion

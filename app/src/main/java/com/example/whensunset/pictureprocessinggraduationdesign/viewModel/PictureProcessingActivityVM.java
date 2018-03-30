@@ -7,11 +7,12 @@ import android.net.Uri;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.BaseSeekBarRecycleViewVM;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.util.MyLog;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.util.ObserverParamMap;
-import com.example.whensunset.pictureprocessinggraduationdesign.base.viewmodel.BaseVM;
+import com.example.whensunset.pictureprocessinggraduationdesign.base.viewmodel.ChildBaseVM;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.viewmodel.ParentBaseVM;
 import com.example.whensunset.pictureprocessinggraduationdesign.impl.BaseMyConsumer;
 import com.example.whensunset.pictureprocessinggraduationdesign.mete.CutView;
 import com.example.whensunset.pictureprocessinggraduationdesign.pictureProcessing.StringConsumerChain;
+import com.example.whensunset.pictureprocessinggraduationdesign.viewModel.includeLayoutVM.PictureFilterMenuVM;
 import com.example.whensunset.pictureprocessinggraduationdesign.viewModel.includeLayoutVM.PictureFrameMenuVM;
 import com.example.whensunset.pictureprocessinggraduationdesign.viewModel.includeLayoutVM.PictureParamMenuVM;
 import com.example.whensunset.pictureprocessinggraduationdesign.viewModel.includeLayoutVM.PictureTextMenuVM;
@@ -21,10 +22,12 @@ import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 
 import static com.example.whensunset.pictureprocessinggraduationdesign.base.BaseSeekBarRecycleViewVM.LEAVE_BSBRV_VM_LISTENER;
+import static com.example.whensunset.pictureprocessinggraduationdesign.base.viewmodel.ItemManagerBaseVM.CLICK_ITEM;
 import static com.example.whensunset.pictureprocessinggraduationdesign.mete.CutView.CUT_MODEL;
 import static com.example.whensunset.pictureprocessinggraduationdesign.mete.CutView.INSERT_IMAGE_MODEL;
 import static com.example.whensunset.pictureprocessinggraduationdesign.mete.CutView.INSERT_TEXT_MODEL;
 import static com.example.whensunset.pictureprocessinggraduationdesign.mete.CutView.SCALE_MODEL;
+import static com.example.whensunset.pictureprocessinggraduationdesign.staticParam.ObserverMapKey.PictureFilterItemVM_mat;
 import static com.example.whensunset.pictureprocessinggraduationdesign.staticParam.ObserverMapKey.PictureFrameItemVM_mat;
 import static com.example.whensunset.pictureprocessinggraduationdesign.staticParam.ObserverMapKey.PictureParamMenuVM_mat;
 import static com.example.whensunset.pictureprocessinggraduationdesign.staticParam.ObserverMapKey.PictureTextItemVM_mat;
@@ -62,17 +65,18 @@ public class PictureProcessingActivityVM extends ParentBaseVM {
     public static final int CLICK_REDO = 6;
     public static final int CLICK_BACK = 7;
 
+    public static final int CHILD_VM_mPictureFilterMenuVM = 0;
+    public static final int CHILD_VM_mPictureTransformMenuVM = 1;
+    public static final int CHILD_VM_mPictureParamMenuVM = 2;
+    public static final int CHILD_VM_mPictureFrameMenuVM = 3;
+    public static final int CHILD_VM_mPictureTextMenuVM = 4;
+
     public final ObservableField<Bitmap> mImageBitMap = new ObservableField<>();
     public final ObservableField<Integer> mSelectTab = new ObservableField<>(0);
     public final ObservableField<Integer> mCutViewModel = new ObservableField<>(SCALE_MODEL);
     public final ObservableField<Boolean> mCanUndo = new ObservableField<>(false);
     public final ObservableField<Boolean> mCanRedo = new ObservableField<>(false);
     public final ObservableField<CutView.OnLimitRectChangedListener> mCutViewListener = new ObservableField<>();
-
-    public final PictureTransformMenuVM mPictureTransformMenuVM;
-    public final PictureParamMenuVM mPictureParamMenuVM;
-    public final PictureFrameMenuVM mPictureFrameMenuVM;
-    public final PictureTextMenuVM mPictureTextMenuVM;
     public final ObservableField<BaseSeekBarRecycleViewVM> mNowBaseSeekBarRecycleViewVM = new ObservableField<>();
 
     private StringConsumerChain mStringConsumerChain = StringConsumerChain.getInstance();
@@ -83,28 +87,36 @@ public class PictureProcessingActivityVM extends ParentBaseVM {
         initDefaultUIActionManager();
 
         mImagePath = Uri.parse(imageUri).getPath();
-        mPictureTransformMenuVM = new PictureTransformMenuVM();
-        mPictureParamMenuVM = new PictureParamMenuVM();
-        mPictureFrameMenuVM = new PictureFrameMenuVM();
-        mPictureTextMenuVM = new PictureTextMenuVM();
-        mNowBaseSeekBarRecycleViewVM.set(mPictureFrameMenuVM);
+        initChildBaseVM(PictureFilterMenuVM.class , CHILD_VM_mPictureFilterMenuVM);
+        initChildBaseVM(PictureTransformMenuVM.class , CHILD_VM_mPictureTransformMenuVM);
+        initChildBaseVM(PictureParamMenuVM.class , CHILD_VM_mPictureParamMenuVM);
+        initChildBaseVM(PictureFrameMenuVM.class , CHILD_VM_mPictureFrameMenuVM);
+        initChildBaseVM(PictureTextMenuVM.class , CHILD_VM_mPictureTextMenuVM);
+        mNowBaseSeekBarRecycleViewVM.set(getPictureFilterMenuVM());
 
         mStringConsumerChain.init(mImagePath);
-        mStringConsumerChain
-                .rxRunStartConvenient((BaseMyConsumer) null)
-                .subscribe(this::showMat);
+        mStringConsumerChain.rxRunStartConvenient((BaseMyConsumer) null).subscribe(this::showMat);
 
         initPictureAction();
         initClick();
 
-        changeNowChildVM(mPictureTransformMenuVM);
+        changeNowChildVM(getPictureFilterMenuVM());
         MyLog.d(TAG, "PictureProcessingActivityVM", "imageUri:", imageUri );
     }
 
     private void initPictureAction() {
 
+        // 监听 图片滤镜 的操作以更新图片
+        initListener(getPictureFilterMenuVM() , (observable, i) -> {
+            Mat mat = ObserverParamMap.staticGetValue(observable , PictureFilterItemVM_mat);
+            if (mat == null) {
+                return;
+            }
+            showMat(mat);
+        }, CLICK_ITEM);
+
         // 监听 图片变换 的操作以更新图片
-        BaseVM.initListener(mPictureTransformMenuVM ,
+        initListener(getPictureTransformMenuVM() ,
                 (observable, i) -> showMat(ObserverParamMap.staticGetValue(observable , PictureTransformMenuVM_mat)) ,
                 SELECT_PICTURE_ROTATE ,
                 SELECT_PICTURE_HORIZONTAL_FLIP ,
@@ -114,7 +126,7 @@ public class PictureProcessingActivityVM extends ParentBaseVM {
                 LEAVE_TRANSFORM_LISTENER);
 
         // 监听 图片参数变化 的操作以更新图片
-        BaseVM.initListener(mPictureParamMenuVM ,
+        initListener(getPictureParamMenuVM() ,
                 (observable, i) -> showMat(ObserverParamMap.staticGetValue(observable , PictureParamMenuVM_mat)) ,
                 SELECT_BRIGHTNESS ,
                 SELECT_CONTRAST ,
@@ -123,13 +135,13 @@ public class PictureProcessingActivityVM extends ParentBaseVM {
                 PARAM_PROGRESS_CHANGE);
 
         // 监听 图片插入变化 的操作以更新图片
-        BaseVM.initListener(mPictureFrameMenuVM ,
+        initListener(getPictureFilterMenuVM() ,
                 (observable, i) -> showMat(ObserverParamMap.staticGetValue(observable , PictureFrameItemVM_mat)) ,
                 LEAVE_BSBRV_VM_LISTENER,
                 FRAME_PROGRESS_CHANGE);
 
         // 监听 文字插入变化 的操作以更新图片
-        BaseVM.initListener(mPictureTextMenuVM, (observable, i) -> {
+        initListener(getPictureTextMenuVM() , (observable, i) -> {
             Mat mat = ObserverParamMap.staticGetValue(observable , PictureTextItemVM_mat);
             if (mat != null) {
                 showMat(mat);
@@ -153,45 +165,37 @@ public class PictureProcessingActivityVM extends ParentBaseVM {
                         return false;
                     }
                     return true;
-                }).map(position -> {
-                        mNowChildBaseVM.stop();
-                        mSelectTab.set(position);
-                    return position;
                 }).subscribe(position -> {
+                    ChildBaseVM childBaseVM = getChildBaseVM(position);
                     switch (position) {
                         case SELECT_PICTURE_FILTER:
-                            mNowChildBaseVM = mPictureTransformMenuVM;
                             mCutViewModel.set(SCALE_MODEL);
-                            mNowBaseSeekBarRecycleViewVM.set(mPictureFrameMenuVM);
+                            mNowBaseSeekBarRecycleViewVM.set((BaseSeekBarRecycleViewVM) childBaseVM);
 
                             break;
                         case SELECT_PICTURE_TRANSFORM:
-                            mNowChildBaseVM = mPictureTransformMenuVM;
-                            mCutViewListener.set(mPictureTransformMenuVM);
+                            mCutViewListener.set((CutView.OnLimitRectChangedListener) childBaseVM);
                             mCutViewModel.set(CUT_MODEL);
 
                             break;
                         case SELECT_PICTURE_PARAM:
-                            mNowChildBaseVM = mPictureParamMenuVM;
                             mCutViewModel.set(SCALE_MODEL);
 
                             break;
                         case SELECT_PICTURE_FRAME:
-                            mNowChildBaseVM = mPictureFrameMenuVM;
-                            mCutViewListener.set(mPictureFrameMenuVM);
+                            mCutViewListener.set((CutView.OnLimitRectChangedListener) childBaseVM);
                             mCutViewModel.set(INSERT_IMAGE_MODEL);
-                            mNowBaseSeekBarRecycleViewVM.set(mPictureFrameMenuVM);
+                            mNowBaseSeekBarRecycleViewVM.set((BaseSeekBarRecycleViewVM) childBaseVM);
 
                             break;
                         case SELECT_PICTURE_TEXT:
-                            mNowChildBaseVM = mPictureTextMenuVM;
                             mCutViewModel.set(INSERT_TEXT_MODEL);
-                            mNowBaseSeekBarRecycleViewVM.set(mPictureTextMenuVM);
+                            mNowBaseSeekBarRecycleViewVM.set((BaseSeekBarRecycleViewVM) childBaseVM);
 
                             break;
                     }
-            mNowChildBaseVM.resume();
-            mEventListenerList.get(position).notifyChange();
+            mSelectTab.set(position);
+            changeNowChildVM(childBaseVM);
         });
     }
 
@@ -200,11 +204,9 @@ public class PictureProcessingActivityVM extends ParentBaseVM {
                 .rxUndoConvenient()
                 .subscribe(this::showMat);
 
-        if (mPictureParamMenuVM.isResume()) {
-            mPictureParamMenuVM.fresh();
-        }
+        getPictureParamMenuVM().fresh();
 
-        MyLog.d(TAG, "clickUndo", "状态:mPictureParamMenuVM.isResume():", "undo完毕" , mPictureParamMenuVM.isResume());
+        MyLog.d(TAG, "clickUndo", "状态:", "undo完毕");
     }
 
     private void clickRedo() {
@@ -212,11 +214,9 @@ public class PictureProcessingActivityVM extends ParentBaseVM {
                 .rxRedoConvenient()
                 .subscribe(this::showMat);
 
-        if (mPictureParamMenuVM.isResume()) {
-            mPictureParamMenuVM.fresh();
-        }
+        getPictureParamMenuVM().fresh();
 
-        MyLog.d(TAG, "clickRedo", "状态:mPictureParamMenuVM.isResume():", "redo完毕" , mPictureParamMenuVM.isResume());
+        MyLog.d(TAG, "clickRedo", "状态:", "redo完毕");
     }
 
     private void clickBack(int position) {
@@ -245,4 +245,25 @@ public class PictureProcessingActivityVM extends ParentBaseVM {
 
         MyLog.d(TAG, "showMat", "状态:mCanUndo:mCanRedo:", "图片展示完毕" , mCanUndo.get() , mCanRedo.get());
     }
+
+    public PictureFilterMenuVM getPictureFilterMenuVM() {
+        return getChildBaseVM(CHILD_VM_mPictureFilterMenuVM);
+    }
+
+    public PictureTransformMenuVM getPictureTransformMenuVM() {
+        return getChildBaseVM(CHILD_VM_mPictureTransformMenuVM);
+    }
+
+    public PictureParamMenuVM getPictureParamMenuVM() {
+        return getChildBaseVM(CHILD_VM_mPictureParamMenuVM);
+    }
+
+    public PictureFrameMenuVM getPictureFrameMenuVM() {
+        return getChildBaseVM(CHILD_VM_mPictureFrameMenuVM);
+    }
+
+    public PictureTextMenuVM getPictureTextMenuVM() {
+        return getChildBaseVM(CHILD_VM_mPictureTextMenuVM);
+    }
+
 }

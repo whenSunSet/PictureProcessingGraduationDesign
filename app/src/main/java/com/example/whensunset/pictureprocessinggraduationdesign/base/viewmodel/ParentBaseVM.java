@@ -1,10 +1,13 @@
 package com.example.whensunset.pictureprocessinggraduationdesign.base.viewmodel;
 
+import android.annotation.SuppressLint;
 import android.databinding.ObservableField;
 
 import com.example.whensunset.pictureprocessinggraduationdesign.base.util.MyLog;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by whensunset on 2018/3/23.
@@ -12,6 +15,8 @@ import java.util.List;
 
 public abstract class ParentBaseVM extends ChildBaseVM {
     public static final String TAG = "何时夕:ParentBaseVM";
+    @SuppressLint("UseSparseArrays")
+    protected Map<Integer , ChildBaseVM> mChildBaseVMMap = new HashMap<>();
     protected ChildBaseVM mNowChildBaseVM = null;
 
     public ParentBaseVM(List<ObservableField<? super Object>> eventListenerList) {
@@ -37,5 +42,39 @@ public abstract class ParentBaseVM extends ChildBaseVM {
 
     public ChildBaseVM getNowChildBaseVM() {
         return mNowChildBaseVM;
+    }
+
+    protected void initChildBaseVM(Class<? extends ChildBaseVM> clazz , int childBaseVMPosition) {
+        try {
+            ChildBaseVM childBaseVM = clazz.newInstance();
+            mChildBaseVMMap.put(childBaseVMPosition , childBaseVM);
+        } catch (Exception e) {
+            throw new RuntimeException("该ChildBaseVM需要参数才能进行初始化，没有无参构造函数");
+        }
+    }
+
+    protected void initChildBaseVM(ParentBaseVM parentBaseVM , ChildBaseVM childBaseVM , int childBaseVMPosition) {
+        mChildBaseVMMap.put(childBaseVMPosition , childBaseVM);
+    }
+
+    public  <T extends ChildBaseVM> T getChildBaseVM(int childBaseVMPosition) {
+        ChildBaseVM childBaseVM = mChildBaseVMMap.get(childBaseVMPosition);
+        if (childBaseVM == null) {
+            MyLog.d(TAG, "getChildBaseVM", "状态:", getRealClassName() + "没有这种:" + childBaseVMPosition);
+            throw new RuntimeException("没有这种ChildBaseVM");
+        }
+        return (T) childBaseVM;
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        for (Integer integer:mChildBaseVMMap.keySet()) {
+            ChildBaseVM childBaseVM = mChildBaseVMMap.get(integer);
+            if (childBaseVM.isNeedDestroy()) {
+                childBaseVM.onDestroy();
+                MyLog.d(TAG, "onDestroy", "状态:", childBaseVM.getRealClassName() + "被销毁了");
+            }
+        }
     }
 }

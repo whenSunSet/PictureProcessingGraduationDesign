@@ -9,10 +9,9 @@ import com.example.whensunset.pictureprocessinggraduationdesign.PictureProcessin
 import com.example.whensunset.pictureprocessinggraduationdesign.R;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.BaseSeekBarRecycleViewVM;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.IImageUriFetch;
+import com.example.whensunset.pictureprocessinggraduationdesign.base.uiaction.ProgressChangedUIAction;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.util.MyLog;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.util.ObserverParamMap;
-import com.example.whensunset.pictureprocessinggraduationdesign.base.uiaction.ProgressChangedUIAction;
-import com.example.whensunset.pictureprocessinggraduationdesign.base.viewmodel.BaseVM;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.viewmodel.ItemBaseVM;
 import com.example.whensunset.pictureprocessinggraduationdesign.impl.LocalFrameImageUriFetch;
 import com.example.whensunset.pictureprocessinggraduationdesign.mete.CutView;
@@ -67,7 +66,7 @@ public class PictureFrameMenuVM extends BaseSeekBarRecycleViewVM<PictureFrameMen
 
     @Override
     protected void initClick() {
-        BaseVM.initListener(this, (observable, i) -> {
+        initListener(this, (observable, i) -> {
             String frameImagePath = ObserverParamMap.staticGetValue(observable , PictureFrameItemVM_frameImagePath);
             Integer selectPosition = ObserverParamMap.staticGetValue(observable , PictureFrameItemVM_mPosition);
             mInsertImagePath.set(frameImagePath);
@@ -102,10 +101,6 @@ public class PictureFrameMenuVM extends BaseSeekBarRecycleViewVM<PictureFrameMen
     public void stop() {
         super.stop();
         runInsertImage();
-        if (mSelectedPosition.get() >= 0) {
-            mDataItemList.get(mSelectedPosition.get()).isSelected.set(false);
-            mSelectedPosition.set(-1);
-        }
     }
 
     private void runInsertImage() {
@@ -129,15 +124,13 @@ public class PictureFrameMenuVM extends BaseSeekBarRecycleViewVM<PictureFrameMen
     }
 
     public static class PictureFrameItemVM extends ItemBaseVM {
-        public static final String TAG = "何时夕:PictureTextItemVM";
+        public static final String TAG = "何时夕:PictureFilterItemVM";
 
         public static final int ITEM_PICTURE_RESIZE_WIDTH = 80;
         public static final int ITEM_PICTURE_RESIZE_HEIGHT = 80;
 
         private boolean isAdd = false;
-        private final Integer mPosition;
 
-        public final ObservableField<Boolean> isSelected=new ObservableField<>();
         public final ObservableField<String> mImageUri=new ObservableField<>();
 
         public PictureFrameItemVM(List<ObservableField<? super Object>> clickItemListenerList , String imageUri , Integer position , boolean isAdd) {
@@ -150,26 +143,23 @@ public class PictureFrameMenuVM extends BaseSeekBarRecycleViewVM<PictureFrameMen
             initDefaultUIActionManager();
 
             mImageUri.set(imageUri);
-            mPosition = position;
-            isSelected.set(false);
             initClick();
         }
 
         private void initClick() {
             getDefaultClickThrottleFlowable()
                     .filter(position -> {
-                        MyLog.d(TAG, "initClickAction", "状态:isAdd", "判断当前的item是否是 add" , isAdd);
+                        MyLog.d(TAG, "initClick", "状态:isAdd", "判断当前的item是否是 add" , isAdd);
                         return !isAdd;
                     }).map(position -> {
                         String frameImagePath = Uri.parse(mImageUri.get()).getPath();
-                        MyLog.d(TAG, "apply", "状态:position:frameImagePath:", "" , position , frameImagePath);
+                        MyLog.d(TAG, "initClick", "状态:position:frameImagePath:", "" , position , frameImagePath);
                         return frameImagePath;
                     }).subscribe(frameImagePath -> {
-                        MyLog.d(TAG, "accept", "状态:frameImagePath:mPosition:", "结束了为图片添加图片框" , frameImagePath , mPosition);
-                        isSelected.set(true);
-                        mEventListenerList.get(CLICK_ITEM).set(ObserverParamMap
-                                        .staticSet(PictureFrameItemVM_mPosition , mPosition)
-                                        .set(PictureFrameItemVM_frameImagePath , frameImagePath));
+                        ObserverParamMap observerParamMap = getPositionParamMap()
+                                .set(PictureFrameItemVM_frameImagePath , frameImagePath);
+                        mEventListenerList.get(CLICK_ITEM).set(observerParamMap);
+                        MyLog.d(TAG, "initClick", "状态:observerParamMap:", "结束了为图片添加图片框" , observerParamMap);
                     });
         }
 

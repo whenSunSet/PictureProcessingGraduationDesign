@@ -18,6 +18,9 @@ public interface ObserverMapKey {
     String PictureTextItemVM_mTypefaceName = "mTypefaceName";
     String PictureTextItemVM_mPictureTextParamDialogVM = "mPictureTextParamDialogVM";
     String PictureTextItemVM_mat = "mat";
+    String PictureFilterItemVM_mFilterAction = "mFilterAction";
+    String PictureFilterItemVM_mPosition = "mPosition";
+    String PictureFilterItemVM_mat = "mat";
 
     String PictureItemManagerVM_mPosition = "mPosition";
     String PictureItemManagerVM_mImageUri = "mImageUri";

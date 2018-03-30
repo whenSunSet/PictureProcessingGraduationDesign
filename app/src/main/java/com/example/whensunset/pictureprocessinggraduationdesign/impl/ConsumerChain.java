@@ -87,6 +87,9 @@ public abstract class ConsumerChain<T> implements Chain<T , Mat> {
         }
 
         addConsumers(consumers);
+        if (mPreviousMat != null && mPreviousMat != mFirstMat){
+            mPreviousMat.release();
+        }
         mPreviousMat = mNowMat;
         mNowMat = runConsumers(Arrays.asList(consumers) , mFirstMat);
 
@@ -115,6 +118,9 @@ public abstract class ConsumerChain<T> implements Chain<T , Mat> {
         boolean isNeedRun = nowConsumer.isNeedRun(nextMyConsumer);
         if (isNeedRun) {
             addConsumer(nextMyConsumer);
+            if (mPreviousMat != null && mPreviousMat != mFirstMat) {
+                mPreviousMat.release();
+            }
             mPreviousMat = mNowMat;
             mNowMat = runConsumers(Collections.singletonList(nextMyConsumer) , mNowMat);
         }
@@ -161,6 +167,9 @@ public abstract class ConsumerChain<T> implements Chain<T , Mat> {
             throw new RuntimeException("当前状态不可以 undo");
         }
 
+        if (mNowMat != null && mNowMat != mFirstMat) {
+            mNowMat.release();
+        }
         mNowMat = mPreviousMat;
         if (mConsumerPoint <= 1) {
             // 如果当前 consumer 指针指向 第二个consumer的时候，当撤销了之后，mPreviousMat 应该为null
@@ -200,6 +209,9 @@ public abstract class ConsumerChain<T> implements Chain<T , Mat> {
         }
 
         mConsumerPoint++;
+        if (mPreviousMat != null && mPreviousMat != mFirstMat) {
+            mPreviousMat.release();
+        }
         mPreviousMat = mNowMat;
         mNowMat = runConsumers(Collections.singletonList(getNowConsumer()), mNowMat);
 
@@ -397,6 +409,16 @@ public abstract class ConsumerChain<T> implements Chain<T , Mat> {
     public BaseMyConsumer getNowConsumer() {
         checkState();
         return mConsumerList.get(mConsumerPoint);
+    }
+
+    public Mat getPreviousMat() {
+        // 为了防止被外部释放掉 所以需要进行克隆
+        return mPreviousMat == null ? null : mPreviousMat.clone();
+    }
+
+    public Mat getFirstMat() {
+        // 为了防止被外部释放掉 所以需要进行克隆
+        return mFirstMat == null ? null : mFirstMat.clone();
     }
 
     protected abstract Mat getStartResult(T startParam);

@@ -3,14 +3,16 @@ package com.example.whensunset.pictureprocessinggraduationdesign.base.viewmodel;
 import android.databinding.Observable;
 import android.databinding.ObservableField;
 
-import com.example.whensunset.pictureprocessinggraduationdesign.base.util.MyLog;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.ObservableAction;
-import com.example.whensunset.pictureprocessinggraduationdesign.base.util.ObserverParamMap;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.uiaction.ClickUIAction;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.uiaction.UIActionManager;
+import com.example.whensunset.pictureprocessinggraduationdesign.base.util.MyLog;
+import com.example.whensunset.pictureprocessinggraduationdesign.base.util.ObserverParamMap;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import io.reactivex.Flowable;
 import io.reactivex.functions.Function;
@@ -24,6 +26,7 @@ import static com.example.whensunset.pictureprocessinggraduationdesign.base.uiac
 public abstract class BaseVM {
     public static final String TAG = "何时夕:BaseVM";
 
+    private Map<ObservableField , Observable.OnPropertyChangedCallback> mRegisteredViewModelFiledObserverMap;
     protected final ObservableField<? super Object> mShowToastListener = new ObservableField<>();
     protected final List<ObservableField<? super Object>> mEventListenerList = new ArrayList<>();
     public UIActionManager mUIActionManager;
@@ -52,6 +55,13 @@ public abstract class BaseVM {
 
     }
 
+    protected Flowable<Integer> getDefaultClickThrottleFlowable(int throttleMilliseconds) {
+        return mUIActionManager
+                .<ClickUIAction>getDefaultThrottleFlowable(throttleMilliseconds , CLICK_ACTION)
+                .map(ClickUIAction::getLastEventListenerPosition);
+
+    }
+
     public void showToast(String message) {
         mShowToastListener.set(ObserverParamMap.setToastMessage(message));
     }
@@ -75,7 +85,7 @@ public abstract class BaseVM {
         return getClass().getSimpleName();
     }
 
-    public static void initListener(ChildBaseVM childVM, ObservableAction observableAction, Integer... listenerPositions) {
+    public void initListener(ChildBaseVM childVM, ObservableAction observableAction, Integer... listenerPositions) {
         if (childVM == null) {
             throw new RuntimeException("被监听的childVM为null");
         }
@@ -85,19 +95,42 @@ public abstract class BaseVM {
         if (listenerPositions == null) {
             throw new RuntimeException("被传入的监听器的position列表为null");
         }
+
         // 监听 某个childVM的变化 以运行observableAction
         Flowable.fromArray(listenerPositions)
                 .filter(position -> {
-                    MyLog.d(TAG, "initListener", "状态:position:childVM.mClickListenerList.size():", "过滤监听器", position, childVM.mEventListenerList.size());
-                    return !(position == null || position >= childVM.mEventListenerList.size());
-                }).map((Function<Integer, ObservableField<? super Object>>) childVM.mEventListenerList::get)
-                .subscribe(observableField -> observableField.addOnPropertyChangedCallback(new Observable.OnPropertyChangedCallback() {
-                    @Override
-                    public void onPropertyChanged(Observable observable, int i) {
-                        observableAction.onPropertyChanged(observable, i);
-                    }
-                }));
-
+                    MyLog.d(TAG, "initListener", "状态:position:childVM.mClickListenerList.size():", "过滤监听器", position, childVM.getEventListenerList().size());
+                    return !(position == null || position >= childVM.getEventListenerList().size());
+                }).map((Function<Integer, ObservableField<? super Object>>) childVM.getEventListenerList()::get)
+                .subscribe(observableField -> {
+                    Observable.OnPropertyChangedCallback onPropertyChangedCallback = new Observable.OnPropertyChangedCallback() {
+                        @Override
+                        public void onPropertyChanged(Observable observable, int i) {
+                            observableAction.onPropertyChanged(observable, i);
+                        }
+                    };
+                    registered(observableField , onPropertyChangedCallback);
+                    observableField.addOnPropertyChangedCallback(onPropertyChangedCallback);
+                });
     }
 
+    private void registered(ObservableField observableField , Observable.OnPropertyChangedCallback onPropertyChangedCallback) {
+        if (mRegisteredViewModelFiledObserverMap == null) {
+            mRegisteredViewModelFiledObserverMap = new HashMap<>();
+        }
+        mRegisteredViewModelFiledObserverMap.put(observableField , onPropertyChangedCallback);
+    }
+
+    public void onDestroy() {
+        if (mRegisteredViewModelFiledObserverMap != null) {
+            for (ObservableField observableField : mRegisteredViewModelFiledObserverMap.keySet()) {
+                observableField.removeOnPropertyChangedCallback(mRegisteredViewModelFiledObserverMap.get(observableField));
+            }
+            mRegisteredViewModelFiledObserverMap.clear();
+        }
+    }
+
+    public boolean isNeedDestroy() {
+        return true;
+    }
 }

@@ -66,7 +66,7 @@ public class PictureTextParamDialogVM extends ChildBaseVM{
         mFinalTextSizeProgress = mTextSizeProgress.get();
         mFinalTextColorRGBProgress = mTextColorRGBProgress.get();
         mFinalTextColorWBProgress = mTextColorWBProgress.get();
-        mEventListenerList.get(STOP_TEXT_PARAM_DIALOG_VM).notifyChange();
+        mEventListenerList.get(STOP_TEXT_PARAM_DIALOG_VM).set(null);
     }
 
     @Override

@@ -3,17 +3,15 @@ package com.example.whensunset.pictureprocessinggraduationdesign.viewModel.inclu
 import android.databinding.ObservableField;
 import android.graphics.Color;
 import android.graphics.Rect;
+import android.text.TextUtils;
 
 import com.example.whensunset.pictureprocessinggraduationdesign.BR;
 import com.example.whensunset.pictureprocessinggraduationdesign.R;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.BaseSeekBarRecycleViewVM;
-import com.example.whensunset.pictureprocessinggraduationdesign.base.IImageUriFetch;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.ITypefaceFetch;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.util.MyLog;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.util.ObserverParamMap;
-import com.example.whensunset.pictureprocessinggraduationdesign.base.viewmodel.BaseVM;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.viewmodel.ItemBaseVM;
-import com.example.whensunset.pictureprocessinggraduationdesign.impl.LocalFrameImageUriFetch;
 import com.example.whensunset.pictureprocessinggraduationdesign.mete.CutView;
 import com.example.whensunset.pictureprocessinggraduationdesign.mete.MoveFrameLayout;
 import com.example.whensunset.pictureprocessinggraduationdesign.pictureProcessing.PictureFrameMyConsumer;
@@ -37,9 +35,9 @@ import static com.example.whensunset.pictureprocessinggraduationdesign.viewModel
 public class PictureTextMenuVM extends BaseSeekBarRecycleViewVM<PictureTextMenuVM.PictureTextItemVM>  implements CutView.OnLimitMaxRectChangeListener , MoveFrameLayout.OnPlaceChangedListener {
     public static final String TAG = "何时夕:PictureTextMenuVM";
 
-    private final IImageUriFetch mLocalFrameImageUriFetch = LocalFrameImageUriFetch.getInstance();
     private final StringConsumerChain mStringConsumerChain = StringConsumerChain.getInstance();
     private PictureTextParamDialogVM mPictureTextParamDialogVM = new PictureTextParamDialogVM("默认");
+    public final ObservableField<String> mText = new ObservableField<>();
     public final ObservableField<String> mNowTypeface = new ObservableField<>("默认");
     public final ObservableField<Integer> mTextColor = new ObservableField<>(Color.BLACK);
     public final ObservableField<Integer> mTextSize = new ObservableField<>(20);
@@ -59,17 +57,17 @@ public class PictureTextMenuVM extends BaseSeekBarRecycleViewVM<PictureTextMenuV
 
     @Override
     protected void initClick() {
-        BaseVM.initListener(this, (observable, i) -> {
+        initListener(this, (observable, i) -> {
             String typefaceName = ObserverParamMap.staticGetValue(observable , PictureTextItemVM_mTypefaceName);
             mNowTypeface.set(typefaceName);
             MyLog.d(TAG, "initClick", "状态:typefaceName:", "更新typeface" , typefaceName);
-        }, CLICK_ITEM);
+        } , CLICK_ITEM);
 
-        BaseVM.initListener(mPictureTextParamDialogVM, (observable, i) -> {
+        initListener(mPictureTextParamDialogVM, (observable, i) -> {
             mTextColor.set(mPictureTextParamDialogVM.getFinalTextColor());
             mTextSize.set(mPictureTextParamDialogVM.getFinalTextSize());
             MyLog.d(TAG, "initClick", "状态:mTextColor:mTextSize:", "重新设置被插入文字的颜色和大小" , mTextColor.get() , mTextSize.get());
-        }, STOP_TEXT_PARAM_DIALOG_VM);
+        } , STOP_TEXT_PARAM_DIALOG_VM);
     }
 
     @Override
@@ -80,6 +78,7 @@ public class PictureTextMenuVM extends BaseSeekBarRecycleViewVM<PictureTextMenuV
     @Override
     public void resume() {
         super.resume();
+        mText.set("");
     }
 
     @Override
@@ -93,8 +92,12 @@ public class PictureTextMenuVM extends BaseSeekBarRecycleViewVM<PictureTextMenuV
             showToast("被添加的文字超出图片界限，无法插入文字！");
             return;
         }
+        if (TextUtils.isEmpty(mText.get())) {
+            MyLog.d(TAG, "runInsertText", "状态:", "要插入的文字为空，不需要插入");
+            return;
+        }
 
-        mEventListenerList.get(LEAVE_BSBRV_VM_LISTENER).notifyChange();
+        mEventListenerList.get(LEAVE_BSBRV_VM_LISTENER).set(null);
         org.opencv.core.Rect opencvRect = new org.opencv.core.Rect();
         opencvRect.x = (int) ((mEditTextRect.left - mNowLimitMaxRect.left) / mZoomCoefficient);
         opencvRect.y = (int) ((mEditTextRect.top - mNowLimitMaxRect.top) / mZoomCoefficient);
@@ -102,6 +105,8 @@ public class PictureTextMenuVM extends BaseSeekBarRecycleViewVM<PictureTextMenuV
         opencvRect.height = (int) ((mEditTextRect.bottom - mEditTextRect.top) / mZoomCoefficient);
 
         PictureFrameMyConsumer consumer = new PictureFrameMyConsumer(FONT_EDIT_VIEW_IMAGE , opencvRect);
+        MyLog.d(TAG, "runInsertText", "状态:mNowLimitMaxRect:mEditTextRect:mZoomCoefficient:opencvRect:", "插入文字" , mNowLimitMaxRect , mEditTextRect , mZoomCoefficient , opencvRect);
+
         mStringConsumerChain
                 .rxRunNextConvenient(consumer)
                 .subscribe(mat -> mEventListenerList.get(LEAVE_BSBRV_VM_LISTENER).set(ObserverParamMap.staticSet(PictureTextItemVM_mat , mat)));
@@ -126,7 +131,7 @@ public class PictureTextMenuVM extends BaseSeekBarRecycleViewVM<PictureTextMenuV
     }
 
     public static class PictureTextItemVM extends ItemBaseVM {
-        public static final String TAG = "何时夕:PictureTextItemVM";
+        public static final String TAG = "何时夕:PictureFilterItemVM";
 
         private boolean isAdd = false;
         public ObservableField<String> mTypefaceName = new ObservableField<>();
@@ -153,17 +158,17 @@ public class PictureTextMenuVM extends BaseSeekBarRecycleViewVM<PictureTextMenuV
                         return !isAdd;
                     }).subscribe(clickPosition -> {
                         mPictureTextParamDialogVM.mTypefaceName.set(mTypefaceName.get());
-                        ObserverParamMap observerParamMap = ObserverParamMap
-                                .staticSet(PictureTextItemVM_mTypefaceName , mTypefaceName.get())
+                        ObserverParamMap observerParamMap = getPositionParamMap()
+                                .set(PictureTextItemVM_mTypefaceName , mTypefaceName.get())
                                 .set(PictureTextItemVM_mPictureTextParamDialogVM , mPictureTextParamDialogVM);
                         mEventListenerList.get(CLICK_ITEM).set(observerParamMap);
-                        MyLog.d(TAG, "accept", "状态:observerParamMap:clickPosition:mPosition:mTypefaceName:", "" , observerParamMap , clickPosition , mPosition , mTypefaceName.get());
+                        MyLog.d(TAG, "accept", "状态:observerParamMap:clickPosition:", "" , observerParamMap , clickPosition );
                     });
         }
 
         @Override
         public String toString() {
-            return "PictureTextItemVM{" +
+            return "PictureFilterItemVM{" +
                     "isAdd=" + isAdd +
                     ", mPosition=" + mPosition +
                     '}';

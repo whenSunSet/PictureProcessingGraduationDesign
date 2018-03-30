@@ -142,6 +142,11 @@ public class PictureParamMenuVM extends ChildBaseVM{
     }
 
     public void fresh() {
+        MyLog.d(TAG, "fresh", "状态:isResume:" , isResume());
+        if (!isResume()) {
+            return;
+        }
+
         BaseMyConsumer consumer = mStringConsumerChain.getNowConsumer();
 
         if (consumer instanceof PictureParamMyConsumer) {

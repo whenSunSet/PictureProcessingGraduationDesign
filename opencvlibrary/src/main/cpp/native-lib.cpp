@@ -308,7 +308,104 @@ void adjustHSL(Mat& img, Mat& aImg, int  hue, int saturation, int lightness)
 
 }
 
-void resize(Mat& in , Mat& out , int width , int height) {
+void filterRelief(Mat& in, Mat& out) {
+    //读入图像
+    Mat src = in;
+    Mat img0(src.size(),CV_8UC3);
+    for (int y=1; y<src.rows-1; y++) {
+        uchar *p0 = src.ptr<uchar>(y);
+        uchar *p1 = src.ptr<uchar>(y + 1);
+
+        uchar *q0 = img0.ptr<uchar>(y);
+        for (int x = 1; x < src.cols - 1; x++) {
+            for (int i = 0; i < 3; i++) {
+                int tmp0 = p1[3 * (x + 1) + i] - p0[3 * (x - 1) + i] + 128;//浮雕
+                if (tmp0 < 0)
+                    q0[3 * x + i] = 0;
+                else if (tmp0 > 255)
+                    q0[3 * x + i] = 255;
+                else
+                    q0[3 * x + i] = tmp0;
+
+            }
+        }
+    }
+    out = img0;
 }
 
+void carvingFilter(Mat& in, Mat& out) {
+    Mat src = in;
+    Mat img1(src.size(),CV_8UC3);
+    for (int y=1; y<src.rows-1; y++)
+    {
+        uchar *p0 = src.ptr<uchar>(y);
+        uchar *p1 = src.ptr<uchar>(y+1);
 
+        uchar *q1 = img1.ptr<uchar>(y);
+        for (int x=1; x<src.cols-1; x++)
+        {
+            for (int i=0; i<3; i++)
+            {
+                int tmp1 = p0[3*(x-1)+i]-p1[3*(x+1)+i]+128;//雕刻
+                if (tmp1<0)
+                    q1[3*x+i]=0;
+                else if(tmp1>255)
+                    q1[3*x+i]=255;
+                else
+                    q1[3*x+i]=tmp1;
+            }
+        }
+    }
+    out = img1;
+}
+
+void nostalgiaFilter(Mat& in, Mat& out){
+    in.copyTo(out);
+
+    int rowNum = out.rows;
+    int colNum = out.cols;
+
+    for(int j = 0;j<rowNum;j++){
+        uchar* data = out.ptr<uchar>(j);
+        for(int i = 0;i<colNum;i++){
+            int b = data[i*3];
+            int g = data[i*3+1];
+            int r = data[i*3+2];
+
+            int R = static_cast<int>(0.393*r + 0.769*g + 0.189*b);
+            int G = static_cast<int>(0.349*r + 0.686*g + 0.168*b);
+            int B = static_cast<int>(0.272*r + 0.534*g + 0.131*b);
+
+            data[i*3+2] = max(0,min(R,255));
+            data[i*3+1] = max(0,min(G,255));
+            data[i*3] = max(0,min(B,255));
+        }
+    }
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_example_whensunset_pictureprocessinggraduationdesign_pictureProcessing_filteraction_ReliefFilterAction_filterRelief(
+        JNIEnv *env, jobject instance, jlong in, jlong out) {
+
+    Mat& oldMat = *(Mat *) in;
+    Mat& newMat = *(Mat *) out;
+    filterRelief(oldMat , newMat);
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_example_whensunset_pictureprocessinggraduationdesign_pictureProcessing_filteraction_CarvingFilterAction_filterCarving(
+        JNIEnv *env, jobject instance, jlong in, jlong out) {
+    Mat& oldMat = *(Mat *) in;
+    Mat& newMat = *(Mat *) out;
+    carvingFilter(oldMat , newMat);
+}extern "C"
+JNIEXPORT void JNICALL
+Java_com_example_whensunset_pictureprocessinggraduationdesign_pictureProcessing_filteraction_NostalgiaFilterAction_filterNostalgia(
+        JNIEnv *env, jobject instance, jlong in, jlong out) {
+
+    Mat& oldMat = *(Mat *) in;
+    Mat& newMat = *(Mat *) out;
+    nostalgiaFilter(oldMat , newMat);
+}

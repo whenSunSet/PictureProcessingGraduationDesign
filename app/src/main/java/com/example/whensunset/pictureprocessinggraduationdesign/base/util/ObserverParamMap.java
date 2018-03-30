@@ -34,6 +34,7 @@ public class ObserverParamMap {
         }
         ObserverParamMap observerParamMap = new ObserverParamMap();
         observerParamMap.mObjectMap.put(key , value);
+
         return observerParamMap;
     }
 
@@ -95,5 +96,22 @@ public class ObserverParamMap {
         }
 
         return v;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("ObserverParamMap{");
+        stringBuilder.append("mObjectMap=[");
+        for (Object o : mObjectMap.keySet()) {
+            stringBuilder.append("key:");
+            stringBuilder.append(o.toString());
+            stringBuilder.append(",");
+            stringBuilder.append("value:");
+            stringBuilder.append(mObjectMap.get(o).toString());
+            stringBuilder.append("  ");
+        }
+        stringBuilder.append("]}");
+        return stringBuilder.toString();
     }
 }

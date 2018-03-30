@@ -49,6 +49,7 @@ public class DirectorySpinnerItemManagerVM extends ItemManagerBaseVM<DirectorySp
                     Integer selectedPosition = itemSelectedUIAction.getSelectedItemPosition();
                     Integer eventListenerPosition = itemSelectedUIAction.getLastEventListenerPosition();
                     String directoryName = mDataItemList.get(selectedPosition).mDirectoryName;
+
                     ObserverParamMap observerParamMap = ObserverParamMap
                             .staticSet(DirectorySpinnerItemManagerVM_directoryName , directoryName)
                             .set(ItemBaseVM_mPosition , selectedPosition);

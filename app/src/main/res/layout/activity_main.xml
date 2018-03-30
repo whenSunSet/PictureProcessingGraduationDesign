@@ -33,8 +33,8 @@
                 app:popupTheme="@style/AppTheme.PopupOverlay" >
 
                 <Spinner
-                    android:entries="@{viewModel.mDirectorySpinnerItemManagerVM.mDataItemList}"
-                    android:onItemSelected="@{(parent, view, position, id) -> viewModel.mDirectorySpinnerItemManagerVM.mUIActionManager.doItemSelected(DirectorySpinnerItemManagerVM.CLICK_ITEM , position)}"
+                    android:entries="@{viewModel.getDirectorySpinnerItemManagerVM().mDataItemList}"
+                    android:onItemSelected="@{(parent, view, position, id) -> viewModel.getDirectorySpinnerItemManagerVM().mUIActionManager.doItemSelected(DirectorySpinnerItemManagerVM.CLICK_ITEM , position)}"
                     android:id="@+id/directory_spinner"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent">
@@ -54,8 +54,8 @@
 
             bind:layoutManager="@{LayoutManager.grid(3)}"
             bind:itemDecor="@{ItemDecoration.defaultItemDecoration()}"
-            bind:itemView="@{viewModel.mPictureItemManager.mViewSelector}"
-            bind:items="@{viewModel.mPictureItemManager.mDataItemList}">
+            bind:itemView="@{viewModel.getPictureItemManagerVM().mViewSelector}"
+            bind:items="@{viewModel.getPictureItemManagerVM().mDataItemList}">
         </android.support.v7.widget.RecyclerView>
 
     </LinearLayout>

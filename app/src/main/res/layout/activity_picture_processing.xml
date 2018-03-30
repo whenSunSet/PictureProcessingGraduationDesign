@@ -80,14 +80,14 @@
                 android:layout_height="match_parent"
                 android:layout_width="match_parent"
 
-                bind:insertImagePath="@{viewModel.mPictureFrameMenuVM.mInsertImagePath}"
+                bind:insertImagePath="@{viewModel.getPictureFrameMenuVM().mInsertImagePath}"
                 bind:onLimitRectChangedListener="@{viewModel.mCutViewListener}"
-                bind:onLimitMaxRectChangedListener="@{viewModel.mPictureTextMenuVM}"
+                bind:onLimitMaxRectChangedListener="@{viewModel.getPictureTextMenuVM()}"
                 bind:model="@{viewModel.mCutViewModel}"
                 bind:bitmap="@{viewModel.mImageBitMap}"/>
 
             <com.example.whensunset.pictureprocessinggraduationdesign.mete.MoveFrameLayout
-                bind:onPlaceChangedListener="@{viewModel.mPictureTextMenuVM}"
+                bind:onPlaceChangedListener="@{viewModel.getPictureTextMenuVM()}"
                 android:visibility="@{(viewModel.mSelectTab == PictureProcessingActivityVM.SELECT_PICTURE_TEXT) ? View.VISIBLE : View.GONE}"
                 android:background="#00000000"
                 android:layout_width="wrap_content"
@@ -99,24 +99,16 @@
                 <com.example.whensunset.pictureprocessinggraduationdesign.mete.FontEditText
                     android:id="@+id/picture_text_font_edit_view"
                     android:background="#00000000"
-                    bind:typeface="@{viewModel.mPictureTextMenuVM.mNowTypeface}"
-                    android:textColor="@{viewModel.mPictureTextMenuVM.mTextColor}"
-                    android:textSize="@{viewModel.mPictureTextMenuVM.mTextSize}"
+                    android:text="@={viewModel.getPictureTextMenuVM().mText}"
+                    bind:typeface="@{viewModel.getPictureTextMenuVM().mNowTypeface}"
+                    android:textColor="@{viewModel.getPictureTextMenuVM().mTextColor}"
+                    android:textSize="@{viewModel.getPictureTextMenuVM().mTextSize}"
                     android:minWidth="40dp"
                     android:minHeight="40dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
 
             </com.example.whensunset.pictureprocessinggraduationdesign.mete.MoveFrameLayout>
-
-            <TextView
-                android:visibility="@{(viewModel.mSelectTab == PictureProcessingActivityVM.SELECT_PICTURE_PARAM) ? View.VISIBLE : View.GONE}"
-                android:gravity="bottom"
-                android:layout_gravity="center"
-                android:textColor="@color/white"
-                android:text="@{@string/empty + viewModel.mPictureParamMenuVM.mSelectParam}"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent" />
 
         </FrameLayout>
 
@@ -130,14 +122,14 @@
 
             <include
                 layout="@layout/activity_picture_processing_picture_transform_menu"
-                bind:viewModel="@{viewModel.mPictureTransformMenuVM}"
+                bind:viewModel="@{viewModel.getPictureTransformMenuVM()}"
                 android:visibility="@{(viewModel.mSelectTab == PictureProcessingActivityVM.SELECT_PICTURE_TRANSFORM) ? View.VISIBLE : View.GONE}"
                 android:id="@+id/picture_transform_menu">
             </include>
 
             <include
                 layout="@layout/activity_picture_processing_picture_param_menu"
-                bind:viewModel="@{viewModel.mPictureParamMenuVM}"
+                bind:viewModel="@{viewModel.getPictureParamMenuVM()}"
                 android:visibility="@{(viewModel.mSelectTab == PictureProcessingActivityVM.SELECT_PICTURE_PARAM) ? View.VISIBLE : View.GONE}"
                 android:id="@+id/picture_param_menu">
             </include>
@@ -145,8 +137,8 @@
             <include
                 layout="@layout/activity_picture_processing_picture_seekbar_recycleview_menu"
                 bind:viewModel="@{viewModel.mNowBaseSeekBarRecycleViewVM}"
-                android:visibility="@{(viewModel.mSelectTab == PictureProcessingActivityVM.SELECT_PICTURE_FRAME || viewModel.mSelectTab == PictureProcessingActivityVM.SELECT_PICTURE_TEXT) ? View.VISIBLE : View.GONE}"
-                android:id="@+id/picture_frame_menu">
+                android:visibility="@{(viewModel.mSelectTab == PictureProcessingActivityVM.SELECT_PICTURE_FRAME || viewModel.mSelectTab == PictureProcessingActivityVM.SELECT_PICTURE_TEXT || viewModel.mSelectTab == PictureProcessingActivityVM.SELECT_PICTURE_FILTER) ? View.VISIBLE : View.GONE}"
+                android:id="@+id/picture_seekbar_recycleview_menu">
             </include>
 
         </FrameLayout>
