@@ -19,6 +19,8 @@ public interface UIAction {
             ((ItemSelectedUIAction) uiAction).setOnItemChangedListener(listener);
         } else if (uiAction instanceof  ProgressChangedUIAction) {
             ((ProgressChangedUIAction) uiAction).setOnProgressChangedListener(listener);
+        } else if (uiAction instanceof  TextChangedUIAction) {
+            ((TextChangedUIAction) uiAction).setTextChangedListener(listener);
         }
     }
 

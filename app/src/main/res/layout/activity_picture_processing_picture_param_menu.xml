@@ -61,7 +61,7 @@
 
                     bind:bindingRightMargin="@{PictureParamMenuVM.MENU_ITEM_MARGIN}"
 
-                    android:src="@drawable/picture_brightness"
+                    android:src="@{viewModel.mNowSelectListenerPosition == PictureParamMenuVM.SELECT_BRIGHTNESS ? @drawable/picture_brightness_blue : @drawable/picture_brightness}"
                     android:id="@+id/picture_param_brightness_image_view"
                     android:onClick="@{() -> viewModel.mUIActionManager.doClick(PictureParamMenuVM.SELECT_BRIGHTNESS)}"
                     style="@style/PictureProcessingParamTabMenuImageView"/>
@@ -73,7 +73,7 @@
                     bind:bindingLeftMargin="@{PictureParamMenuVM.MENU_ITEM_MARGIN}"
                     bind:bindingRightMargin="@{PictureParamMenuVM.MENU_ITEM_MARGIN}"
 
-                    android:src="@drawable/picture_contrast"
+                    android:src="@{viewModel.mNowSelectListenerPosition == PictureParamMenuVM.SELECT_CONTRAST ? @drawable/picture_contrast_blue : @drawable/picture_contrast}"
                     android:id="@+id/picture_param_contrast_image_view"
                     android:onClick="@{() -> viewModel.mUIActionManager.doClick(PictureParamMenuVM.SELECT_CONTRAST)}"
                     style="@style/PictureProcessingParamTabMenuImageView"/>
@@ -85,7 +85,7 @@
                     bind:bindingLeftMargin="@{PictureParamMenuVM.MENU_ITEM_MARGIN}"
                     bind:bindingRightMargin="@{PictureParamMenuVM.MENU_ITEM_MARGIN}"
 
-                    android:src="@drawable/picture_saturation"
+                    android:src="@{viewModel.mNowSelectListenerPosition == PictureParamMenuVM.SELECT_SATURATION ? @drawable/picture_saturation_blue : @drawable/picture_saturation}"
                     android:id="@+id/picture_param_saturation_image_view"
                     android:onClick="@{() -> viewModel.mUIActionManager.doClick(PictureParamMenuVM.SELECT_SATURATION)}"
                     style="@style/PictureProcessingParamTabMenuImageView"/>
@@ -96,7 +96,7 @@
 
                     bind:bindingLeftMargin="@{PictureParamMenuVM.MENU_ITEM_MARGIN}"
 
-                    android:src="@drawable/picture_transform_cut"
+                    android:src="@{viewModel.mNowSelectListenerPosition == PictureParamMenuVM.SELECT_TONAL ? @drawable/picture_tonal_blue : @drawable/picture_tonal}"
                     android:id="@+id/picture_param_tonal_image_view"
                     android:onClick="@{() -> viewModel.mUIActionManager.doClick(PictureParamMenuVM.SELECT_TONAL)}"
                     style="@style/PictureProcessingParamTabMenuImageView"/>
@@ -114,6 +114,7 @@
                     bind:bindingHeight="@{PictureParamMenuVM.MENU_ITEM_HEIGHT}"
 
                     bind:bindingRightMargin="@{PictureParamMenuVM.MENU_ITEM_MARGIN}"
+                    android:textColor="@{viewModel.mNowSelectListenerPosition == PictureParamMenuVM.SELECT_BRIGHTNESS ? @color/blue : @color/white}"
                     android:text="@string/brightness"/>
 
                 <TextView
@@ -124,6 +125,7 @@
                     bind:bindingRightMargin="@{PictureParamMenuVM.MENU_ITEM_MARGIN}"
                     bind:bindingLeftMargin="@{PictureParamMenuVM.MENU_ITEM_MARGIN}"
 
+                    android:textColor="@{viewModel.mNowSelectListenerPosition == PictureParamMenuVM.SELECT_CONTRAST ? @color/blue : @color/white}"
                     android:text="@string/contrast"/>
 
                 <TextView
@@ -134,6 +136,7 @@
                     bind:bindingRightMargin="@{PictureParamMenuVM.MENU_ITEM_MARGIN}"
                     bind:bindingLeftMargin="@{PictureParamMenuVM.MENU_ITEM_MARGIN}"
 
+                    android:textColor="@{viewModel.mNowSelectListenerPosition == PictureParamMenuVM.SELECT_SATURATION ? @color/blue : @color/white}"
                     android:text="@string/saturation"/>
 
                 <TextView
@@ -141,6 +144,7 @@
                     bind:bindingWidth="@{PictureParamMenuVM.MENU_ITEM_WIDTH}"
                     bind:bindingHeight="@{PictureParamMenuVM.MENU_ITEM_HEIGHT}"
 
+                    android:textColor="@{viewModel.mNowSelectListenerPosition == PictureParamMenuVM.SELECT_TONAL ? @color/blue : @color/white}"
                     bind:bindingLeftMargin="@{PictureParamMenuVM.MENU_ITEM_MARGIN}"
                     android:text="@string/tonal"/>
 

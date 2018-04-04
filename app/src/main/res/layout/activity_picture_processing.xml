@@ -7,6 +7,7 @@
     <data class = 'com.example.whensunset.pictureprocessinggraduationdesign.ui.PictureProcessingActivityBinding'>
         <import type="android.view.View"/>
         <import type="com.example.whensunset.pictureprocessinggraduationdesign.viewModel.PictureProcessingActivityVM"/>
+        <import type="com.example.whensunset.pictureprocessinggraduationdesign.viewModel.includeLayoutVM.PictureTextMenuVM"/>
         <import type="com.example.whensunset.pictureprocessinggraduationdesign.dataBindingUtil.BindingUtils"/>
         <import type="android.support.v7.widget.RecyclerView"/>
         <import type="com.example.whensunset.pictureprocessinggraduationdesign.dataBindingUtil.LayoutManager"/>
@@ -43,7 +44,27 @@
                        android:layout_height="20dp" />
 
                    <ImageView
+                       android:src="@drawable/picture_no"
+                       android:visibility="@{viewModel.mIsShowYesNo ? View.VISIBLE : View.GONE}"
+                       android:onClick="@{() -> viewModel.mUIActionManager.doClick(PictureProcessingActivityVM.CLICK_NO)}"
+                       android:layout_centerVertical="true"
+                       android:id="@+id/no"
+                       android:layout_toLeftOf="@id/yes"
+                       android:layout_width="40dp"
+                       android:layout_height="20dp" />
+
+                   <ImageView
+                       android:src="@drawable/picture_yes"
+                       android:visibility="@{viewModel.mIsShowYesNo ? View.VISIBLE : View.GONE}"
+                       android:onClick="@{() -> viewModel.mUIActionManager.doClick(PictureProcessingActivityVM.CLICK_YES)}"
+                       android:layout_centerInParent="true"
+                       android:id="@+id/yes"
+                       android:layout_width="40dp"
+                       android:layout_height="20dp" />
+
+                   <ImageView
                        android:src="@{viewModel.mCanUndo ? @drawable/undo_white : @drawable/undo_gray}"
+                       android:visibility="@{viewModel.mIsShowYesNo ? View.GONE : View.VISIBLE}"
                        android:clickable="@{viewModel.mCanUndo}"
                        android:onClick="@{() -> viewModel.mUIActionManager.doClick(PictureProcessingActivityVM.CLICK_UNDO)}"
                        android:layout_centerVertical="true"
@@ -54,6 +75,7 @@
 
                    <ImageView
                        android:src="@{viewModel.mCanRedo ? @drawable/redo_white : @drawable/redo_gray}"
+                       android:visibility="@{viewModel.mIsShowYesNo ? View.GONE : View.VISIBLE}"
                        android:clickable="@{viewModel.mCanRedo}"
                        android:onClick="@{() -> viewModel.mUIActionManager.doClick(PictureProcessingActivityVM.CLICK_REDO)}"
                        android:layout_centerVertical="true"
@@ -101,6 +123,7 @@
                     android:background="#00000000"
                     android:text="@={viewModel.getPictureTextMenuVM().mText}"
                     bind:typeface="@{viewModel.getPictureTextMenuVM().mNowTypeface}"
+                    android:onTextChanged="@{(s, start, before, count) -> viewModel.getPictureTextMenuVM().mUIActionManager.doTextChanged(PictureTextMenuVM.TEXT_CHANGE , s)}"
                     android:textColor="@{viewModel.getPictureTextMenuVM().mTextColor}"
                     android:textSize="@{viewModel.getPictureTextMenuVM().mTextSize}"
                     android:minWidth="40dp"
@@ -129,7 +152,7 @@
 
             <include
                 layout="@layout/activity_picture_processing_picture_param_menu"
-                bind:viewModel="@{viewModel.getPictureParamMenuVM()}"
+                bind:viewModel="@{viewModel.getPictureParamMenuVM()æ}"
                 android:visibility="@{(viewModel.mSelectTab == PictureProcessingActivityVM.SELECT_PICTURE_PARAM) ? View.VISIBLE : View.GONE}"
                 android:id="@+id/picture_param_menu">
             </include>

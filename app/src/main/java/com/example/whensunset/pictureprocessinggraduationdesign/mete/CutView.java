@@ -265,9 +265,9 @@ public class CutView extends PinchImageView {
         mPaint.setStyle(Paint.Style.STROKE);
 
         if (mLimitMaxRect.contains(mLimitRect)) {
-            canvas.drawRect(mLimitRect , mPaint);
+            drawSudoku(mLimitRect , canvas);
         } else {
-            canvas.drawRect(mLimitMaxRect , mPaint);
+            drawSudoku(mLimitMaxRect , canvas);
         }
 
         MyLog.d(TAG, "drawCutMask", "状态:width:height:mLimitMaxRect:mLimitRect:", "进入绘制剪切图片界面的蒙板");
@@ -280,15 +280,41 @@ public class CutView extends PinchImageView {
             mPaint.setStyle(Paint.Style.STROKE);
 
             if (mLimitMaxRect.contains(mLimitRect)) {
-                canvas.drawRect(mLimitRect , mPaint);
+                drawSudoku(mLimitRect , canvas);
                 canvas.drawBitmap(BitmapFactory.decodeFile(mInsertImagePath) , null , mLimitRect , mPaint);
 
             } else {
-                canvas.drawRect(mLimitMaxRect , mPaint);
+                drawSudoku(mLimitMaxRect , canvas);
                 canvas.drawBitmap(BitmapFactory.decodeFile(mInsertImagePath) , null , mLimitRect , mPaint);
             }
         }
         MyLog.d(TAG, "drawInsertImageMask", "状态:mInsertImagePath:mLimitMaxRect:mLimitRect:", "进入绘制插入图片界面的蒙板" , mInsertImagePath , mLimitMaxRect , mLimitRect);
+    }
+
+    private void drawSudoku(Rect rect , Canvas canvas) {
+        canvas.drawRect(mLimitRect , mPaint);
+        PointF wOne = new PointF();
+        PointF wTwo = new PointF();
+
+        PointF hOne = new PointF();
+        PointF hTwo = new PointF();
+
+        wOne.x = rect.left + rect.width() / 3;
+        wOne.y = rect.top;
+
+        wTwo.x = rect.left + (rect.width() / 3) * 2;
+        wTwo.y = rect.top;
+
+        hOne.x = rect.left;
+        hOne.y = rect.top + rect.height() / 3;
+
+        hTwo.x = rect.left;
+        hTwo.y = rect.top + (rect.height() / 3) * 2;
+
+        canvas.drawLine(wOne.x , wOne.y , wOne.x , rect.bottom , mPaint);
+        canvas.drawLine(wTwo.x , wTwo.y , wTwo.x , rect.bottom , mPaint);
+        canvas.drawLine(hOne.x , hOne.y , rect.right , hOne.y , mPaint);
+        canvas.drawLine(hTwo.x , hTwo.y , rect.right , hTwo.y , mPaint);
     }
 
     private void getImgDisplaySize() {

@@ -164,8 +164,6 @@ int imageCrop(InputArray src, OutputArray dst, Rect rect)
 {
     Mat input = src.getMat();
     if( input.empty() ) {
-
-
         return -1;
     }
 
@@ -181,7 +179,7 @@ int imageCrop(InputArray src, OutputArray dst, Rect rect)
 
     try {
         //复制源图像的剪切区域 到结果图像
-        input(rect).copyTo( output );
+        input(rect).copyTo(output);
         return 0;
     } catch (...) {
         return -3;

@@ -7,7 +7,7 @@ import com.example.whensunset.pictureprocessinggraduationdesign.base.util.MyLog;
  */
 
 public class ProgressChangedUIAction extends BaseUIAction{
-    String TAG = "何时夕:ProgressChangedUIAction";
+    public static final String TAG = "何时夕:ProgressChangedUIAction";
     private UIActionListener<ProgressChangedUIAction> mOnProgressChangedListener = null;
     private int mProgress = Integer.MIN_VALUE;
 

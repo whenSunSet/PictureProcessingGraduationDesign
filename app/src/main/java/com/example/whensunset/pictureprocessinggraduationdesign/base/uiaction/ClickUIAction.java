@@ -16,7 +16,7 @@ public class ClickUIAction extends BaseUIAction {
         if (mOnClickListener != null) {
             mOnClickListener.onUIActionChanged(this);
         }
-        MyLog.d(TAG, "onClick", "状态:eventListenerPosition:", "触发了点击事件监听器", eventListenerPosition);
+        MyLog.d(TAG, "onTextChanged", "状态:eventListenerPosition:", "触发了点击事件监听器", eventListenerPosition);
     }
 
 

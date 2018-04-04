@@ -35,8 +35,8 @@ public class PictureTextParamDialogVM extends ChildBaseVM{
     public ObservableField<String> mTypefaceName = new ObservableField<>();
 
     private int mFinalTextColor = Color.BLACK;
-    private int mFinalTextSize = 10;
-    private int mFinalTextSizeProgress = 10;
+    private int mFinalTextSize = 20;
+    private int mFinalTextSizeProgress = 20;
     private int mFinalTextColorRGBProgress = 128;
     private int mFinalTextColorWBProgress = 128;
 
@@ -66,7 +66,9 @@ public class PictureTextParamDialogVM extends ChildBaseVM{
         mFinalTextSizeProgress = mTextSizeProgress.get();
         mFinalTextColorRGBProgress = mTextColorRGBProgress.get();
         mFinalTextColorWBProgress = mTextColorWBProgress.get();
-        mEventListenerList.get(STOP_TEXT_PARAM_DIALOG_VM).set(null);
+        ObservableField<? extends Object> observableField = mEventListenerList.get(STOP_TEXT_PARAM_DIALOG_VM);
+        observableField.set(null);
+        observableField.notifyChange();
     }
 
     @Override

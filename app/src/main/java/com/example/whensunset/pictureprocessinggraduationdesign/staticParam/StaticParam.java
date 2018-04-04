@@ -9,4 +9,6 @@ import com.example.whensunset.pictureprocessinggraduationdesign.base.util.MyUtil
 
 public interface StaticParam {
     String FONT_EDIT_VIEW_IMAGE = MyUtil.getCacheDirectory(PictureProcessingApplication.getAppContext(), "").getPath() + "/picture_text_font_edit_view.png";
+    String PICTURE_FILTER_SAMPLE_IMAGE = MyUtil.getCacheDirectory(PictureProcessingApplication.getAppContext(), "").getPath() + "/picture_filter_sample_image.jpg";
+    String PICTURE_FRAME_ADD = MyUtil.getCacheDirectory(PictureProcessingApplication.getAppContext(), "").getPath() + "/picture_frame_add.png";
 }

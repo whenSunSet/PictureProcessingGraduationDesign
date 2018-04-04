@@ -12,6 +12,7 @@ import com.example.whensunset.pictureprocessinggraduationdesign.base.viewmodel.I
 import com.example.whensunset.pictureprocessinggraduationdesign.pictureProcessing.PictureFilterMyConsumer;
 import com.example.whensunset.pictureprocessinggraduationdesign.pictureProcessing.StringConsumerChain;
 import com.example.whensunset.pictureprocessinggraduationdesign.pictureProcessing.filteraction.FilterAction;
+import com.example.whensunset.pictureprocessinggraduationdesign.staticParam.StaticParam;
 
 import org.opencv.core.Mat;
 
@@ -33,11 +34,12 @@ public class PictureFilterMenuVM extends BaseSeekBarRecycleViewVM<PictureFilterM
 
     private final StringConsumerChain mStringConsumerChain = StringConsumerChain.getInstance();
     private final String mSampleImageUri;
-    private Boolean isRunNow = false;
+    private boolean isRunNow = false;
 
     public PictureFilterMenuVM() {
         super(3 , BR.viewModel , R.layout.activity_picture_processing_picture_filter_item);
-        mSampleImageUri = Uri.fromFile(new File("/storage/emulated/0/Download/055123530.jpg")).toString();
+
+        mSampleImageUri = Uri.fromFile(new File(StaticParam.PICTURE_FILTER_SAMPLE_IMAGE)).toString();
         initItemVM();
         initClick();
     }
@@ -58,19 +60,20 @@ public class PictureFilterMenuVM extends BaseSeekBarRecycleViewVM<PictureFilterM
             }
             FilterAction filterAction = ObserverParamMap.staticGetValue(observable , PictureFilterItemVM_mFilterAction);
             PictureFilterMyConsumer pictureFilterMyConsumer = new PictureFilterMyConsumer(filterAction);
-            Flowable<Mat> flowable = null;
+            Flowable<Mat> flowable;
             if (isRunNow) {
                 flowable = mStringConsumerChain.rxRunNowConvenient(pictureFilterMyConsumer);
             } else {
                 flowable = mStringConsumerChain.rxRunNextConvenient(pictureFilterMyConsumer);
                 isRunNow = true;
             }
-
             flowable.subscribe(mat1 -> {
-                ObserverParamMap observerParamMap = ObserverParamMap.staticSet(PictureFilterItemVM_mat , mat1);
+                ObserverParamMap observerParamMap = ObserverParamMap
+                        .staticSet(PictureFilterItemVM_mat , mat1);
                 mEventListenerList.get(CLICK_ITEM).set(observerParamMap);
-                MyLog.d(TAG, "initClick", "状态:observerParamMap:", "" , observerParamMap);
+                MyLog.d(TAG, "useFilter", "状态:observerParamMap:", "" , observerParamMap);
             });
+            MyLog.d(TAG, "initClick", "状态:filterAction:isRunNow:isShowYesNo:", "调用滤镜" , filterAction , isRunNow , true);
         }, CLICK_ITEM);
     }
 
@@ -82,14 +85,12 @@ public class PictureFilterMenuVM extends BaseSeekBarRecycleViewVM<PictureFilterM
     @Override
     public void resume() {
         super.resume();
-    }
-
-    @Override
-    public void stop() {
-        super.stop();
         isRunNow = false;
     }
 
+    public void setRunNow(boolean runNow) {
+        isRunNow = runNow;
+    }
 
     public static class PictureFilterItemVM extends ItemBaseVM {
         public static final String TAG = "何时夕:PictureFilterItemVM";
@@ -117,8 +118,7 @@ public class PictureFilterMenuVM extends BaseSeekBarRecycleViewVM<PictureFilterM
                     .filter(clickPosition -> {
                         MyLog.d(TAG, "initClickAction", "状态:isAdd:mFilterAction", "判断当前的item是否是 add" , isAdd , mFilterAction);
                         return (!isAdd && mFilterAction != null);
-                    })
-                    .subscribe(clickPosition -> {
+                    }).subscribe(clickPosition -> {
                         ObserverParamMap observerParamMap = getPositionParamMap()
                                 .set(PictureFilterItemVM_mFilterAction , mFilterAction);
                         mEventListenerList.get(CLICK_ITEM).set(observerParamMap);

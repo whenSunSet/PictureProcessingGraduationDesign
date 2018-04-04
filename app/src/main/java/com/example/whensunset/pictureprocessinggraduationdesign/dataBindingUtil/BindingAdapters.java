@@ -19,7 +19,6 @@ import com.example.whensunset.pictureprocessinggraduationdesign.mete.ColorPicker
 import com.example.whensunset.pictureprocessinggraduationdesign.mete.CutView;
 import com.example.whensunset.pictureprocessinggraduationdesign.mete.MoveFrameLayout;
 import com.example.whensunset.pictureprocessinggraduationdesign.pictureProcessing.filteraction.FilterAction;
-import com.example.whensunset.pictureprocessinggraduationdesign.pictureProcessing.filteraction.NormalFilterAction;
 import com.facebook.drawee.backends.pipeline.Fresco;
 import com.facebook.drawee.backends.pipeline.PipelineDraweeController;
 import com.facebook.drawee.view.SimpleDraweeView;
@@ -53,7 +52,9 @@ public class BindingAdapters {
         BindingRecyclerViewAdapter<T> adapter = new BindingRecyclerViewAdapter<>(arg);
         if (items!=null)adapter.setItems(items);
         if (animator!=null)recyclerView.setItemAnimator(animator);
-        if (decor!=null)recyclerView.addItemDecoration(decor);
+        if (recyclerView.getItemDecorationAt(0) == null) {
+            recyclerView.addItemDecoration(decor);
+        }
 
         if (itemHeight != 0 || itemWidth != 0) {
             ViewGroup.LayoutParams itemParams = new ViewGroup.LayoutParams(MyUtil.dip2px(itemWidth) , MyUtil.dip2px(itemHeight));
@@ -183,18 +184,16 @@ public class BindingAdapters {
 
             @Override
             public void process(Bitmap bitmap) {
-                if (filterAction != NormalFilterAction.getInstance()) {
-                    Mat oldMat = new Mat();
-                    Mat newMat = new Mat();
+                Mat oldMat = new Mat();
+                Mat newMat = new Mat();
 
-                    filterAction.filter(Imgcodecs.imread(path) , newMat);
-                    Utils.matToBitmap(newMat , bitmap);
+                filterAction.filter(Imgcodecs.imread(path) , newMat);
+                Utils.matToBitmap(newMat , bitmap);
 
-                    MyLog.d(TAG, "setFilterImage", "状态:oldMat:newMat:filterAction:", "在fresco内部使用滤镜处理图片" , oldMat , newMat , filterAction);
+                MyLog.d(TAG, "setFilterImage", "状态:oldMat:newMat:filterAction:", "在fresco内部使用滤镜处理图片" , oldMat , newMat , filterAction);
 
-                    oldMat.release();
-                    newMat.release();
-                }
+                oldMat.release();
+                newMat.release();
             }
         };
 

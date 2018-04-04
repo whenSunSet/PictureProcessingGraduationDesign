@@ -86,12 +86,12 @@ public abstract class ConsumerChain<T> implements Chain<T , Mat> {
             return mNowMat;
         }
 
-        addConsumers(consumers);
         if (mPreviousMat != null && mPreviousMat != mFirstMat){
             mPreviousMat.release();
         }
         mPreviousMat = mNowMat;
         mNowMat = runConsumers(Arrays.asList(consumers) , mFirstMat);
+        addConsumers(consumers);
 
         isStarted = true;
         return mNowMat;
@@ -117,12 +117,13 @@ public abstract class ConsumerChain<T> implements Chain<T , Mat> {
         BaseMyConsumer nowConsumer = getNowConsumer();
         boolean isNeedRun = nowConsumer.isNeedRun(nextMyConsumer);
         if (isNeedRun) {
-            addConsumer(nextMyConsumer);
             if (mPreviousMat != null && mPreviousMat != mFirstMat) {
                 mPreviousMat.release();
             }
             mPreviousMat = mNowMat;
             mNowMat = runConsumers(Collections.singletonList(nextMyConsumer) , mNowMat);
+
+            addConsumer(nextMyConsumer);
         }
         MyLog.d(TAG, "runNext", "状态:isNeedRun:nowConsumer:mNowMat:mPreviousMat:", ""  , isNeedRun , nowConsumer , mNowMat , mPreviousMat);
         return mNowMat;
@@ -137,10 +138,8 @@ public abstract class ConsumerChain<T> implements Chain<T , Mat> {
     public Mat runNow(BaseMyConsumer changeMyConsumer) {
         MyLog.d(TAG, "runNow", "状态:consumer:", "重新运行当前的" , changeMyConsumer);
 
-        checkState();
-
-        if (mConsumerPoint == 0) {
-            throw new RuntimeException("不能重新运行 第一个 consumer");
+        if (!canRunNow(changeMyConsumer)) {
+            throw new RuntimeException("不能重新运行当前consumer");
         }
 
         BaseMyConsumer nowConsumer = getNowConsumer();
@@ -153,7 +152,7 @@ public abstract class ConsumerChain<T> implements Chain<T , Mat> {
         return mNowMat;
     }
 
-    /**
+   /**
      * 撤销当前 consumer 对图片的影响，具体的方法是 每次都undo 都将前面的 consumer 都运行一遍 获取到 mPreviousMat ，为下次undo做准备
      * @return
      */
@@ -219,18 +218,30 @@ public abstract class ConsumerChain<T> implements Chain<T , Mat> {
         return mNowMat;
     }
 
-    public boolean canUndo() {
-        if (mConsumerPoint <= 0) {
-            return false;
+    /**
+     * 取消当前的 consumer
+     * @return
+     */
+    public Mat cancelNowConsumer() {
+        if (!canUndo()) {
+            throw new RuntimeException("不可以取消当前的 consumer");
         }
-        return true;
+        Mat mat = undo();
+        removeAfterUndoRedoPointConsumer();
+        return mat;
+    }
+
+    public boolean canUndo() {
+        return mConsumerPoint > 0;
     }
 
     public boolean canRedo() {
-        if (mConsumerPoint >= (mConsumerList.size() - 1)) {
-            return false;
-        }
-        return true;
+        return mConsumerPoint < (mConsumerList.size() - 1);
+    }
+
+    public boolean canRunNow(BaseMyConsumer changeMyConsumer) {
+        checkState();
+        return getNowConsumer().canRunNow(changeMyConsumer);
     }
 
     /**

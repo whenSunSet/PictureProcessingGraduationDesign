@@ -74,12 +74,24 @@ public abstract class BaseMyConsumer implements MyConsumer<Mat , Mat> {
         return true;
     }
 
+    public boolean canRunNow(BaseMyConsumer nextNowMyConsumer) {
+        MyLog.d(TAG, "canRunNow", "状态:nextNowMyConsumer:", "判断是否可以重新运行当前的consumer" , nextNowMyConsumer);
+
+        if (nextNowMyConsumer == null) {
+            throw new RuntimeException("传入的 consumer 为null");
+        }
+        return false;
+    }
+
     protected abstract Mat onNewResultImpl(Mat oldResult);
 
     protected abstract void onFailureImpl(Throwable t);
 
     protected abstract void onCancellationImpl();
 
+    public String getRealName() {
+        return getClass().getSimpleName();
+    }
 
     protected void onUnhandledException(Exception e) {
         MyLog.d(TAG, "onUnhandledException", "class:e.getMessage():e.toString():" , this.getClass().getName() , e.getMessage() , e.toString());

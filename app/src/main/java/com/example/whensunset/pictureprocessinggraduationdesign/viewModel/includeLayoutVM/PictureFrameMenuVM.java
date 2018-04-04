@@ -5,7 +5,6 @@ import android.net.Uri;
 import android.text.TextUtils;
 
 import com.example.whensunset.pictureprocessinggraduationdesign.BR;
-import com.example.whensunset.pictureprocessinggraduationdesign.PictureProcessingApplication;
 import com.example.whensunset.pictureprocessinggraduationdesign.R;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.BaseSeekBarRecycleViewVM;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.IImageUriFetch;
@@ -20,14 +19,15 @@ import com.example.whensunset.pictureprocessinggraduationdesign.pictureProcessin
 
 import org.opencv.core.Rect;
 
+import java.io.File;
 import java.util.List;
 
 import io.reactivex.Flowable;
 
 import static com.example.whensunset.pictureprocessinggraduationdesign.base.uiaction.UIActionManager.PROGRESS_CHANGED_ACTION;
 import static com.example.whensunset.pictureprocessinggraduationdesign.staticParam.ObserverMapKey.PictureFrameItemVM_frameImagePath;
-import static com.example.whensunset.pictureprocessinggraduationdesign.staticParam.ObserverMapKey.PictureFrameItemVM_mPosition;
 import static com.example.whensunset.pictureprocessinggraduationdesign.staticParam.ObserverMapKey.PictureFrameItemVM_mat;
+import static com.example.whensunset.pictureprocessinggraduationdesign.staticParam.StaticParam.PICTURE_FRAME_ADD;
 
 
 /**
@@ -53,8 +53,7 @@ public class PictureFrameMenuVM extends BaseSeekBarRecycleViewVM<PictureFrameMen
     protected void initItemVM() {
         mDataItemList.clear();
 
-        PictureFrameItemVM firstPictureFrameItemVM = new PictureFrameItemVM(mEventListenerList ,
-                "android.resource://" + PictureProcessingApplication.getAppContext().getPackageName() + "/" +R.drawable.picture_frame_add , 0 , true);
+        PictureFrameItemVM firstPictureFrameItemVM = new PictureFrameItemVM(mEventListenerList , Uri.fromFile(new File(PICTURE_FRAME_ADD)).toString() , 0 , true);
         mDataItemList.add(firstPictureFrameItemVM);
 
         final int[] nowPosition = {1};
@@ -68,15 +67,8 @@ public class PictureFrameMenuVM extends BaseSeekBarRecycleViewVM<PictureFrameMen
     protected void initClick() {
         initListener(this, (observable, i) -> {
             String frameImagePath = ObserverParamMap.staticGetValue(observable , PictureFrameItemVM_frameImagePath);
-            Integer selectPosition = ObserverParamMap.staticGetValue(observable , PictureFrameItemVM_mPosition);
             mInsertImagePath.set(frameImagePath);
 
-            if (mSelectedPosition.get() >= 0) {
-                mDataItemList.get(mSelectedPosition.get()).isSelected.set(false);
-            }
-            mDataItemList.get(selectPosition).isSelected.set(true);
-
-            mSelectedPosition.set(selectPosition);
             MyLog.d(TAG, "initItemListener", "状态:selectPosition:frameImagePath:", "" , frameImagePath);
         }, CLICK_ITEM);
     }
@@ -97,13 +89,7 @@ public class PictureFrameMenuVM extends BaseSeekBarRecycleViewVM<PictureFrameMen
         nowInsertImageRect = mStringConsumerChain.getNowRect();
     }
 
-    @Override
-    public void stop() {
-        super.stop();
-        runInsertImage();
-    }
-
-    private void runInsertImage() {
+    public void runInsertImage() {
         if (!TextUtils.isEmpty(mInsertImagePath.get())) {
             PictureFrameMyConsumer consumer = new PictureFrameMyConsumer(mInsertImagePath.get() , nowInsertImageRect);
             mStringConsumerChain

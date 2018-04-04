@@ -9,6 +9,8 @@ import com.example.whensunset.pictureprocessinggraduationdesign.BR;
 import com.example.whensunset.pictureprocessinggraduationdesign.R;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.BaseSeekBarRecycleViewVM;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.ITypefaceFetch;
+import com.example.whensunset.pictureprocessinggraduationdesign.base.uiaction.TextChangedUIAction;
+import com.example.whensunset.pictureprocessinggraduationdesign.base.uiaction.UIActionManager;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.util.MyLog;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.util.ObserverParamMap;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.viewmodel.ItemBaseVM;
@@ -21,6 +23,8 @@ import java.util.List;
 
 import io.reactivex.Flowable;
 
+import static com.example.whensunset.pictureprocessinggraduationdesign.base.uiaction.UIActionManager.PROGRESS_CHANGED_ACTION;
+import static com.example.whensunset.pictureprocessinggraduationdesign.base.uiaction.UIActionManager.TEXT_CHANGED_ACTION;
 import static com.example.whensunset.pictureprocessinggraduationdesign.staticParam.ObserverMapKey.PictureTextItemVM_mPictureTextParamDialogVM;
 import static com.example.whensunset.pictureprocessinggraduationdesign.staticParam.ObserverMapKey.PictureTextItemVM_mTypefaceName;
 import static com.example.whensunset.pictureprocessinggraduationdesign.staticParam.ObserverMapKey.PictureTextItemVM_mat;
@@ -35,6 +39,8 @@ import static com.example.whensunset.pictureprocessinggraduationdesign.viewModel
 public class PictureTextMenuVM extends BaseSeekBarRecycleViewVM<PictureTextMenuVM.PictureTextItemVM>  implements CutView.OnLimitMaxRectChangeListener , MoveFrameLayout.OnPlaceChangedListener {
     public static final String TAG = "何时夕:PictureTextMenuVM";
 
+    public static final int TEXT_CHANGE = 3;
+
     private final StringConsumerChain mStringConsumerChain = StringConsumerChain.getInstance();
     private PictureTextParamDialogVM mPictureTextParamDialogVM = new PictureTextParamDialogVM("默认");
     public final ObservableField<String> mText = new ObservableField<>();
@@ -43,9 +49,16 @@ public class PictureTextMenuVM extends BaseSeekBarRecycleViewVM<PictureTextMenuV
     public final ObservableField<Integer> mTextSize = new ObservableField<>(20);
 
     public PictureTextMenuVM() {
-        super(3 , BR.viewModel , R.layout.activity_picture_processing_picture_text_item);
+        super(4 , BR.viewModel , R.layout.activity_picture_processing_picture_text_item);
+
         initItemVM();
         initClick();
+        initTextChanged();
+    }
+
+    @Override
+    protected void initDefaultUIActionManager() {
+        mUIActionManager = new UIActionManager(this , PROGRESS_CHANGED_ACTION , TEXT_CHANGED_ACTION);
     }
 
     @Override
@@ -60,6 +73,7 @@ public class PictureTextMenuVM extends BaseSeekBarRecycleViewVM<PictureTextMenuV
         initListener(this, (observable, i) -> {
             String typefaceName = ObserverParamMap.staticGetValue(observable , PictureTextItemVM_mTypefaceName);
             mNowTypeface.set(typefaceName);
+
             MyLog.d(TAG, "initClick", "状态:typefaceName:", "更新typeface" , typefaceName);
         } , CLICK_ITEM);
 
@@ -75,19 +89,21 @@ public class PictureTextMenuVM extends BaseSeekBarRecycleViewVM<PictureTextMenuV
 
     }
 
+    private void initTextChanged() {
+        mUIActionManager
+                .<TextChangedUIAction>getDefaultThrottleFlowable(TEXT_CHANGED_ACTION)
+                .filter(textChangedUIAction -> {
+                    CharSequence charSequence = textChangedUIAction.getNowText();
+                    return charSequence.length() > 0;
+                }).subscribe(s -> mEventListenerList.get(TEXT_CHANGE).notifyChange());
+    }
+
     @Override
     public void resume() {
         super.resume();
-        mText.set("");
     }
 
-    @Override
-    public void stop() {
-        super.stop();
-        runInsertText();
-    }
-
-    private void runInsertText() {
+    public void runInsertText() {
         if (!mNowLimitMaxRect.contains(mEditTextRect)) {
             showToast("被添加的文字超出图片界限，无法插入文字！");
             return;
@@ -97,7 +113,10 @@ public class PictureTextMenuVM extends BaseSeekBarRecycleViewVM<PictureTextMenuV
             return;
         }
 
-        mEventListenerList.get(LEAVE_BSBRV_VM_LISTENER).set(null);
+        ObservableField<? extends Object> observableField = mEventListenerList.get(LEAVE_BSBRV_VM_LISTENER);
+        observableField.set(null);
+        observableField.notifyChange();
+
         org.opencv.core.Rect opencvRect = new org.opencv.core.Rect();
         opencvRect.x = (int) ((mEditTextRect.left - mNowLimitMaxRect.left) / mZoomCoefficient);
         opencvRect.y = (int) ((mEditTextRect.top - mNowLimitMaxRect.top) / mZoomCoefficient);
@@ -109,7 +128,10 @@ public class PictureTextMenuVM extends BaseSeekBarRecycleViewVM<PictureTextMenuV
 
         mStringConsumerChain
                 .rxRunNextConvenient(consumer)
-                .subscribe(mat -> mEventListenerList.get(LEAVE_BSBRV_VM_LISTENER).set(ObserverParamMap.staticSet(PictureTextItemVM_mat , mat)));
+                .subscribe(mat -> {
+                    mText.set("");
+                    mEventListenerList.get(LEAVE_BSBRV_VM_LISTENER).set(ObserverParamMap.staticSet(PictureTextItemVM_mat , mat));
+                });
 
         MyLog.d(TAG, "runInsertText", "状态:mNowLimitMaxRect:mEditTextRect:mZoomCoefficient:opencvRect:", "插入文字" , mNowLimitMaxRect , mEditTextRect , mZoomCoefficient , opencvRect);
     }
@@ -148,13 +170,13 @@ public class PictureTextMenuVM extends BaseSeekBarRecycleViewVM<PictureTextMenuV
 
             mPictureTextParamDialogVM = pictureTextParamDialogVM;
             mTypefaceName.set(typefaceName);
-            initClickAction();
+            initClick();
         }
 
-        private void initClickAction() {
+        private void initClick() {
             getDefaultClickThrottleFlowable()
                     .filter(clickPosition -> {
-                        MyLog.d(TAG, "initClickAction", "状态:isAdd", "判断当前的item是否是 add" , isAdd);
+                        MyLog.d(TAG, "initClick", "状态:isAdd", "判断当前的item是否是 add" , isAdd);
                         return !isAdd;
                     }).subscribe(clickPosition -> {
                         mPictureTextParamDialogVM.mTypefaceName.set(mTypefaceName.get());

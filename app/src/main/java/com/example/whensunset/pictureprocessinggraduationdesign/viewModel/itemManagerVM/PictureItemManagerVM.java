@@ -27,7 +27,7 @@ public class PictureItemManagerVM extends ItemManagerBaseVM<PictureItemManagerVM
 
     public static final int ITEM_PICTURE_RESIZE_WIDTH = 100;
     public static final int ITEM_PICTURE_RESIZE_HEIGHT = 100;
-    public static final int MENU_ITEM_WIDTH = MyUtil.getDisplayWidthDp() / 3;
+    public static final int MENU_ITEM_WIDTH = MyUtil.getDisplayWidthDp() / 3 - MyUtil.px2dip(10);
     public static final int MENU_ITEM_HEIGHT = MENU_ITEM_WIDTH;
 
     private final IImageUriFetch mIImageUriFetch;
@@ -73,7 +73,7 @@ public class PictureItemManagerVM extends ItemManagerBaseVM<PictureItemManagerVM
                         ObserverParamMap paramMap = getPositionParamMap()
                                 .set(PictureItemManagerVM_mImageUri , mImageUri.get());
                         mEventListenerList.get(LastEventListenerPosition).set(paramMap);
-                        MyLog.d(TAG, "onClick", "状态:LastEventListenerPosition:ObserverParamMap:", LastEventListenerPosition , paramMap);
+                        MyLog.d(TAG, "onTextChanged", "状态:LastEventListenerPosition:ObserverParamMap:", LastEventListenerPosition , paramMap);
                     });
         }
     }

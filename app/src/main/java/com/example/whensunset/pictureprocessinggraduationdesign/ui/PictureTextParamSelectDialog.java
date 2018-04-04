@@ -39,9 +39,9 @@ public class PictureTextParamSelectDialog extends DialogFragment {
         builder.setView(mActivityPictureProcessingPictureTextParamDialogBinding.getRoot())
                 .setPositiveButton("确定", (dialog, which) -> {
                     mPictureTextParamDialogVM.stop();
-                    MyLog.d(TAG, "onClick", "状态:", "更改字体大小和颜色");
+                    MyLog.d(TAG, "onTextChanged", "状态:", "更改字体大小和颜色");
                 }).setNegativeButton("取消", (dialog, which) -> {
-                    MyLog.d(TAG, "onClick", "状态:", "取消更改字体大小和颜色");
+                    MyLog.d(TAG, "onTextChanged", "状态:", "取消更改字体大小和颜色");
                 });
         return builder.create();
     }

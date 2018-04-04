@@ -53,7 +53,7 @@
             bind:itemHeight="@{PictureItemManagerVM.MENU_ITEM_HEIGHT}"
 
             bind:layoutManager="@{LayoutManager.grid(3)}"
-            bind:itemDecor="@{ItemDecoration.defaultItemDecoration()}"
+            bind:itemDecor="@{ItemDecoration.defaultGridLayoutItemDecoration()}"
             bind:itemView="@{viewModel.getPictureItemManagerVM().mViewSelector}"
             bind:items="@{viewModel.getPictureItemManagerVM().mDataItemList}">
         </android.support.v7.widget.RecyclerView>

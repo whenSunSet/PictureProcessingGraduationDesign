@@ -28,7 +28,6 @@ import static com.example.whensunset.pictureprocessinggraduationdesign.staticPar
 
 public class PictureParamMenuVM extends ChildBaseVM{
     public static final String TAG = "何时夕:PictureParamMenuVM";
-    public static final int PROGRESS_CHANGE_THROTTLE_MILLISECONDS = 400;
 
     public static final int PROGRESS_MAX = 100;
     public static final int LISTENER_SIZE = 5;
@@ -49,11 +48,11 @@ public class PictureParamMenuVM extends ChildBaseVM{
     public static final int PARAM_PROGRESS_CHANGE = 4;
 
     public final ObservableField<Integer> mSelectParam = new ObservableField<>(PROGRESS_MAX / 2);
+    public final ObservableField<Integer> mNowSelectListenerPosition = new ObservableField<>(SELECT_BRIGHTNESS);
     public final ObservableField<Boolean> isInTonal = new ObservableField<>(false);
 
     private StringConsumerChain mStringConsumerChain = StringConsumerChain.getInstance();
     private final List<Integer> mParamList = new ArrayList<>();
-    private int mNowSelectListenerPosition = SELECT_BRIGHTNESS;
     private boolean isRunNow = false;
 
     public PictureParamMenuVM() {
@@ -76,11 +75,11 @@ public class PictureParamMenuVM extends ChildBaseVM{
     private void initClick() {
         getDefaultClickThrottleFlowable()
                 .subscribe(position -> {
-                    mNowSelectListenerPosition = position;
-                    mSelectParam.set(mParamList.get(mNowSelectListenerPosition));
+                    mNowSelectListenerPosition.set(position);
+                    mSelectParam.set(mParamList.get(mNowSelectListenerPosition.get()));
                     isInTonal.set(false);
 
-                    switch (mNowSelectListenerPosition) {
+                    switch (mNowSelectListenerPosition.get()) {
                         case SELECT_BRIGHTNESS:
                             break;
                         case SELECT_CONTRAST:
@@ -92,7 +91,7 @@ public class PictureParamMenuVM extends ChildBaseVM{
                             break;
                     }
 
-                    MyLog.d(TAG, "onClick", "状态:mNowSelectListenerPosition:mSelectParam:mParamList:",
+                    MyLog.d(TAG, "onTextChanged", "状态:mNowSelectListenerPosition:mSelectParam:mParamList:",
                             "切换了需要变化了图片参数" , mNowSelectListenerPosition , mSelectParam.get() , mParamList);
                 });
     }
@@ -102,7 +101,7 @@ public class PictureParamMenuVM extends ChildBaseVM{
                 .<ProgressChangedUIAction>getDefaultThrottleFlowable(PROGRESS_CHANGED_ACTION)
                 .filter(progressChangedUIAction -> {
                     int progress = progressChangedUIAction.getProgress();
-                    mParamList.set(mNowSelectListenerPosition , progress);
+                    mParamList.set(mNowSelectListenerPosition.get() , progress);
                     mSelectParam.set(progress);
                     MyLog.d(TAG, "initProgressChangedAction", "状态:mParamList:mNowSelectListenerPosition:progress:progressChangedUIAction:",
                             "某个图片参数变化了，构建PictureParamMyConsumer" , mParamList , mNowSelectListenerPosition , progress , progressChangedUIAction);
@@ -133,7 +132,7 @@ public class PictureParamMenuVM extends ChildBaseVM{
         super.resume();
         isRunNow = false;
         mSelectParam.set(PROGRESS_MAX / 2);
-        mNowSelectListenerPosition = SELECT_BRIGHTNESS;
+        mNowSelectListenerPosition.set(SELECT_BRIGHTNESS);
         for (int i = 0; i < 4; i++) {
             mParamList.set(i , PROGRESS_MAX / 2);
         }
@@ -151,7 +150,7 @@ public class PictureParamMenuVM extends ChildBaseVM{
 
         if (consumer instanceof PictureParamMyConsumer) {
             PictureParamMyConsumer pictureParamMyConsumer = ((PictureParamMyConsumer) consumer);
-            mSelectParam.set(pictureParamMyConsumer.getParamList().get(mNowSelectListenerPosition));
+            mSelectParam.set(pictureParamMyConsumer.getParamList().get(mNowSelectListenerPosition.get()));
 
             mParamList.clear();
             mParamList.addAll(pictureParamMyConsumer.getParamList());

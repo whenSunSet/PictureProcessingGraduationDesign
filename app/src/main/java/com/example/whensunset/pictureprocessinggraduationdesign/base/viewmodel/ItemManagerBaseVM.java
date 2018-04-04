@@ -1,5 +1,6 @@
 package com.example.whensunset.pictureprocessinggraduationdesign.base.viewmodel;
 
+import android.databinding.Observable;
 import android.databinding.ObservableArrayList;
 import android.databinding.ObservableField;
 import android.databinding.ObservableList;
@@ -9,6 +10,7 @@ import com.example.whensunset.pictureprocessinggraduationdesign.base.util.Observ
 import com.example.whensunset.pictureprocessinggraduationdesign.dataBindingUtil.ItemViewArg;
 
 import static com.example.whensunset.pictureprocessinggraduationdesign.staticParam.ObserverMapKey.ItemBaseVM_mPosition;
+import static com.example.whensunset.pictureprocessinggraduationdesign.staticParam.ObserverMapKey.PictureFrameItemVM_mPosition;
 
 /**
  * Created by whensunset on 2018/3/23.
@@ -37,6 +39,8 @@ public abstract class ItemManagerBaseVM <T extends ItemBaseVM> extends ChildBase
     private void initItemChanged() {
         initListener(this, (observable, i) -> {
             Integer selectedItemPosition = ObserverParamMap.staticGetValue(observable , ItemBaseVM_mPosition);
+            MyLog.d(TAG, "initItemChanged", "状态:selectedItemPosition:", "更改当前选择的position" , selectedItemPosition);
+
             if (selectedItemPosition == null) {
                 return;
             }
@@ -55,6 +59,8 @@ public abstract class ItemManagerBaseVM <T extends ItemBaseVM> extends ChildBase
             lastItemBaseVM.isSelected.set(false);
             lastItemBaseVM.stop();
         }
+
+        MyLog.d(TAG, "changeSelectPosition", "状态:nowSelectPosition:mSelectedPosition:", "" , nowSelectPosition , mSelectedPosition.get());
 
         mSelectedPosition.set(nowSelectPosition);
         ItemBaseVM nowItemBaseVM = mDataItemList.get(nowSelectPosition);
@@ -84,10 +90,23 @@ public abstract class ItemManagerBaseVM <T extends ItemBaseVM> extends ChildBase
     @Override
     public void stop() {
         super.stop();
+        initSelectedPosition();
+    }
+
+    public void initSelectedPosition() {
         if (mSelectedPosition.get() >= 0) {
             mDataItemList.get(mSelectedPosition.get()).isSelected.set(false);
             mSelectedPosition.set(-1);
         }
+    }
+
+    protected void changeSelectedPosition(Observable observable) {
+        Integer selectPosition = ObserverParamMap.staticGetValue(observable , PictureFrameItemVM_mPosition);
+        if (mSelectedPosition.get() >= 0) {
+            mDataItemList.get(mSelectedPosition.get()).isSelected.set(false);
+        }
+        mDataItemList.get(selectPosition).isSelected.set(true);
+        mSelectedPosition.set(selectPosition);
     }
 
     @Override

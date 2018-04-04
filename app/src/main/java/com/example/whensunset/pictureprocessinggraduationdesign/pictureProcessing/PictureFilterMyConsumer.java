@@ -51,6 +51,22 @@ public class PictureFilterMyConsumer extends BaseMyConsumer {
     }
 
     @Override
+    public boolean canRunNow(BaseMyConsumer nextNowMyConsumer) {
+        super.canRunNow(nextNowMyConsumer);
+        if (!(nextNowMyConsumer instanceof PictureFilterMyConsumer)) {
+            MyLog.d(TAG, "canRunNow", "状态:nextNowMyConsumer", "传入的consumer类型不同，不能runNow" , nextNowMyConsumer.getRealName());
+            return false;
+        }
+
+        if (((PictureFilterMyConsumer) nextNowMyConsumer).mFilterAction == null) {
+            MyLog.d(TAG, "canRunNow", "状态:", "传入的滤镜为null，不能runNow");
+            return false;
+        }
+
+        return true;
+    }
+
+    @Override
     protected Mat onNewResultImpl(Mat oldResult) {
         MyLog.d(TAG, "onNewResultImpl", "状态:oldResult:", "运行", oldResult);
 

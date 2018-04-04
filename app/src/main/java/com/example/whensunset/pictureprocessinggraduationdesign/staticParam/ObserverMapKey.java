@@ -21,6 +21,7 @@ public interface ObserverMapKey {
     String PictureFilterItemVM_mFilterAction = "mFilterAction";
     String PictureFilterItemVM_mPosition = "mPosition";
     String PictureFilterItemVM_mat = "mat";
+    String PictureFilterItemVM_isShowYesNo = "isShowYesNo";
 
     String PictureItemManagerVM_mPosition = "mPosition";
     String PictureItemManagerVM_mImageUri = "mImageUri";

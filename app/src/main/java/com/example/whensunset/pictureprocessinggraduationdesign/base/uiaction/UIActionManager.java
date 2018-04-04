@@ -22,6 +22,7 @@ public class UIActionManager {
     public static final int CLICK_ACTION = 0;
     public static final int ITEM_SELECTED_ACTION = 1;
     public static final int PROGRESS_CHANGED_ACTION = 2;
+    public static final int TEXT_CHANGED_ACTION = 3;
 
     private BaseVM mBaseVM;
     @SuppressLint("UseSparseArrays")
@@ -51,7 +52,8 @@ public class UIActionManager {
                 return new ItemSelectedUIAction();
             case PROGRESS_CHANGED_ACTION:
                 return new ProgressChangedUIAction();
-
+            case TEXT_CHANGED_ACTION:
+                return new TextChangedUIAction();
         }
         return null;
     }
@@ -68,6 +70,10 @@ public class UIActionManager {
         doUIAction(eventListenerPosition , PROGRESS_CHANGED_ACTION , params);
     }
 
+    public void doTextChanged(int eventListenerPosition , Object... params) {
+        doUIAction(eventListenerPosition , TEXT_CHANGED_ACTION , params);
+    }
+
     private void doUIAction(int eventListenerPosition , int uiActionFlag , Object... params) {
         UIAction uiAction = getUIAction(uiActionFlag);
         mBaseVM.checkEventListenerList(eventListenerPosition);
@@ -82,6 +88,8 @@ public class UIActionManager {
             ((ItemSelectedUIAction) uiAction).onItemSelected(eventListenerPosition , (Integer) params[0] , mBaseVM);
         } else if (uiAction instanceof ProgressChangedUIAction) {
             ((ProgressChangedUIAction) uiAction).onProgressChanged(eventListenerPosition , (Integer) params[0]);
+        } else if (uiAction instanceof TextChangedUIAction) {
+            ((TextChangedUIAction) uiAction).onTextChanged(eventListenerPosition , (CharSequence) params[0]);
         }
     }
 

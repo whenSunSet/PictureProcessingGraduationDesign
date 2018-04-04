@@ -19,6 +19,7 @@ import static org.opencv.imgcodecs.Imgcodecs.CV_LOAD_IMAGE_UNCHANGED;
 public class PictureFrameMyConsumer extends BaseMyConsumer {
     public static String TAG = "何时夕:PictureFrameMyConsumer";
 
+    private Integer mAlph;
     private String mFrameImagePath;
     private Rect mRect;
 

@@ -8,6 +8,7 @@ import com.example.whensunset.pictureprocessinggraduationdesign.base.BaseSeekBar
 import com.example.whensunset.pictureprocessinggraduationdesign.base.util.MyLog;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.util.ObserverParamMap;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.viewmodel.ChildBaseVM;
+import com.example.whensunset.pictureprocessinggraduationdesign.base.viewmodel.ItemManagerBaseVM;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.viewmodel.ParentBaseVM;
 import com.example.whensunset.pictureprocessinggraduationdesign.impl.BaseMyConsumer;
 import com.example.whensunset.pictureprocessinggraduationdesign.mete.CutView;
@@ -33,12 +34,12 @@ import static com.example.whensunset.pictureprocessinggraduationdesign.staticPar
 import static com.example.whensunset.pictureprocessinggraduationdesign.staticParam.ObserverMapKey.PictureTextItemVM_mat;
 import static com.example.whensunset.pictureprocessinggraduationdesign.staticParam.ObserverMapKey.PictureTransformMenuVM_mat;
 import static com.example.whensunset.pictureprocessinggraduationdesign.staticParam.ObserverMapKey.PictureTransformMenuVM_position;
-import static com.example.whensunset.pictureprocessinggraduationdesign.viewModel.includeLayoutVM.PictureFrameMenuVM.FRAME_PROGRESS_CHANGE;
 import static com.example.whensunset.pictureprocessinggraduationdesign.viewModel.includeLayoutVM.PictureParamMenuVM.PARAM_PROGRESS_CHANGE;
 import static com.example.whensunset.pictureprocessinggraduationdesign.viewModel.includeLayoutVM.PictureParamMenuVM.SELECT_BRIGHTNESS;
 import static com.example.whensunset.pictureprocessinggraduationdesign.viewModel.includeLayoutVM.PictureParamMenuVM.SELECT_CONTRAST;
 import static com.example.whensunset.pictureprocessinggraduationdesign.viewModel.includeLayoutVM.PictureParamMenuVM.SELECT_SATURATION;
 import static com.example.whensunset.pictureprocessinggraduationdesign.viewModel.includeLayoutVM.PictureParamMenuVM.SELECT_TONAL;
+import static com.example.whensunset.pictureprocessinggraduationdesign.viewModel.includeLayoutVM.PictureTextMenuVM.TEXT_CHANGE;
 import static com.example.whensunset.pictureprocessinggraduationdesign.viewModel.includeLayoutVM.PictureTransformMenuVM.LEAVE_TRANSFORM_LISTENER;
 import static com.example.whensunset.pictureprocessinggraduationdesign.viewModel.includeLayoutVM.PictureTransformMenuVM.SELECT_PICTURE_CUT;
 import static com.example.whensunset.pictureprocessinggraduationdesign.viewModel.includeLayoutVM.PictureTransformMenuVM.SELECT_PICTURE_HORIZONTAL_FLIP;
@@ -53,9 +54,6 @@ import static com.example.whensunset.pictureprocessinggraduationdesign.viewModel
 public class PictureProcessingActivityVM extends ParentBaseVM {
     public static final String TAG = "何时夕:PictureProcessingActivityVM";
 
-    public static final int THROTTLE_MILLISECONDS = 200;
-    public static final int MENU_MAX_HEIGHT = PictureTransformMenuVM.MENU_HEIGHT;
-
     public static final int SELECT_PICTURE_FILTER = 0;
     public static final int SELECT_PICTURE_TRANSFORM = 1;
     public static final int SELECT_PICTURE_PARAM = 2;
@@ -64,6 +62,8 @@ public class PictureProcessingActivityVM extends ParentBaseVM {
     public static final int CLICK_UNDO = 5;
     public static final int CLICK_REDO = 6;
     public static final int CLICK_BACK = 7;
+    public static final int CLICK_YES = 8;
+    public static final int CLICK_NO = 9;
 
     public static final int CHILD_VM_mPictureFilterMenuVM = 0;
     public static final int CHILD_VM_mPictureTransformMenuVM = 1;
@@ -76,6 +76,7 @@ public class PictureProcessingActivityVM extends ParentBaseVM {
     public final ObservableField<Integer> mCutViewModel = new ObservableField<>(SCALE_MODEL);
     public final ObservableField<Boolean> mCanUndo = new ObservableField<>(false);
     public final ObservableField<Boolean> mCanRedo = new ObservableField<>(false);
+    public final ObservableField<Boolean> mIsShowYesNo = new ObservableField<>(false);
     public final ObservableField<CutView.OnLimitRectChangedListener> mCutViewListener = new ObservableField<>();
     public final ObservableField<BaseSeekBarRecycleViewVM> mNowBaseSeekBarRecycleViewVM = new ObservableField<>();
 
@@ -83,7 +84,7 @@ public class PictureProcessingActivityVM extends ParentBaseVM {
     private String mImagePath;
 
     public PictureProcessingActivityVM(String imageUri) {
-        super(8);
+        super(10);
         initDefaultUIActionManager();
 
         mImagePath = Uri.parse(imageUri).getPath();
@@ -106,16 +107,18 @@ public class PictureProcessingActivityVM extends ParentBaseVM {
 
     private void initPictureAction() {
 
-        // 监听 图片滤镜 的操作以更新图片
+        // 监听 图片滤镜 的点击操作
         initListener(getPictureFilterMenuVM() , (observable, i) -> {
             Mat mat = ObserverParamMap.staticGetValue(observable , PictureFilterItemVM_mat);
             if (mat == null) {
                 return;
             }
+            mIsShowYesNo.set(true);
             showMat(mat);
+            MyLog.d(TAG, "initPictureAction", "状态:isShowYesNo:mat:", "" , true , mat);
         }, CLICK_ITEM);
 
-        // 监听 图片变换 的操作以更新图片
+       // 监听 图片变换 的操作以更新图片
         initListener(getPictureTransformMenuVM() ,
                 (observable, i) -> showMat(ObserverParamMap.staticGetValue(observable , PictureTransformMenuVM_mat)) ,
                 SELECT_PICTURE_ROTATE ,
@@ -134,18 +137,22 @@ public class PictureProcessingActivityVM extends ParentBaseVM {
                 SELECT_TONAL ,
                 PARAM_PROGRESS_CHANGE);
 
-        // 监听 图片插入变化 的操作以更新图片
-        initListener(getPictureFilterMenuVM() ,
-                (observable, i) -> showMat(ObserverParamMap.staticGetValue(observable , PictureFrameItemVM_mat)) ,
-                LEAVE_BSBRV_VM_LISTENER,
-                FRAME_PROGRESS_CHANGE);
+        // 监听 图片插入 的点击操作
+        initListener(getPictureFrameMenuVM(), (observable, i) -> mIsShowYesNo.set(true), CLICK_ITEM);
 
-        // 监听 文字插入变化 的操作以更新图片
-        initListener(getPictureTextMenuVM() , (observable, i) -> {
+        // 监听 图片插入 的图片更新
+        initListener(getPictureFrameMenuVM(), (observable, i) -> showMat(ObserverParamMap.staticGetValue(observable , PictureFrameItemVM_mat)) , LEAVE_BSBRV_VM_LISTENER);
+
+        // 监听 文字插入 的输入文字操作
+        initListener(getPictureTextMenuVM() , (observable, i) -> mIsShowYesNo.set(true), TEXT_CHANGE);
+
+        // 监听 图片插入 的图片更新
+        initListener(getPictureTextMenuVM(), (observable, i) -> {
             Mat mat = ObserverParamMap.staticGetValue(observable , PictureTextItemVM_mat);
-            if (mat != null) {
-                showMat(mat);
+            if (mat == null) {
+                return;
             }
+            showMat(mat);
         }, LEAVE_BSBRV_VM_LISTENER);
 
         MyLog.d(TAG, "initPictureAction", "状态:", "监听图像变化初始化完毕");
@@ -162,6 +169,12 @@ public class PictureProcessingActivityVM extends ParentBaseVM {
                         return false;
                     } else if (position == CLICK_BACK) {
                         clickBack(position);
+                        return false;
+                    } else if (position == CLICK_YES) {
+                        clickYes();
+                        return false;
+                    } else if (position == CLICK_NO) {
+                        clickNo();
                         return false;
                     }
                     return true;
@@ -195,6 +208,9 @@ public class PictureProcessingActivityVM extends ParentBaseVM {
                             break;
                     }
             mSelectTab.set(position);
+            if (mIsShowYesNo.get()) {
+                clickYes();
+            }
             changeNowChildVM(childBaseVM);
         });
     }
@@ -221,6 +237,40 @@ public class PictureProcessingActivityVM extends ParentBaseVM {
 
     private void clickBack(int position) {
         mEventListenerList.get(position).set(ObserverParamMap.staticSet(PictureTransformMenuVM_position , CLICK_BACK));
+    }
+
+    private void clickYes() {
+        if (mNowChildBaseVM == getPictureFilterMenuVM()) {
+            getPictureFilterMenuVM().setRunNow(false);
+        } else if (mNowChildBaseVM == getPictureFrameMenuVM()) {
+            getPictureFrameMenuVM().runInsertImage();
+            getPictureFrameMenuVM().mInsertImagePath.set("");
+        } else if (mNowChildBaseVM == getPictureTextMenuVM()) {
+            getPictureTextMenuVM().runInsertText();
+        }
+
+        if (mNowChildBaseVM instanceof ItemManagerBaseVM) {
+            ((ItemManagerBaseVM) mNowChildBaseVM).initSelectedPosition();
+        }
+        mIsShowYesNo.set(false);
+    }
+
+    private void clickNo() {
+        if (mNowChildBaseVM == getPictureFilterMenuVM()) {
+            getPictureFilterMenuVM().setRunNow(false);
+            if (mCanUndo.get()) {
+                showMat(mStringConsumerChain.cancelNowConsumer());
+            }
+        } else if (mNowChildBaseVM == getPictureFrameMenuVM()) {
+            getPictureFrameMenuVM().mInsertImagePath.set("");
+        } else if (mNowChildBaseVM == getPictureTextMenuVM()) {
+            getPictureTextMenuVM().mText.set("");;
+        }
+
+        if (mNowChildBaseVM instanceof ItemManagerBaseVM) {
+            ((ItemManagerBaseVM) mNowChildBaseVM).initSelectedPosition();
+        }
+        mIsShowYesNo.set(false);
     }
 
     private void showMat(Mat mat) {
