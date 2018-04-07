@@ -1,6 +1,7 @@
 package com.example.whensunset.pictureprocessinggraduationdesign.base.uiaction;
 
 import com.example.whensunset.pictureprocessinggraduationdesign.base.util.MyLog;
+import com.example.whensunset.pictureprocessinggraduationdesign.base.viewmodel.BaseVM;
 
 /**
  * Created by whensunset on 2018/3/22.
@@ -10,22 +11,19 @@ public class ClickUIAction extends BaseUIAction {
     public static final String TAG = "何时夕:ClickUIAction";
     private UIActionListener<ClickUIAction> mOnClickListener = null;
 
-    public void onClick(int eventListenerPosition) {
+    @Override
+    public void onTriggerListener(int eventListenerPosition , BaseVM baseVM , Object... params) {
         mLastEventListenerPosition = eventListenerPosition;
 
         if (mOnClickListener != null) {
             mOnClickListener.onUIActionChanged(this);
         }
-        MyLog.d(TAG, "onTextChanged", "状态:eventListenerPosition:", "触发了点击事件监听器", eventListenerPosition);
+        MyLog.d(TAG, "onTriggerListener", "状态:eventListenerPosition:", "触发了点击事件监听器", eventListenerPosition);
     }
 
-
-    public UIActionListener<ClickUIAction> getOnClickListener() {
-        return mOnClickListener;
-    }
-
-    public void setOnClickListener(UIActionListener<ClickUIAction> onClickListener) {
-        mOnClickListener = onClickListener;
+    @Override
+    public void setListener(UIActionListener<? extends UIAction> listener) {
+        mOnClickListener = (UIActionListener<ClickUIAction>) listener;
     }
 
     @Override

@@ -23,8 +23,6 @@ public class SystemTypefaceFetch implements ITypefaceFetch {
     static {
         mTypefaceName.add("默认");
         mTypefaceName.add("粗体");
-        mTypefaceName.add("等宽体");
-        mTypefaceName.add("衬线体");
     }
 
     public static SystemTypefaceFetch getInstance() {
@@ -68,10 +66,6 @@ public class SystemTypefaceFetch implements ITypefaceFetch {
                 typeface = Typeface.DEFAULT;
             } else if (typefaceName.equals("粗体")) {
                 typeface = Typeface.DEFAULT_BOLD;
-            } else if (typefaceName.equals("等宽体")) {
-                typeface = Typeface.MONOSPACE;
-            } else if (typefaceName.equals("衬线体")) {
-                typeface = Typeface.SERIF;
             }
             mTypeface.put(typefaceName , typeface);
         }

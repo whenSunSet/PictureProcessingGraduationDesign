@@ -10,10 +10,6 @@ public class NostalgiaFilterAction implements FilterAction{
     private static NostalgiaFilterAction INSTANCE = new NostalgiaFilterAction();
     private static final String NAME = "雕刻";
 
-    static {
-        FilterAction.addFilterAction(INSTANCE);
-    }
-
     private NostalgiaFilterAction() {
     }
 

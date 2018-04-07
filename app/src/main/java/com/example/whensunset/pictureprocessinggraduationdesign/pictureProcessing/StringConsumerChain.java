@@ -2,10 +2,10 @@ package com.example.whensunset.pictureprocessinggraduationdesign.pictureProcessi
 
 import android.text.TextUtils;
 
-import com.example.whensunset.pictureprocessinggraduationdesign.impl.ConsumerChain;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.util.MyLog;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.util.MyUtil;
 import com.example.whensunset.pictureprocessinggraduationdesign.impl.BaseMyConsumer;
+import com.example.whensunset.pictureprocessinggraduationdesign.impl.ConsumerChain;
 
 import org.opencv.core.Mat;
 import org.opencv.core.Rect;
@@ -52,23 +52,19 @@ public class StringConsumerChain extends ConsumerChain<String> {
         }
 
         int[] imageInfo = MyUtil.getImageWidthHeight(path);
-        Mat firstMat = Imgcodecs.imread(path , IMREAD_COLOR);
-
-        if (firstMat == null) {
-            throw new RuntimeException("初始化 Chain 图片失败，图片Mat为null");
-        }
+        Mat firstMatBGR = Imgcodecs.imread(path , IMREAD_COLOR);
 
         Rect rect = new Rect(0 , 0 , imageInfo[0] , imageInfo[1]);
         BaseMyConsumer firstCutMyConsumer = new CutMyConsumer(rect) {
             @Override
             protected Mat onNewResultImpl(Mat oldResult) {
-                return firstMat;
+                return firstMatBGR;
             }
         };
         addConsumer(firstCutMyConsumer);
 
-        MyLog.d(TAG, "getStartResult", "状态:firstMat:rect" , "获取图片结束" , firstMat , rect);
-        return firstMat;
+        MyLog.d(TAG, "getStartResult", "状态:firstMat:rect" , "获取图片结束" , firstMatBGR , rect);
+        return firstMatBGR;
     }
 
 }

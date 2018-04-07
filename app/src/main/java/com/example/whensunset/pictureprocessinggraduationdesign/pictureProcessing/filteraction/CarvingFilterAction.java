@@ -10,10 +10,6 @@ public class CarvingFilterAction implements FilterAction {
     private static CarvingFilterAction INSTANCE = new CarvingFilterAction();
     private static final String NAME = "雕刻";
 
-    static {
-        FilterAction.addFilterAction(INSTANCE);
-    }
-
     private CarvingFilterAction() {
     }
 

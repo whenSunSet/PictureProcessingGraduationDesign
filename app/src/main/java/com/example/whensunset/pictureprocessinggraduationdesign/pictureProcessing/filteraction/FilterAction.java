@@ -14,6 +14,13 @@ public interface FilterAction {
 
     List<FilterAction> FILTER_ACTION_LIST = new ArrayList<>();
 
+    static void init() {
+        FilterAction.addFilterAction(CarvingFilterAction.getInstance());
+        FilterAction.addFilterAction(ReliefFilterAction.getInstance());
+        FilterAction.addFilterAction(NostalgiaFilterAction.getInstance());
+        FilterAction.addFilterAction(ComicBooksFilterAction.getInstance());
+    }
+
     static void addFilterAction(FilterAction filterAction) {
         FILTER_ACTION_LIST.add(filterAction);
     }

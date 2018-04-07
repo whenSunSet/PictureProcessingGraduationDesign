@@ -78,6 +78,7 @@ public class PictureFrameMenuVM extends BaseSeekBarRecycleViewVM<PictureFrameMen
         mUIActionManager
                 .<ProgressChangedUIAction>getDefaultThrottleFlowable(PROGRESS_CHANGED_ACTION)
                 .subscribe(progressChangedUIAction -> {
+                    mSelectParam.set(progressChangedUIAction.getProgress());
                     MyLog.d(TAG, "initProgressChanged", "状态:", "滑动了");
                 });
     }
@@ -85,13 +86,14 @@ public class PictureFrameMenuVM extends BaseSeekBarRecycleViewVM<PictureFrameMen
     @Override
     public void resume() {
         super.resume();
+        mSelectParam.set(PROGRESS_MAX);
         mInsertImagePath.set("");
         nowInsertImageRect = mStringConsumerChain.getNowRect();
     }
 
     public void runInsertImage() {
         if (!TextUtils.isEmpty(mInsertImagePath.get())) {
-            PictureFrameMyConsumer consumer = new PictureFrameMyConsumer(mInsertImagePath.get() , nowInsertImageRect);
+            PictureFrameMyConsumer consumer = new PictureFrameMyConsumer(mSelectParam.get() , mInsertImagePath.get() , nowInsertImageRect);
             mStringConsumerChain
                     .rxRunNextConvenient(consumer)
                     .subscribe(mat -> mEventListenerList.get(LEAVE_BSBRV_VM_LISTENER).set(ObserverParamMap.staticSet(PictureFrameItemVM_mat , mat)));

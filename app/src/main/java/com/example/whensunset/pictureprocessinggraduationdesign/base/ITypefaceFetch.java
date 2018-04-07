@@ -2,6 +2,9 @@ package com.example.whensunset.pictureprocessinggraduationdesign.base;
 
 import android.graphics.Typeface;
 
+import com.example.whensunset.pictureprocessinggraduationdesign.impl.LocalTypefaceFetch;
+import com.example.whensunset.pictureprocessinggraduationdesign.impl.SystemTypefaceFetch;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,6 +18,12 @@ public interface ITypefaceFetch {
     List<Typeface> getAllTypeface();
     List<String> getAllTypefaceName();
     Typeface getTypeface(String typefaceName);
+
+
+    static void init() {
+        SystemTypefaceFetch.getInstance();
+        LocalTypefaceFetch.getInstance();
+    }
 
     static Typeface getTypefaceFromAll(String typefaceName) {
         Typeface typeface;

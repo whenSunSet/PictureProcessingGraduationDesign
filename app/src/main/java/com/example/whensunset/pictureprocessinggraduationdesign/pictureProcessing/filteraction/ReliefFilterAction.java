@@ -7,14 +7,8 @@ import org.opencv.core.Mat;
  */
 
 public class ReliefFilterAction implements FilterAction {
-    public static final String TAG = "何时夕:ReliefFilterAction";
-    private static final String NAME = "浮雕";
-
     private static ReliefFilterAction INSTANCE = new ReliefFilterAction();
-
-    static {
-        FilterAction.addFilterAction(INSTANCE);
-    }
+    private static final String NAME = "浮雕";
 
     private ReliefFilterAction() {
     }

@@ -63,6 +63,26 @@
                        android:layout_height="20dp" />
 
                    <ImageView
+                       android:src="@drawable/picture_share"
+                       android:visibility="@{viewModel.mIsShowYesNo ? View.GONE : View.VISIBLE}"
+                       android:onClick="@{() -> viewModel.mUIActionManager.doClick(PictureProcessingActivityVM.CLICK_SHARE)}"
+                       android:layout_centerVertical="true"
+                       android:id="@+id/share"
+                       android:layout_toLeftOf="@id/undo"
+                       android:layout_width="40dp"
+                       android:layout_height="20dp" />
+
+                   <ImageView
+                       android:src="@drawable/picture_save"
+                       android:visibility="@{viewModel.mIsShowYesNo ? View.GONE : View.VISIBLE}"
+                       android:onClick="@{() -> viewModel.mUIActionManager.doClick(PictureProcessingActivityVM.CLICK_SAVE)}"
+                       android:layout_centerVertical="true"
+                       android:id="@+id/save"
+                       android:layout_toLeftOf="@id/share"
+                       android:layout_width="40dp"
+                       android:layout_height="20dp" />
+
+                   <ImageView
                        android:src="@{viewModel.mCanUndo ? @drawable/undo_white : @drawable/undo_gray}"
                        android:visibility="@{viewModel.mIsShowYesNo ? View.GONE : View.VISIBLE}"
                        android:clickable="@{viewModel.mCanUndo}"
@@ -102,6 +122,7 @@
                 android:layout_height="match_parent"
                 android:layout_width="match_parent"
 
+                bind:insertImageAlpha="@{viewModel.getPictureFrameMenuVM().mSelectParam}"
                 bind:insertImagePath="@{viewModel.getPictureFrameMenuVM().mInsertImagePath}"
                 bind:onLimitRectChangedListener="@{viewModel.mCutViewListener}"
                 bind:onLimitMaxRectChangedListener="@{viewModel.getPictureTextMenuVM()}"

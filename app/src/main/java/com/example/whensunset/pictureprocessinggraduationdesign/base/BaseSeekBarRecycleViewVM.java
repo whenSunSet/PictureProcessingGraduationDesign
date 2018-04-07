@@ -18,7 +18,7 @@ public abstract class BaseSeekBarRecycleViewVM<T extends ItemBaseVM> extends Ite
     public static final String TAG = "何时夕:BaseSeekBarRecycleViewVM";
 
     public static final int LEAVE_BSBRV_VM_LISTENER = 1;
-    public static final int FRAME_PROGRESS_CHANGE = 2;
+    public static final int PROGRESS_CHANGE = 2;
 
     public static final int PROGRESS_MAX = 100;
 
@@ -29,7 +29,7 @@ public abstract class BaseSeekBarRecycleViewVM<T extends ItemBaseVM> extends Ite
     public static final int MENU_ITEM_HEIGHT = PictureParamMenuVM.MENU_ITEM_HEIGHT;
     public static final int MENU_ITEM_WIDTH = MENU_ITEM_HEIGHT;
 
-    public final ObservableField<Integer> mSelectParam = new ObservableField<>(PROGRESS_MAX / 3);
+    public final ObservableField<Integer> mSelectParam = new ObservableField<>(PROGRESS_MAX / 2);
 
     public BaseSeekBarRecycleViewVM(int listenerSize, int viewModelId, int viewItemLayoutId) {
         super(listenerSize, viewModelId, viewItemLayoutId);

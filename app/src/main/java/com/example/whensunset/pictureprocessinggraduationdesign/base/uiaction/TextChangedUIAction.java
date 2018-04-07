@@ -1,6 +1,7 @@
 package com.example.whensunset.pictureprocessinggraduationdesign.base.uiaction;
 
 import com.example.whensunset.pictureprocessinggraduationdesign.base.util.MyLog;
+import com.example.whensunset.pictureprocessinggraduationdesign.base.viewmodel.BaseVM;
 
 /**
  * Created by whensunset on 2018/3/22.
@@ -11,22 +12,20 @@ public class TextChangedUIAction extends BaseUIAction {
     private UIActionListener<TextChangedUIAction> mTextChangedListener= null;
     private CharSequence mNowText;
 
-    public void onTextChanged(int eventListenerPosition , CharSequence changedText) {
+    @Override
+    public void onTriggerListener(int eventListenerPosition , BaseVM baseVM , Object... params) {
+        CharSequence changedText = (CharSequence) params[0];
         mLastEventListenerPosition = eventListenerPosition;
         mNowText = changedText;
         if (mTextChangedListener != null) {
             mTextChangedListener.onUIActionChanged(this);
         }
-        MyLog.d(TAG, "onTextChanged", "状态:eventListenerPosition:", "触发了输入框文字变化事件", eventListenerPosition);
+        MyLog.d(TAG, "onTriggerListener", "状态:eventListenerPosition:changedText:", "触发了输入框文字变化事件", eventListenerPosition , changedText);
     }
 
-
-    public UIActionListener<TextChangedUIAction> getTextChangedListener() {
-        return mTextChangedListener;
-    }
-
-    public void setTextChangedListener(UIActionListener<TextChangedUIAction> onClickListener) {
-        mTextChangedListener = onClickListener;
+    @Override
+    public void setListener(UIActionListener<? extends UIAction> listener) {
+        mTextChangedListener = (UIActionListener<TextChangedUIAction>) listener;
     }
 
     public CharSequence getNowText() {

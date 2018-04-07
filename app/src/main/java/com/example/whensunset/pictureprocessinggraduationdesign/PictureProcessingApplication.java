@@ -2,20 +2,17 @@ package com.example.whensunset.pictureprocessinggraduationdesign;
 
 import android.app.Application;
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 
-import com.example.whensunset.pictureprocessinggraduationdesign.base.util.MyUtil;
-import com.example.whensunset.pictureprocessinggraduationdesign.impl.LocalTypefaceFetch;
-import com.example.whensunset.pictureprocessinggraduationdesign.impl.SystemTypefaceFetch;
-import com.example.whensunset.pictureprocessinggraduationdesign.pictureProcessing.filteraction.CarvingFilterAction;
-import com.example.whensunset.pictureprocessinggraduationdesign.pictureProcessing.filteraction.NostalgiaFilterAction;
-import com.example.whensunset.pictureprocessinggraduationdesign.pictureProcessing.filteraction.ReliefFilterAction;
+import com.example.whensunset.pictureprocessinggraduationdesign.base.ITypefaceFetch;
+import com.example.whensunset.pictureprocessinggraduationdesign.pictureProcessing.filteraction.FilterAction;
 import com.example.whensunset.pictureprocessinggraduationdesign.staticParam.StaticParam;
 import com.facebook.drawee.backends.pipeline.Fresco;
 import com.facebook.imagepipeline.core.ImagePipelineConfig;
 
 import java.io.File;
+
+import static com.example.whensunset.pictureprocessinggraduationdesign.staticParam.StaticParam.MY_PHOTO_SHOP_DIRECTORY;
+import static com.example.whensunset.pictureprocessinggraduationdesign.staticParam.StaticParam.MY_SHARE_DIRECTORY;
 
 /**
  * Created by whensunset on 2018/3/2.
@@ -32,24 +29,22 @@ public class PictureProcessingApplication extends Application {
                 .setDownsampleEnabled(true)
                 .build();
         Fresco.initialize(this , config);
-        SystemTypefaceFetch.getInstance();
-        LocalTypefaceFetch.getInstance();
 
-        CarvingFilterAction.getInstance();
-        ReliefFilterAction.getInstance();
-        NostalgiaFilterAction.getInstance();
+        ITypefaceFetch.init();
+        FilterAction.init();
+        StaticParam.init();
 
-        File pictureFilterSampleImage = new File(StaticParam.PICTURE_FILTER_SAMPLE_IMAGE);
-        if (!pictureFilterSampleImage.exists()) {
-            Bitmap bitmap = BitmapFactory.decodeResource(getResources() , R.drawable.picture_filter_sample_image);
-            MyUtil.saveBitmap(bitmap , StaticParam.PICTURE_FILTER_SAMPLE_IMAGE);
+        File file = new File(MY_SHARE_DIRECTORY);
+        if (!file.exists()) {
+            file.mkdir();
         }
 
-        File pictureFrameAddImage = new File(StaticParam.PICTURE_FRAME_ADD);
-        if (!pictureFrameAddImage.exists()) {
-            Bitmap bitmap = BitmapFactory.decodeResource(getResources() , R.drawable.picture_frame_add);
-            MyUtil.saveBitmap(bitmap , StaticParam.PICTURE_FRAME_ADD);
+        File file1 = new File(MY_PHOTO_SHOP_DIRECTORY);
+        if (!file1.exists()) {
+            file1.mkdir();
         }
+
+
     }
     public static Context getAppContext() {
         return appContext;

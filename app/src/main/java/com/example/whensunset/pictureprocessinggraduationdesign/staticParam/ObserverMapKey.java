@@ -7,6 +7,8 @@ package com.example.whensunset.pictureprocessinggraduationdesign.staticParam;
 public interface ObserverMapKey {
     String SHOW_TOAST_MESSAGE = "message";
 
+
+    String PictureProcessingActivityVM_intent = "intent";
     String ItemBaseVM_mPosition = "mPosition";
     String PictureTransformMenuVM_mat = "mat";
     String PictureTransformMenuVM_position = "position";

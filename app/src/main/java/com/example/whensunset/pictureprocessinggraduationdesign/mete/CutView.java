@@ -2,6 +2,7 @@ package com.example.whensunset.pictureprocessinggraduationdesign.mete;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -16,6 +17,8 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 
 import com.example.whensunset.pictureprocessinggraduationdesign.base.util.MyLog;
+
+import static com.example.whensunset.pictureprocessinggraduationdesign.base.BaseSeekBarRecycleViewVM.PROGRESS_MAX;
 
 /**
  * Created by whensunset on 2018/3/11.
@@ -45,6 +48,7 @@ public class CutView extends PinchImageView {
     private boolean isInResize = false;
     private boolean isInMove = false;
     private boolean isInit = true;
+    private int mInsertImageAlpha = PROGRESS_MAX;
 
     public CutView(Context context) {
         super(context);
@@ -178,8 +182,15 @@ public class CutView extends PinchImageView {
         isOpenPinchImage = (mModel == SCALE_MODEL);
     }
 
+    private Bitmap mInsertBitmap = null;
     public void setInsertImagePath(String insertImageUri) {
         mInsertImagePath = insertImageUri;
+        if (!TextUtils.isEmpty(mInsertImagePath)) {
+            if (mInsertBitmap != null) {
+                mInsertBitmap.recycle();
+            }
+            mInsertBitmap = BitmapFactory.decodeFile(mInsertImagePath);
+        }
         postInvalidate();
     }
 
@@ -189,6 +200,11 @@ public class CutView extends PinchImageView {
 
     public void setOnLimitMaxRectChangeListener(OnLimitMaxRectChangeListener onLimitMaxRectChangeListener) {
         mOnLimitMaxRectChangeListener = onLimitMaxRectChangeListener;
+    }
+
+    public void setInsertImageAlph(int insertImageAlph) {
+        mInsertImageAlpha = insertImageAlph;
+        postInvalidate();
     }
 
     private org.opencv.core.Rect getOpencvCutRect() {
@@ -207,6 +223,7 @@ public class CutView extends PinchImageView {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
+
         getZoomCoefficientXY();
         getImgDisplaySize();
 
@@ -274,18 +291,19 @@ public class CutView extends PinchImageView {
     }
 
     private void drawInsertImageMask(Canvas canvas) {
-        if (!TextUtils.isEmpty(mInsertImagePath)) {
+        if (!TextUtils.isEmpty(mInsertImagePath) && mInsertBitmap != null) {
             mPaint.setColor(Color.WHITE);
             mPaint.setStrokeWidth(STROKE_WIDTH);
             mPaint.setStyle(Paint.Style.STROKE);
+            mPaint.setAlpha((int) (mInsertImageAlpha * 2.55));
 
             if (mLimitMaxRect.contains(mLimitRect)) {
                 drawSudoku(mLimitRect , canvas);
-                canvas.drawBitmap(BitmapFactory.decodeFile(mInsertImagePath) , null , mLimitRect , mPaint);
+                canvas.drawBitmap(mInsertBitmap , null , mLimitRect , mPaint);
 
             } else {
                 drawSudoku(mLimitMaxRect , canvas);
-                canvas.drawBitmap(BitmapFactory.decodeFile(mInsertImagePath) , null , mLimitRect , mPaint);
+                canvas.drawBitmap(mInsertBitmap , null , mLimitRect , mPaint);
             }
         }
         MyLog.d(TAG, "drawInsertImageMask", "状态:mInsertImagePath:mLimitMaxRect:mLimitRect:", "进入绘制插入图片界面的蒙板" , mInsertImagePath , mLimitMaxRect , mLimitRect);

@@ -24,7 +24,8 @@
         <android.support.v7.widget.AppCompatSeekBar
             bind:bindingHeight="@{BaseSeekBarRecycleViewVM.SEEK_BAR_HEIGHT}"
             bind:progressMax="@{BaseSeekBarRecycleViewVM.PROGRESS_MAX}"
-            android:progress="@{50}"
+            android:onProgressChanged="@{(seekBar, progress, fromUser) -> viewModel.mUIActionManager.doProgressChanged(BaseSeekBarRecycleViewVM.PROGRESS_CHANGE , progress)}"
+            android:progress="@{viewModel.mSelectParam}"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 

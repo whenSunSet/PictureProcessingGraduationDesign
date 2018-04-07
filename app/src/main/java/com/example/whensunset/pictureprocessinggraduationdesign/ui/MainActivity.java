@@ -1,18 +1,18 @@
 package com.example.whensunset.pictureprocessinggraduationdesign.ui;
 
+import android.Manifest;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.RequiresApi;
 
 import com.example.whensunset.pictureprocessinggraduationdesign.R;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.BaseActivity;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.util.MyLog;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.util.ObserverParamMap;
 import com.example.whensunset.pictureprocessinggraduationdesign.viewModel.MainActivityVM;
-
-import org.opencv.android.BaseLoaderCallback;
-import org.opencv.android.LoaderCallbackInterface;
-import org.opencv.android.OpenCVLoader;
+import com.tbruyelle.rxpermissions2.RxPermissions;
 
 import static com.example.whensunset.pictureprocessinggraduationdesign.base.viewmodel.ItemManagerBaseVM.CLICK_ITEM;
 import static com.example.whensunset.pictureprocessinggraduationdesign.staticParam.ObserverMapKey.DirectorySpinnerItemManagerVM_directoryName;
@@ -28,14 +28,23 @@ public class MainActivity extends BaseActivity {
         System.loadLibrary("native-lib");
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mMainActivityBinding = DataBindingUtil.setContentView(this , R.layout.activity_main);
-        mMainActivityVM = new MainActivityVM();
-        mMainActivityBinding.setViewModel(mMainActivityVM);
 
-        registeredViewModelFiledsObserver();
+        RxPermissions rxPermissions = new RxPermissions(this);
+        rxPermissions.requestEach(
+                Manifest.permission.READ_EXTERNAL_STORAGE ,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                .filter(permission -> permission.granted)
+                .subscribe(permission -> {
+                    mMainActivityBinding = DataBindingUtil.setContentView(MainActivity.this , R.layout.activity_main);
+                    mMainActivityVM = new MainActivityVM();
+                    mMainActivityBinding.setViewModel(mMainActivityVM);
+
+                    registeredViewModelFiledsObserver();
+                });
     }
 
     @Override
@@ -63,46 +72,9 @@ public class MainActivity extends BaseActivity {
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        if (!OpenCVLoader.initDebug()) {
-            OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_0_0, this, mLoaderCallback);
-        } else {
-            mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
-        }
-    }
-
-    @Override
     protected void onDestroy() {
         super.onDestroy();
         mMainActivityVM.onDestroy();
     }
-
-    private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
-        @Override
-        public void onManagerConnected(int status) {
-            switch (status) {
-                case LoaderCallbackInterface.SUCCESS: {
-//                    Log.i("xuekelindun", "OpenCV loaded successfully");
-//                    Log.i("xuekelindun", OpenCVApi.INSTANCE.stringFromJNI());
-//                    ImageView iv_image = findViewById(R.id.image);
-//                    Bitmap bitmap = ((BitmapDrawable) getResources().getDrawable(
-//                            R.mipmap.image)).getBitmap();
-//                    int w = bitmap.getWidth(), h = bitmap.getHeight();
-//                    int[] pix = new int[w * h];
-//                    bitmap.getPixels(pix, 0, w, 0, 0, w, h);
-//                    int [] resultPixes= MyClass.gray(pix,w,h);
-//                    Bitmap result = Bitmap.createBitmap(w,h, Bitmap.Config.RGB_565);
-//                    result.setPixels(resultPixes, 0, w, 0, 0,w, h);
-//                    iv_image.setImageBitmap(result);
-                }
-                break;
-                default: {
-                    super.onManagerConnected(status);
-                }
-                break;
-            }
-        }
-    };
 
 }

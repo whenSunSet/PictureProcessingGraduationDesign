@@ -131,6 +131,7 @@ public class PictureParamMenuVM extends ChildBaseVM{
     public void resume() {
         super.resume();
         isRunNow = false;
+        isInTonal.set(false);
         mSelectParam.set(PROGRESS_MAX / 2);
         mNowSelectListenerPosition.set(SELECT_BRIGHTNESS);
         for (int i = 0; i < 4; i++) {

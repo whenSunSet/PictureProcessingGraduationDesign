@@ -17,7 +17,9 @@ public class ItemSelectedUIAction extends BaseUIAction{
     private UIActionListener<ItemSelectedUIAction> mOnItemChangedListener = null;
     private int mSelectedItemPosition = -1;
 
-    public void onItemSelected(int eventListenerPosition, int position , BaseVM baseVM) {
+    @Override
+    public void onTriggerListener(int eventListenerPosition , BaseVM baseVM , Object... params) {
+        int position = (int) params[0];
         ItemManagerBaseVM<ItemBaseVM> itemManagerBaseVM = (ItemManagerBaseVM<ItemBaseVM>) baseVM;
         ObservableList<ItemBaseVM> dataItemList = itemManagerBaseVM.mDataItemList;
         if (dataItemList.size() <= position) {
@@ -36,11 +38,12 @@ public class ItemSelectedUIAction extends BaseUIAction{
         if (mOnItemChangedListener != null) {
             mOnItemChangedListener.onUIActionChanged(this);
         }
-        MyLog.d(TAG, "onItemSelected", "状态:eventListenerPosition:position:", "触发了点击事件监听器", eventListenerPosition , position);
+        MyLog.d(TAG, "onTriggerListener", "状态:eventListenerPosition:position:", "触发了点击事件监听器", eventListenerPosition , position);
     }
 
-    public void setOnItemChangedListener(UIActionListener<ItemSelectedUIAction> uiActionListener) {
-        mOnItemChangedListener = uiActionListener;
+    @Override
+    public void setListener(UIActionListener<? extends UIAction> listener) {
+        mOnItemChangedListener = (UIActionListener<ItemSelectedUIAction>) listener;
     }
 
     public int getSelectedItemPosition() {

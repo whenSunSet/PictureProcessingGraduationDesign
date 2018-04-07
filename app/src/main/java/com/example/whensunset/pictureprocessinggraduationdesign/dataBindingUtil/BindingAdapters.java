@@ -115,6 +115,7 @@ public class BindingAdapters {
             MyLog.d(TAG, "setModel", "状态:", "重新进入了 transform 和 frame 和 text 需要重新初始化cutView的限制条件");
             cutView.setInit(true);
         }
+        cutView.reset();
         cutView.post(cutView::invalidate);
     }
 
@@ -136,6 +137,11 @@ public class BindingAdapters {
         if (selectPosition >= 0 ){
             recyclerView.smoothScrollToPosition(selectPosition);
         }
+    }
+
+    @BindingAdapter("insertImageAlpha")
+    public static void setInsertImageAlpha(CutView cutView , int alpha) {
+        cutView.setInsertImageAlph(alpha);
     }
 
     @BindingAdapter("onLimitRectChangedListener")
@@ -184,16 +190,16 @@ public class BindingAdapters {
 
             @Override
             public void process(Bitmap bitmap) {
-                Mat oldMat = new Mat();
                 Mat newMat = new Mat();
 
                 filterAction.filter(Imgcodecs.imread(path) , newMat);
-                Utils.matToBitmap(newMat , bitmap);
+                Mat matRgba = MyUtil.matBgrToRgba(newMat);
+                Utils.matToBitmap(matRgba , bitmap);
 
-                MyLog.d(TAG, "setFilterImage", "状态:oldMat:newMat:filterAction:", "在fresco内部使用滤镜处理图片" , oldMat , newMat , filterAction);
+                MyLog.d(TAG, "setFilterImage", "状态:newMat:filterAction:", "在fresco内部使用滤镜处理图片" , newMat , filterAction);
 
-                oldMat.release();
                 newMat.release();
+                matRgba.release();
             }
         };
 

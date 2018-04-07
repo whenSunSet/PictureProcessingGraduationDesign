@@ -1,9 +1,11 @@
 package com.example.whensunset.pictureprocessinggraduationdesign.base.util;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Environment;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
@@ -11,10 +13,15 @@ import android.util.Log;
 
 import com.example.whensunset.pictureprocessinggraduationdesign.PictureProcessingApplication;
 
+import org.opencv.core.Mat;
+import org.opencv.imgproc.Imgproc;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+
+import static org.opencv.imgproc.Imgproc.COLOR_BGR2RGBA;
 
 /**
  * Created by whensunset on 2018/3/10.
@@ -163,5 +170,25 @@ public class MyUtil {
             e.printStackTrace();
             throw new RuntimeException("保存图片失败");
         }
+
+//        try {
+//            MediaStore.Images.Media.insertImage(PictureProcessingApplication.getAppContext().getContentResolver(),
+//                    file.getAbsolutePath(), file.getName() , null);
+//        } catch (FileNotFoundException e) {
+//            e.printStackTrace();
+//        }
+        // 最后通知图库更新
+        PictureProcessingApplication.getAppContext().sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://" + path)));
     }
+
+    public static Mat matBgrToRgba(Mat src) {
+        Mat matRgba = new Mat();
+        if (src.channels() == 3 || src.channels() == 4) {
+            Imgproc.cvtColor(src , matRgba , COLOR_BGR2RGBA);
+            return matRgba;
+        } else {
+            return src;
+        }
+    }
+
 }

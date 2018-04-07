@@ -1,11 +1,16 @@
 package com.example.whensunset.pictureprocessinggraduationdesign.viewModel;
 
+import android.content.Intent;
 import android.databinding.ObservableField;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.Build;
+import android.support.v4.content.FileProvider;
 
+import com.example.whensunset.pictureprocessinggraduationdesign.PictureProcessingApplication;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.BaseSeekBarRecycleViewVM;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.util.MyLog;
+import com.example.whensunset.pictureprocessinggraduationdesign.base.util.MyUtil;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.util.ObserverParamMap;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.viewmodel.ChildBaseVM;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.viewmodel.ItemManagerBaseVM;
@@ -13,6 +18,7 @@ import com.example.whensunset.pictureprocessinggraduationdesign.base.viewmodel.P
 import com.example.whensunset.pictureprocessinggraduationdesign.impl.BaseMyConsumer;
 import com.example.whensunset.pictureprocessinggraduationdesign.mete.CutView;
 import com.example.whensunset.pictureprocessinggraduationdesign.pictureProcessing.StringConsumerChain;
+import com.example.whensunset.pictureprocessinggraduationdesign.staticParam.StaticParam;
 import com.example.whensunset.pictureprocessinggraduationdesign.viewModel.includeLayoutVM.PictureFilterMenuVM;
 import com.example.whensunset.pictureprocessinggraduationdesign.viewModel.includeLayoutVM.PictureFrameMenuVM;
 import com.example.whensunset.pictureprocessinggraduationdesign.viewModel.includeLayoutVM.PictureParamMenuVM;
@@ -21,6 +27,8 @@ import com.example.whensunset.pictureprocessinggraduationdesign.viewModel.includ
 
 import org.opencv.android.Utils;
 import org.opencv.core.Mat;
+
+import java.io.File;
 
 import static com.example.whensunset.pictureprocessinggraduationdesign.base.BaseSeekBarRecycleViewVM.LEAVE_BSBRV_VM_LISTENER;
 import static com.example.whensunset.pictureprocessinggraduationdesign.base.viewmodel.ItemManagerBaseVM.CLICK_ITEM;
@@ -31,9 +39,11 @@ import static com.example.whensunset.pictureprocessinggraduationdesign.mete.CutV
 import static com.example.whensunset.pictureprocessinggraduationdesign.staticParam.ObserverMapKey.PictureFilterItemVM_mat;
 import static com.example.whensunset.pictureprocessinggraduationdesign.staticParam.ObserverMapKey.PictureFrameItemVM_mat;
 import static com.example.whensunset.pictureprocessinggraduationdesign.staticParam.ObserverMapKey.PictureParamMenuVM_mat;
+import static com.example.whensunset.pictureprocessinggraduationdesign.staticParam.ObserverMapKey.PictureProcessingActivityVM_intent;
 import static com.example.whensunset.pictureprocessinggraduationdesign.staticParam.ObserverMapKey.PictureTextItemVM_mat;
 import static com.example.whensunset.pictureprocessinggraduationdesign.staticParam.ObserverMapKey.PictureTransformMenuVM_mat;
 import static com.example.whensunset.pictureprocessinggraduationdesign.staticParam.ObserverMapKey.PictureTransformMenuVM_position;
+import static com.example.whensunset.pictureprocessinggraduationdesign.staticParam.StaticParam.SHARE_IMAGE;
 import static com.example.whensunset.pictureprocessinggraduationdesign.viewModel.includeLayoutVM.PictureParamMenuVM.PARAM_PROGRESS_CHANGE;
 import static com.example.whensunset.pictureprocessinggraduationdesign.viewModel.includeLayoutVM.PictureParamMenuVM.SELECT_BRIGHTNESS;
 import static com.example.whensunset.pictureprocessinggraduationdesign.viewModel.includeLayoutVM.PictureParamMenuVM.SELECT_CONTRAST;
@@ -64,6 +74,8 @@ public class PictureProcessingActivityVM extends ParentBaseVM {
     public static final int CLICK_BACK = 7;
     public static final int CLICK_YES = 8;
     public static final int CLICK_NO = 9;
+    public static final int CLICK_SHARE = 10;
+    public static final int CLICK_SAVE = 11;
 
     public static final int CHILD_VM_mPictureFilterMenuVM = 0;
     public static final int CHILD_VM_mPictureTransformMenuVM = 1;
@@ -84,7 +96,7 @@ public class PictureProcessingActivityVM extends ParentBaseVM {
     private String mImagePath;
 
     public PictureProcessingActivityVM(String imageUri) {
-        super(10);
+        super(12);
         initDefaultUIActionManager();
 
         mImagePath = Uri.parse(imageUri).getPath();
@@ -176,6 +188,12 @@ public class PictureProcessingActivityVM extends ParentBaseVM {
                     } else if (position == CLICK_NO) {
                         clickNo();
                         return false;
+                    } else if (position == CLICK_SHARE) {
+                        clickShare();
+                        return false;
+                    } else if (position == CLICK_SAVE) {
+                        clickSave();
+                        return false;
                     }
                     return true;
                 }).subscribe(position -> {
@@ -207,6 +225,7 @@ public class PictureProcessingActivityVM extends ParentBaseVM {
 
                             break;
                     }
+
             mSelectTab.set(position);
             if (mIsShowYesNo.get()) {
                 clickYes();
@@ -273,6 +292,52 @@ public class PictureProcessingActivityVM extends ParentBaseVM {
         mIsShowYesNo.set(false);
     }
 
+    private void clickShare() {
+        MyUtil.saveBitmap(mImageBitMap.get() , SHARE_IMAGE);
+
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("image/*");
+        File imageFile = new File(SHARE_IMAGE);
+        Uri data;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            data = FileProvider.getUriForFile(PictureProcessingApplication.getAppContext() , "com.example.whensunset.pictureprocessinggraduationdesign.fileprovider", imageFile);
+            // 给目标应用一个临时授权
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        } else {
+            data = Uri.fromFile(imageFile);
+        }
+
+        intent.putExtra(Intent.EXTRA_STREAM , data);
+        intent.putExtra(Intent.EXTRA_SUBJECT, "分享");
+        intent.putExtra(Intent.EXTRA_TEXT, "分享了一张图片");
+        mEventListenerList.get(CLICK_SHARE).set(ObserverParamMap.staticSet(PictureProcessingActivityVM_intent , intent));
+
+        MyLog.d(TAG, "clickShare", "状态:", "");
+    }
+
+    private void clickSave() {
+
+        String imageName = mImagePath.substring(mImagePath.lastIndexOf("/") + 1);
+        String imageDirectory = StaticParam.MY_PHOTO_SHOP_DIRECTORY;
+        String[] imageNames = imageName.split("\\.");
+
+        StringBuilder saveImagePath = new StringBuilder();
+        saveImagePath.append(imageDirectory);
+        saveImagePath.append("/");
+        saveImagePath.append(imageNames[0]);
+        saveImagePath.append(System.currentTimeMillis());
+        saveImagePath.append(".");
+        saveImagePath.append(imageNames[1]);
+        MyUtil.saveBitmap(mImageBitMap.get() , saveImagePath.toString());
+
+        showToast("该图片被储存在：" + imageDirectory + " 文件夹中");
+        ObservableField<? extends Object> observableField = mEventListenerList.get(CLICK_SAVE);
+        observableField.set(null);
+        observableField.notifyChange();
+        MyLog.d(TAG, "clickShare", "状态:imageName:imageNames:imageDirectory:saveImagePath:",
+                "" , imageName , imageNames ,imageDirectory , saveImagePath.toString());
+    }
+
     private void showMat(Mat mat) {
         MyLog.d(TAG, "showMat", "状态:mat:", "进行图片展示" , mat);
         if (mat == null) {
@@ -289,9 +354,11 @@ public class PictureProcessingActivityVM extends ParentBaseVM {
             mImageBitMap.set(null);
         }
 
-        Bitmap newBitMap = Bitmap.createBitmap(mat.cols() , mat.rows() , Bitmap.Config.ARGB_8888);
-        Utils.matToBitmap(mat , newBitMap);
+        Mat matRgba = MyUtil.matBgrToRgba(mat);
+        Bitmap newBitMap = Bitmap.createBitmap(matRgba.cols() , matRgba.rows() , Bitmap.Config.ARGB_8888);
+        Utils.matToBitmap(matRgba , newBitMap);
         mImageBitMap.set(newBitMap);
+        matRgba.release();
 
         MyLog.d(TAG, "showMat", "状态:mCanUndo:mCanRedo:", "图片展示完毕" , mCanUndo.get() , mCanRedo.get());
     }

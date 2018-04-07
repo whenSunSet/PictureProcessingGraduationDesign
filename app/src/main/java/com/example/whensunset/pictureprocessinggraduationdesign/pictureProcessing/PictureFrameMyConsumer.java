@@ -6,10 +6,10 @@ import com.example.whensunset.pictureprocessinggraduationdesign.impl.BaseMyConsu
 import org.opencv.core.Mat;
 import org.opencv.core.Rect;
 import org.opencv.imgcodecs.Imgcodecs;
+import org.opencv.imgproc.Imgproc;
 
 import java.io.File;
 
-import static org.opencv.imgcodecs.Imgcodecs.CV_LOAD_IMAGE_COLOR;
 import static org.opencv.imgcodecs.Imgcodecs.CV_LOAD_IMAGE_UNCHANGED;
 
 /**
@@ -18,12 +18,21 @@ import static org.opencv.imgcodecs.Imgcodecs.CV_LOAD_IMAGE_UNCHANGED;
 
 public class PictureFrameMyConsumer extends BaseMyConsumer {
     public static String TAG = "何时夕:PictureFrameMyConsumer";
+    public static final int DEFAULT_ALPH = 100;
+    public static final int MAX_ALPH = 100;
 
-    private Integer mAlph;
+    private int mAlpha;
     private String mFrameImagePath;
     private Rect mRect;
 
-    public PictureFrameMyConsumer(String frameImagePath, Rect rect) {
+    public PictureFrameMyConsumer(String frameImagePath , Rect rect) {
+        mFrameImagePath = frameImagePath;
+        mAlpha = DEFAULT_ALPH;
+        mRect = rect;
+    }
+
+    public PictureFrameMyConsumer(int alpha, String frameImagePath, Rect rect) {
+        mAlpha = alpha;
         mFrameImagePath = frameImagePath;
         mRect = rect;
     }
@@ -53,6 +62,7 @@ public class PictureFrameMyConsumer extends BaseMyConsumer {
 
         String nextFrameImageFile = ((PictureFrameMyConsumer) nextMyConsumer).mFrameImagePath;
         Rect nextRect  = ((PictureFrameMyConsumer) nextMyConsumer).mRect;
+        int alpha = ((PictureFrameMyConsumer) nextMyConsumer).mAlpha;
 
         if (nextFrameImageFile == null || nextRect == null) {
             MyLog.d(TAG, "isNeedRun", "状态:nextFrameImageFile:nextRect:", "图片框地址或者图片框Rect为null，不需要运行");
@@ -70,8 +80,8 @@ public class PictureFrameMyConsumer extends BaseMyConsumer {
             return false;
         }
 
-        if (!mFrameImagePath.equals(nextFrameImageFile) || !mRect.equals(nextRect)) {
-            MyLog.d(TAG, "isNeedRun", "状态:nextFrameImageFile:mFrameImagePath:", "两个图片框地址或者图片框Rect不同，需要运行" , nextFrameImageFile , mFrameImagePath);
+        if (!mFrameImagePath.equals(nextFrameImageFile) || !mRect.equals(nextRect) || mAlpha != alpha) {
+            MyLog.d(TAG, "isNeedRun", "状态:nextFrameImageFile:mFrameImagePath:mAlpha:", "两个图片框地址或者图片框Rect或者alpha不同，需要运行" , nextFrameImageFile , mFrameImagePath , mAlpha);
             return true;
         }
 
@@ -89,16 +99,21 @@ public class PictureFrameMyConsumer extends BaseMyConsumer {
         if (mFrameImagePath.contains(".png")) {
             insertMat = Imgcodecs.imread(mFrameImagePath , CV_LOAD_IMAGE_UNCHANGED);
         } else {
-            insertMat = Imgcodecs.imread(mFrameImagePath , CV_LOAD_IMAGE_COLOR);
+            Mat matBgr = Imgcodecs.imread(mFrameImagePath , CV_LOAD_IMAGE_UNCHANGED);
+            insertMat = new Mat();
+            Imgproc.cvtColor(matBgr , insertMat , Imgproc.COLOR_BGR2BGRA);
+            matBgr.release();
         }
 
         Mat newMat = new Mat();
-        mixed(oldResult.getNativeObjAddr() , insertMat.getNativeObjAddr() , newMat.getNativeObjAddr() , mRect.x , mRect.y , mRect.width , mRect.height);
-        MyLog.d(TAG, "onNewResultImpl", "状态:insertMat:oldResult:newMat:mRect:mFrameImagePath:", "" , insertMat , oldResult , newMat , mRect , mFrameImagePath);
+        float realAlpha = (float) mAlpha / (float) MAX_ALPH;
+        mixed(oldResult.getNativeObjAddr() , insertMat.getNativeObjAddr() , newMat.getNativeObjAddr() , mRect.x , mRect.y , mRect.width , mRect.height , realAlpha);
+        MyLog.d(TAG, "onNewResultImpl", "状态:insertMat:oldResult:newMat:mRect:mFrameImagePath:mAlpha:realAlpha:",
+                "" , insertMat , oldResult , newMat , mRect ,  mFrameImagePath , mAlpha , realAlpha);
         return newMat;
     }
 
-    private native void mixed(long in_mat_addr , long insert_mat_addr , long out_mat_addr , int x , int y , int width , int height);
+    private native void mixed(long in_mat_addr , long insert_mat_addr , long out_mat_addr , int x , int y , int width , int height , float alph);
 
     @Override
     protected void onFailureImpl(Throwable t) {

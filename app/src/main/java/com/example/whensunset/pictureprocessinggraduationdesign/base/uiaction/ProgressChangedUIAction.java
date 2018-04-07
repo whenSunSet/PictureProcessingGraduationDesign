@@ -1,6 +1,7 @@
 package com.example.whensunset.pictureprocessinggraduationdesign.base.uiaction;
 
 import com.example.whensunset.pictureprocessinggraduationdesign.base.util.MyLog;
+import com.example.whensunset.pictureprocessinggraduationdesign.base.viewmodel.BaseVM;
 
 /**
  * Created by whensunset on 2018/3/22.
@@ -11,18 +12,21 @@ public class ProgressChangedUIAction extends BaseUIAction{
     private UIActionListener<ProgressChangedUIAction> mOnProgressChangedListener = null;
     private int mProgress = Integer.MIN_VALUE;
 
-    public void onProgressChanged(int eventListenerPosition, int progress) {
+    @Override
+    public void onTriggerListener(int eventListenerPosition , BaseVM baseVM , Object... params) {
+        int progress = (int) params[0];
         mProgress = progress;
         mLastEventListenerPosition = eventListenerPosition;
 
         if (mOnProgressChangedListener != null) {
             mOnProgressChangedListener.onUIActionChanged(this);
         }
-        MyLog.d(TAG, "onColorChanged", "状态:eventListenerPosition:progress:", "触发了点击事件监听器", eventListenerPosition , progress);
+        MyLog.d(TAG, "onTriggerListener", "状态:eventListenerPosition:progress:", "触发了点击事件监听器", eventListenerPosition , progress);
     }
 
-    public void setOnProgressChangedListener(UIActionListener<ProgressChangedUIAction> uiActionListener) {
-        mOnProgressChangedListener = uiActionListener;
+    @Override
+    public void setListener(UIActionListener<? extends UIAction> listener) {
+        mOnProgressChangedListener = (UIActionListener<ProgressChangedUIAction>) listener;
     }
 
     public int getProgress() {

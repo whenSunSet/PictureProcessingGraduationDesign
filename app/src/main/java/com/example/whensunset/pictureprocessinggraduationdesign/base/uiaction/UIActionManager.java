@@ -11,6 +11,8 @@ import java.util.concurrent.TimeUnit;
 
 import io.reactivex.BackpressureStrategy;
 import io.reactivex.Flowable;
+import io.reactivex.FlowableEmitter;
+import io.reactivex.FlowableOnSubscribe;
 
 /**
  * Created by whensunset on 2018/3/24.
@@ -23,6 +25,16 @@ public class UIActionManager {
     public static final int ITEM_SELECTED_ACTION = 1;
     public static final int PROGRESS_CHANGED_ACTION = 2;
     public static final int TEXT_CHANGED_ACTION = 3;
+    @SuppressLint("UseSparseArrays")
+    private static final Map<Integer , Class<? extends UIAction>> UIActionClassMap = new HashMap<>();
+
+    static {
+        // 添加新的UIAction
+        UIActionClassMap.put(CLICK_ACTION , ClickUIAction.class);
+        UIActionClassMap.put(ITEM_SELECTED_ACTION , ItemSelectedUIAction.class);
+        UIActionClassMap.put(PROGRESS_CHANGED_ACTION , ProgressChangedUIAction.class);
+        UIActionClassMap.put(TEXT_CHANGED_ACTION , TextChangedUIAction.class);
+    }
 
     private BaseVM mBaseVM;
     @SuppressLint("UseSparseArrays")
@@ -44,19 +56,6 @@ public class UIActionManager {
         }
     }
 
-    private UIAction initUIAction(int type) {
-        switch (type) {
-            case CLICK_ACTION:
-                return new ClickUIAction();
-            case ITEM_SELECTED_ACTION:
-                return new ItemSelectedUIAction();
-            case PROGRESS_CHANGED_ACTION:
-                return new ProgressChangedUIAction();
-            case TEXT_CHANGED_ACTION:
-                return new TextChangedUIAction();
-        }
-        return null;
-    }
 
     public void doClick(int eventListenerPosition , Object... params) {
         doUIAction(eventListenerPosition , CLICK_ACTION , params);
@@ -74,7 +73,7 @@ public class UIActionManager {
         doUIAction(eventListenerPosition , TEXT_CHANGED_ACTION , params);
     }
 
-    private void doUIAction(int eventListenerPosition , int uiActionFlag , Object... params) {
+    public void doUIAction(int eventListenerPosition , int uiActionFlag , Object... params) {
         UIAction uiAction = getUIAction(uiActionFlag);
         mBaseVM.checkEventListenerList(eventListenerPosition);
         if (!uiAction.checkParams(params)) {
@@ -82,14 +81,19 @@ public class UIActionManager {
                     "参数校验失败，不可继续执行" ,eventListenerPosition , uiActionFlag , params);
             throw new RuntimeException("参数校验失败，不可继续执行");
         }
-        if (uiAction instanceof ClickUIAction) {
-            ((ClickUIAction) uiAction).onClick(eventListenerPosition);
-        } else if (uiAction instanceof ItemSelectedUIAction) {
-            ((ItemSelectedUIAction) uiAction).onItemSelected(eventListenerPosition , (Integer) params[0] , mBaseVM);
-        } else if (uiAction instanceof ProgressChangedUIAction) {
-            ((ProgressChangedUIAction) uiAction).onProgressChanged(eventListenerPosition , (Integer) params[0]);
-        } else if (uiAction instanceof TextChangedUIAction) {
-            ((TextChangedUIAction) uiAction).onTextChanged(eventListenerPosition , (CharSequence) params[0]);
+
+        uiAction.onTriggerListener(eventListenerPosition , mBaseVM , params);
+    }
+
+    private UIAction initUIAction(int type) {
+       Class<? extends UIAction> uiActionClass = UIActionClassMap.get(type);
+       if (uiActionClass == null) {
+           return null;
+       }
+        try {
+            return uiActionClass.newInstance();
+        } catch (Exception e) {
+            throw new RuntimeException("使用class 构建UIAction对象失败");
         }
     }
 
@@ -98,7 +102,7 @@ public class UIActionManager {
     }
 
     public <T extends UIAction> Flowable<T> getDefaultThrottleFlowable(int throttleMilliseconds , int uiActionFlag) {
-        return Flowable.create(new UIAction.ViewModelThrottleOnSubscribe<>(getUIAction(uiActionFlag)) , BackpressureStrategy.BUFFER)
+        return Flowable.create(new ViewModelThrottleOnSubscribe<>(getUIAction(uiActionFlag)) , BackpressureStrategy.BUFFER)
                 .throttleFirst(throttleMilliseconds , TimeUnit.MILLISECONDS)
                 .filter(uiAction -> {
                     MyLog.d(TAG, "getDefaultThrottleFlowable", "状态:uiAction", "" , uiAction);
@@ -106,6 +110,23 @@ public class UIActionManager {
                 }).map(uiAction -> (T) uiAction);
     }
 
+    class ViewModelThrottleOnSubscribe<T extends UIAction> implements FlowableOnSubscribe<T> {
+        final T mUIAction;
+
+        public ViewModelThrottleOnSubscribe(T uiAction) {
+            this.mUIAction = uiAction;
+        }
+
+        @Override
+        public void subscribe(FlowableEmitter<T> emitter) throws Exception {
+            UIAction.UIActionListener<T> listener = uiAction -> {
+                if (!emitter.isCancelled()) {
+                    emitter.onNext(uiAction);
+                }
+            };
+            mUIAction.setListener(listener);
+        }
+    }
 
     public void addUIAction(Integer uiActionFlag , UIAction uiAction) {
         mUIActionMap.put(uiActionFlag , uiAction);
@@ -125,9 +146,5 @@ public class UIActionManager {
         }
 
         return uiAction;
-    }
-
-    public Map<Integer , UIAction> getUIActionMap() {
-        return mUIActionMap;
     }
 }

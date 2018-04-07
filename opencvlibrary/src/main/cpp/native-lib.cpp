@@ -114,7 +114,7 @@ extern "C"
 JNIEXPORT void JNICALL
 Java_com_example_whensunset_pictureprocessinggraduationdesign_pictureProcessing_PictureFrameMyConsumer_mixed(
         JNIEnv *env, jobject instance, jlong in_mat_addr, jlong insert_mat_addr , jlong out_mat_addr , jint x, jint y,
-        jint width, jint height) {
+        jint width, jint height , jfloat alph) {
     Mat& oldMat = *(Mat *) in_mat_addr;
     Mat& insertMat = *(Mat *) insert_mat_addr;
     Mat middleMat = Mat::zeros(height , width , CV_8UC3);
@@ -128,7 +128,7 @@ Java_com_example_whensunset_pictureprocessinggraduationdesign_pictureProcessing_
     if(middleMat.channels() == 3) {
         middleMat.copyTo(ROI);
     } else if(middleMat.channels() == 4) {
-        cvAdd4cMat_q(ROI , middleMat , 1.0);
+        cvAdd4cMat_q(ROI , middleMat , alph);
     }
 }
 
@@ -381,6 +381,40 @@ void nostalgiaFilter(Mat& in, Mat& out){
     }
 }
 
+void comicBooksFilter(Mat& in, Mat& out){
+    int width=in.cols;
+    int heigh=in.rows;
+    RNG rng;
+    Mat img(in.size(),CV_8UC3);
+    for (int y=0; y<heigh; y++)
+    {
+        uchar* P0  = in.ptr<uchar>(y);
+        uchar* P1  = img.ptr<uchar>(y);
+        for (int x=0; x<width; x++)
+        {
+            float B=P0[3*x];
+            float G=P0[3*x+1];
+            float R=P0[3*x+2];
+            float newB=abs(B-G+B+R)*G/256;
+            float newG=abs(B-G+B+R)*R/256;
+            float newR=abs(G-B+G+R)*R/256;
+            if(newB<0)newB=0;
+            if(newB>255)newB=255;
+            if(newG<0)newG=0;
+            if(newG>255)newG=255;
+            if(newR<0)newR=0;
+            if(newR>255)newR=255;
+            P1[3*x] = (uchar)newB;
+            P1[3*x+1] = (uchar)newG;
+            P1[3*x+2] = (uchar)newR;
+        }
+
+    }
+    cvtColor(img , out ,CV_BGR2GRAY);
+    cvtColor(out , out , CV_GRAY2RGB);
+    normalize(out , out ,255,0,CV_MINMAX);
+}
+
 extern "C"
 JNIEXPORT void JNICALL
 Java_com_example_whensunset_pictureprocessinggraduationdesign_pictureProcessing_filteraction_ReliefFilterAction_filterRelief(
@@ -406,4 +440,12 @@ Java_com_example_whensunset_pictureprocessinggraduationdesign_pictureProcessing_
     Mat& oldMat = *(Mat *) in;
     Mat& newMat = *(Mat *) out;
     nostalgiaFilter(oldMat , newMat);
+}extern "C"
+JNIEXPORT void JNICALL
+Java_com_example_whensunset_pictureprocessinggraduationdesign_pictureProcessing_filteraction_ComicBooksFilterAction_filterComicBooks(
+        JNIEnv *env, jobject instance, jlong in, jlong out) {
+
+    Mat& oldMat = *(Mat *) in;
+    Mat& newMat = *(Mat *) out;
+    comicBooksFilter(oldMat , newMat);
 }

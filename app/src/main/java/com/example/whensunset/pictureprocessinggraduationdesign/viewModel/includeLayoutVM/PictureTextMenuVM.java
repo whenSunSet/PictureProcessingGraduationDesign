@@ -9,6 +9,7 @@ import com.example.whensunset.pictureprocessinggraduationdesign.BR;
 import com.example.whensunset.pictureprocessinggraduationdesign.R;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.BaseSeekBarRecycleViewVM;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.ITypefaceFetch;
+import com.example.whensunset.pictureprocessinggraduationdesign.base.uiaction.ProgressChangedUIAction;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.uiaction.TextChangedUIAction;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.uiaction.UIActionManager;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.util.MyLog;
@@ -54,6 +55,7 @@ public class PictureTextMenuVM extends BaseSeekBarRecycleViewVM<PictureTextMenuV
         initItemVM();
         initClick();
         initTextChanged();
+        initProgressChanged();
     }
 
     @Override
@@ -78,7 +80,7 @@ public class PictureTextMenuVM extends BaseSeekBarRecycleViewVM<PictureTextMenuV
         } , CLICK_ITEM);
 
         initListener(mPictureTextParamDialogVM, (observable, i) -> {
-            mTextColor.set(mPictureTextParamDialogVM.getFinalTextColor());
+            buildTextColor();
             mTextSize.set(mPictureTextParamDialogVM.getFinalTextSize());
             MyLog.d(TAG, "initClick", "状态:mTextColor:mTextSize:", "重新设置被插入文字的颜色和大小" , mTextColor.get() , mTextSize.get());
         } , STOP_TEXT_PARAM_DIALOG_VM);
@@ -86,7 +88,14 @@ public class PictureTextMenuVM extends BaseSeekBarRecycleViewVM<PictureTextMenuV
 
     @Override
     protected void initProgressChanged() {
-
+        mUIActionManager
+                .<ProgressChangedUIAction>getDefaultThrottleFlowable(PROGRESS_CHANGED_ACTION)
+                .map(ProgressChangedUIAction::getProgress)
+                .subscribe(progress -> {
+                    mSelectParam.set(progress);
+                    buildTextColor();
+                    MyLog.d(TAG, "initProgressChanged", "状态:", "滑动了");
+                });
     }
 
     private void initTextChanged() {
@@ -101,6 +110,15 @@ public class PictureTextMenuVM extends BaseSeekBarRecycleViewVM<PictureTextMenuV
     @Override
     public void resume() {
         super.resume();
+        mSelectParam.set(PROGRESS_MAX);
+        buildTextColor();
+    }
+
+    private void buildTextColor() {
+        int realAlpha = (int)(mSelectParam.get() * 2.55);
+        int nowTextColor = mPictureTextParamDialogVM.getFinalTextColor() - 0xFF000000 + 0x01000000 * realAlpha;
+        mTextColor.set(nowTextColor);
+        MyLog.d(TAG, "buildTextColor", "状态:progress:nowTextColor:realAlpha:", "滑动了" , mSelectParam.get() , Integer.toHexString(nowTextColor) ,realAlpha);
     }
 
     public void runInsertText() {
