@@ -34,9 +34,9 @@ public class LocalFrameImageUriFetch implements IImageUriFetch {
     @Override
     public List<String> getAllImageUriList() {
 
-        return Arrays.asList(Uri.fromFile(new File("/storage/emulated/0/DCIM/Camera/IMG_20180303_105510.jpg")).toString() ,
-                Uri.fromFile(new File("/storage/emulated/0/Download/e17ab12bd11a002bb7f43e0e22bc42cf.png")).toString() ,
-                Uri.fromFile(new File("/storage/emulated/0/DCIM/Camera/IMG_20180303_105510.jpg")).toString());
+        return Arrays.asList(Uri.fromFile(new File("/storage/emulated/0/voicenote/user/90ca451227212a9b/image/icon.jpg")).toString() ,
+                Uri.fromFile(new File("/storage/emulated/0/Pictures/Photoshop Express/PSX_20180304_150049.jpg")).toString() ,
+                Uri.fromFile(new File("/storage/emulated/0/UTDFiles/.c2868553337003ca80db0d102d639f74.png")).toString());
 
     }
 

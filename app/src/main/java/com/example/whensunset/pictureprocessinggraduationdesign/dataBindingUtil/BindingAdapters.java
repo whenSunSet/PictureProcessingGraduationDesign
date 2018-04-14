@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewStub;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
@@ -92,6 +93,11 @@ public class BindingAdapters {
     public static void setIsWB(ColorPickerView colorPickerView, Boolean isWB) {
         colorPickerView.setWB(isWB);
         MyLog.d(TAG, "setIsWB", "状态:isWB", "" , isWB);
+    }
+
+    @BindingAdapter("bindingVisibility")
+    public static void setBindingVisibility(ViewStub stub , int visibility) {
+        stub.setVisibility(visibility);
     }
 
     @BindingAdapter(value = {"viewHeight","viewWidth" , "viewLeftMargin" , "viewRightMargin"}, requireAll = false)

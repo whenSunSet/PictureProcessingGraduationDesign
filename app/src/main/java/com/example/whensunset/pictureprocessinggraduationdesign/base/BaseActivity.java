@@ -1,7 +1,10 @@
 package com.example.whensunset.pictureprocessinggraduationdesign.base;
 
+import android.arch.lifecycle.ViewModel;
+import android.arch.lifecycle.ViewModelProviders;
 import android.databinding.Observable;
 import android.databinding.ObservableField;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.Toast;
 
@@ -76,6 +79,10 @@ public abstract class BaseActivity extends AppCompatActivity {
 
     protected void showToast(String message) {
         Toast.makeText(BaseActivity.this, message , Toast.LENGTH_SHORT).show();
+    }
+
+    public <T extends ViewModel> T getViewModel(@NonNull Class<T> modelClass)  {
+        return ViewModelProviders.of(this).get(modelClass);
     }
 
     @Override

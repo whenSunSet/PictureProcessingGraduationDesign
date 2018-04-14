@@ -39,8 +39,9 @@ public class MainActivity extends BaseActivity {
                 Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 .filter(permission -> permission.granted)
                 .subscribe(permission -> {
+
                     mMainActivityBinding = DataBindingUtil.setContentView(MainActivity.this , R.layout.activity_main);
-                    mMainActivityVM = new MainActivityVM();
+                    mMainActivityVM = getViewModel(MainActivityVM.class);
                     mMainActivityBinding.setViewModel(mMainActivityVM);
 
                     registeredViewModelFiledsObserver();
@@ -74,7 +75,7 @@ public class MainActivity extends BaseActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mMainActivityVM.onDestroy();
+        mMainActivityVM.onCleared();
     }
 
 }

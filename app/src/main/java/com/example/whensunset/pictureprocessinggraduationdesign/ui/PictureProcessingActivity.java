@@ -123,6 +123,6 @@ public class PictureProcessingActivity extends BaseActivity {
     protected void onDestroy() {
         super.onDestroy();
         StringConsumerChain.getInstance().destroy();
-        mPictureProcessingActivityVM.onDestroy();
+        mPictureProcessingActivityVM.onCleared();
     }
 }

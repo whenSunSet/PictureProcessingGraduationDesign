@@ -1,6 +1,5 @@
 package com.example.whensunset.pictureprocessinggraduationdesign.base.viewmodel;
 
-import android.databinding.Observable;
 import android.databinding.ObservableArrayList;
 import android.databinding.ObservableField;
 import android.databinding.ObservableList;
@@ -10,7 +9,6 @@ import com.example.whensunset.pictureprocessinggraduationdesign.base.util.Observ
 import com.example.whensunset.pictureprocessinggraduationdesign.dataBindingUtil.ItemViewArg;
 
 import static com.example.whensunset.pictureprocessinggraduationdesign.staticParam.ObserverMapKey.ItemBaseVM_mPosition;
-import static com.example.whensunset.pictureprocessinggraduationdesign.staticParam.ObserverMapKey.PictureFrameItemVM_mPosition;
 
 /**
  * Created by whensunset on 2018/3/23.
@@ -100,22 +98,13 @@ public abstract class ItemManagerBaseVM <T extends ItemBaseVM> extends ChildBase
         }
     }
 
-    protected void changeSelectedPosition(Observable observable) {
-        Integer selectPosition = ObserverParamMap.staticGetValue(observable , PictureFrameItemVM_mPosition);
-        if (mSelectedPosition.get() >= 0) {
-            mDataItemList.get(mSelectedPosition.get()).isSelected.set(false);
-        }
-        mDataItemList.get(selectPosition).isSelected.set(true);
-        mSelectedPosition.set(selectPosition);
-    }
-
     @Override
-    public void onDestroy() {
-        super.onDestroy();
+    public void onCleared() {
+        super.onCleared();
         ItemBaseVM firstItemBaseVM = (mDataItemList.size() == 0 ? null : mDataItemList.get(0));
         if (firstItemBaseVM != null && firstItemBaseVM.isNeedDestroy()) {
             for (ItemBaseVM i : mDataItemList) {
-                i.onDestroy();
+                i.onCleared();
             }
         }
     }

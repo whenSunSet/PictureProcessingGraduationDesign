@@ -1,5 +1,6 @@
 package com.example.whensunset.pictureprocessinggraduationdesign.base.viewmodel;
 
+import android.arch.lifecycle.ViewModel;
 import android.databinding.Observable;
 import android.databinding.ObservableField;
 
@@ -23,7 +24,7 @@ import static com.example.whensunset.pictureprocessinggraduationdesign.base.uiac
  * Created by whensunset on 2018/3/21.
  */
 
-public abstract class BaseVM {
+public abstract class BaseVM extends ViewModel{
     public static final String TAG = "何时夕:BaseVM";
 
     private Map<ObservableField , Observable.OnPropertyChangedCallback> mRegisteredViewModelFiledObserverMap;
@@ -121,7 +122,8 @@ public abstract class BaseVM {
         mRegisteredViewModelFiledObserverMap.put(observableField , onPropertyChangedCallback);
     }
 
-    public void onDestroy() {
+    @Override
+    public void onCleared() {
         if (mRegisteredViewModelFiledObserverMap != null) {
             for (ObservableField observableField : mRegisteredViewModelFiledObserverMap.keySet()) {
                 observableField.removeOnPropertyChangedCallback(mRegisteredViewModelFiledObserverMap.get(observableField));

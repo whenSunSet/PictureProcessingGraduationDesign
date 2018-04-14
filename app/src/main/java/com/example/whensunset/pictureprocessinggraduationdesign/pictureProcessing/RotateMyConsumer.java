@@ -2,7 +2,6 @@ package com.example.whensunset.pictureprocessinggraduationdesign.pictureProcessi
 
 import com.example.whensunset.pictureprocessinggraduationdesign.base.util.MyLog;
 import com.example.whensunset.pictureprocessinggraduationdesign.impl.BaseMyConsumer;
-import com.example.whensunset.pictureprocessinggraduationdesign.impl.UndoMyConsumer;
 
 import org.opencv.core.Mat;
 
@@ -10,7 +9,7 @@ import org.opencv.core.Mat;
  * Created by whensunset on 2018/3/8.
  */
 
-public class RotateMyConsumer extends UndoMyConsumer {
+public class RotateMyConsumer extends BaseMyConsumer {
     public static final String TAG = "何时夕:RotateMyConsumer";
 
     public static final double ROTATE_ANGLE_90 = 90.0;
@@ -83,26 +82,6 @@ public class RotateMyConsumer extends UndoMyConsumer {
     }
 
     private native void rotate(long in_mat_addr , long out_mat_addr , double angle , double scale);
-
-    @Override
-    public Mat undo(Mat oldResult) {
-        if (oldResult == null) {
-            throw new IllegalArgumentException("被undo的旋转的Mat 不可为null");
-        }
-
-        if (mAngle == 0) {
-            return oldResult;
-        }
-
-        Mat newResult = new Mat();
-        if (!isClockwise) {
-            rotate(oldResult.nativeObj , newResult.nativeObj , 360 - mAngle , mScale);
-        } else {
-            rotate(oldResult.nativeObj , newResult.nativeObj , mAngle , mScale);
-        }
-
-        return newResult;
-    }
 
     @Override
     public String toString() {

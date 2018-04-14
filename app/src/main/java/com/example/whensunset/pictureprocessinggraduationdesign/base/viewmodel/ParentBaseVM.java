@@ -53,7 +53,7 @@ public abstract class ParentBaseVM extends ChildBaseVM {
         }
     }
 
-    protected void initChildBaseVM(ParentBaseVM parentBaseVM , ChildBaseVM childBaseVM , int childBaseVMPosition) {
+    protected void initChildBaseVM(ChildBaseVM childBaseVM , int childBaseVMPosition) {
         mChildBaseVMMap.put(childBaseVMPosition , childBaseVM);
     }
 
@@ -67,14 +67,15 @@ public abstract class ParentBaseVM extends ChildBaseVM {
     }
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
+    public void onCleared() {
+        super.onCleared();
         for (Integer integer:mChildBaseVMMap.keySet()) {
             ChildBaseVM childBaseVM = mChildBaseVMMap.get(integer);
             if (childBaseVM.isNeedDestroy()) {
-                childBaseVM.onDestroy();
-                MyLog.d(TAG, "onDestroy", "状态:", childBaseVM.getRealClassName() + "被销毁了");
+                childBaseVM.onCleared();
+                MyLog.d(TAG, "onCleared", "状态:", childBaseVM.getRealClassName() + "被销毁了");
             }
         }
     }
+
 }

@@ -5,6 +5,7 @@
 
     <data>
         <variable name="viewModel" type="com.example.whensunset.pictureprocessinggraduationdesign.viewModel.includeLayoutVM.PictureParamMenuVM"/>
+        <variable name="bindingVisibility" type="java.lang.Integer"/>
         <import type="com.example.whensunset.pictureprocessinggraduationdesign.viewModel.includeLayoutVM.PictureParamMenuVM"/>
         <import type="android.view.View"/>
 
@@ -18,6 +19,7 @@
         bind:bindingHeight="@{PictureParamMenuVM.MENU_HEIGHT}"
         bind:bindingWidth="@{PictureParamMenuVM.MENU_WIDTH}"
 
+        android:visibility="@{bindingVisibility}"
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">

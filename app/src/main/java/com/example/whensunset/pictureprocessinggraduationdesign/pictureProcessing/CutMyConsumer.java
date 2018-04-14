@@ -2,7 +2,6 @@ package com.example.whensunset.pictureprocessinggraduationdesign.pictureProcessi
 
 import com.example.whensunset.pictureprocessinggraduationdesign.base.util.MyLog;
 import com.example.whensunset.pictureprocessinggraduationdesign.impl.BaseMyConsumer;
-import com.example.whensunset.pictureprocessinggraduationdesign.impl.LinkedMyConsumer;
 
 import org.opencv.core.Mat;
 import org.opencv.core.Rect;
@@ -11,13 +10,12 @@ import org.opencv.core.Rect;
  * Created by whensunset on 2018/3/8.
  */
 
-public class CutMyConsumer extends LinkedMyConsumer {
+public class CutMyConsumer extends BaseMyConsumer {
     public static final String TAG = "何时夕:CutMyConsumer";
 
     private Rect mRect;
 
     public CutMyConsumer(Rect rect) {
-        super(null , null);
         mRect = rect;
     }
 
@@ -82,16 +80,7 @@ public class CutMyConsumer extends LinkedMyConsumer {
 
     private native void cut(long in_mat_addr , long out_mat_addr , int x , int y , int width , int height);
 
-    @Override
-    public Mat undo(Mat oldResult) {
-        if (mPreviousConsumer == null) {
-            MyLog.d(TAG, "undo", "状态:" , "已经是最第一个 consumer 了");
-            return oldResult;
-        }
-        return mPreviousConsumer.onNewResult(oldResult);
-    }
-
-    public Rect getRect() {
+   public Rect getRect() {
         return mRect;
     }
 

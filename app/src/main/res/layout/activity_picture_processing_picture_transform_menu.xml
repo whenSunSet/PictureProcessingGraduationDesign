@@ -5,11 +5,13 @@
 
     <data>
         <variable name="viewModel" type="com.example.whensunset.pictureprocessinggraduationdesign.viewModel.includeLayoutVM.PictureTransformMenuVM"/>
+        <variable name="bindingVisibility" type="java.lang.Integer"/>
         <import type="com.example.whensunset.pictureprocessinggraduationdesign.viewModel.includeLayoutVM.PictureTransformMenuVM"/>
 
     </data>
 
     <FrameLayout
+        android:visibility="@{bindingVisibility}"
         bind:bindingLeftPadding="@{PictureTransformMenuVM.MENU_PADDING}"
         bind:bindingRightPadding="@{PictureTransformMenuVM.MENU_PADDING}"
 

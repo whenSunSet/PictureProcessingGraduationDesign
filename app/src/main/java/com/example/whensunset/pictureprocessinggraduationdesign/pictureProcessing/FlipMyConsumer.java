@@ -2,7 +2,6 @@ package com.example.whensunset.pictureprocessinggraduationdesign.pictureProcessi
 
 import com.example.whensunset.pictureprocessinggraduationdesign.base.util.MyLog;
 import com.example.whensunset.pictureprocessinggraduationdesign.impl.BaseMyConsumer;
-import com.example.whensunset.pictureprocessinggraduationdesign.impl.UndoMyConsumer;
 
 import org.opencv.core.Mat;
 
@@ -10,8 +9,8 @@ import org.opencv.core.Mat;
  * Created by whensunset on 2018/3/8.
  */
 
-public class FlipMyConsumer extends UndoMyConsumer {
-    public static final String TAG = "何时夕:UndoMyConsumer";
+public class FlipMyConsumer extends BaseMyConsumer {
+    public static final String TAG = "何时夕:FlipMyConsumer";
 
     public static final int VERTICAL = 0;
     public static final int HORIZONTAL = 1;
@@ -59,11 +58,6 @@ public class FlipMyConsumer extends UndoMyConsumer {
 
         FlipMyConsumer beCopyConsumer = (FlipMyConsumer) baseMyConsumer;
         this.mFlipCode = beCopyConsumer.mFlipCode;
-    }
-
-    @Override
-    public Mat undo(Mat oldResult) {
-        return onNewResultImpl(oldResult);
     }
 
     @Override

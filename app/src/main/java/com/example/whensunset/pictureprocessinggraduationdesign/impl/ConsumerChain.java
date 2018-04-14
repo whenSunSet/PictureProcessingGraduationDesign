@@ -319,9 +319,6 @@ public abstract class ConsumerChain<T> implements Chain<T , Mat> {
                 break;
             }
         }
-        if (nowConsumer instanceof LinkedMyConsumer) {
-            ((LinkedMyConsumer) nowConsumer).mNextConsumer = null;
-        }
 
         int needRemoveSize = mConsumerList.size() - needRemove;
         for (int i = 0; i < needRemoveSize; i++) {

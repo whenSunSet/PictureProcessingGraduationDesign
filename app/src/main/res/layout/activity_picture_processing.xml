@@ -163,27 +163,35 @@
             android:layout_above="@id/tab"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
-
-            <include
-                layout="@layout/activity_picture_processing_picture_transform_menu"
+            
+            <ViewStub
+                android:id="@+id/viewstub"
+                android:layout="@layout/activity_picture_processing_picture_transform_menu"
                 bind:viewModel="@{viewModel.getPictureTransformMenuVM()}"
                 android:visibility="@{(viewModel.mSelectTab == PictureProcessingActivityVM.SELECT_PICTURE_TRANSFORM) ? View.VISIBLE : View.GONE}"
-                android:id="@+id/picture_transform_menu">
-            </include>
+                bind:bindingVisibility="@{(viewModel.mSelectTab == PictureProcessingActivityVM.SELECT_PICTURE_TRANSFORM) ? View.VISIBLE : View.GONE}"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
 
-            <include
-                layout="@layout/activity_picture_processing_picture_param_menu"
-                bind:viewModel="@{viewModel.getPictureParamMenuVM()æ}"
+            <ViewStub
+                android:id="@+id/picture_param_menu"
+                android:layout="@layout/activity_picture_processing_picture_param_menu"
+                bind:viewModel="@{viewModel.getPictureParamMenuVM()}"
                 android:visibility="@{(viewModel.mSelectTab == PictureProcessingActivityVM.SELECT_PICTURE_PARAM) ? View.VISIBLE : View.GONE}"
-                android:id="@+id/picture_param_menu">
-            </include>
 
-            <include
-                layout="@layout/activity_picture_processing_picture_seekbar_recycleview_menu"
+                bind:bindingVisibility="@{(viewModel.mSelectTab == PictureProcessingActivityVM.SELECT_PICTURE_PARAM) ? View.VISIBLE : View.GONE}"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+            <ViewStub
+                android:id="@+id/picture_seekbar_recycleview_menu"
+                android:layout="@layout/activity_picture_processing_picture_seekbar_recycleview_menu"
                 bind:viewModel="@{viewModel.mNowBaseSeekBarRecycleViewVM}"
                 android:visibility="@{(viewModel.mSelectTab == PictureProcessingActivityVM.SELECT_PICTURE_FRAME || viewModel.mSelectTab == PictureProcessingActivityVM.SELECT_PICTURE_TEXT || viewModel.mSelectTab == PictureProcessingActivityVM.SELECT_PICTURE_FILTER) ? View.VISIBLE : View.GONE}"
-                android:id="@+id/picture_seekbar_recycleview_menu">
-            </include>
+
+                bind:bindingVisibility="@{(viewModel.mSelectTab == PictureProcessingActivityVM.SELECT_PICTURE_FRAME || viewModel.mSelectTab == PictureProcessingActivityVM.SELECT_PICTURE_TEXT || viewModel.mSelectTab == PictureProcessingActivityVM.SELECT_PICTURE_FILTER) ? View.VISIBLE : View.GONE}"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
 
         </FrameLayout>
 

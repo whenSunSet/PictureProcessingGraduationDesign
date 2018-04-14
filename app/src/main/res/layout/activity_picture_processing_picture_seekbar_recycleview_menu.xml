@@ -5,6 +5,8 @@
 
     <data>
         <variable name="viewModel" type="com.example.whensunset.pictureprocessinggraduationdesign.base.BaseSeekBarRecycleViewVM"/>
+        <variable name="bindingVisibility" type="java.lang.Integer"/>
+
         <import type="com.example.whensunset.pictureprocessinggraduationdesign.dataBindingUtil.LayoutManager"/>
         <import type="com.example.whensunset.pictureprocessinggraduationdesign.dataBindingUtil.ItemDecoration"/>
         <import type="android.view.View"/>
@@ -13,6 +15,7 @@
     </data>
 
     <LinearLayout
+        android:visibility="@{bindingVisibility}"
         bind:bindingBottomPadding="@{BaseSeekBarRecycleViewVM.MENU_PADDING}"
         bind:bindingHeight="@{BaseSeekBarRecycleViewVM.MENU_HEIGHT}"
         bind:bindingWidth="@{BaseSeekBarRecycleViewVM.MENU_WIDTH}"
