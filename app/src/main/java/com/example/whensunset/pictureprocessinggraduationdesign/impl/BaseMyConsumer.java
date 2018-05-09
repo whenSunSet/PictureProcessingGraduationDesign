@@ -20,9 +20,12 @@ public abstract class BaseMyConsumer implements MyConsumer<Mat , Mat> {
     @Override
     public Mat onNewResult(Mat oldResult) {
         try {
+            if (mNowResult != null && isSaveNowResult) {
+                return mNowResult.clone();
+            }
             Mat nowResult = onNewResultImpl(oldResult);
             if (isSaveNowResult) {
-                mNowResult = nowResult;
+                mNowResult = nowResult.clone();
             }
             return nowResult;
         } catch (Exception e) {
@@ -96,6 +99,12 @@ public abstract class BaseMyConsumer implements MyConsumer<Mat , Mat> {
     protected void onUnhandledException(Exception e) {
         MyLog.d(TAG, "onUnhandledException", "class:e.getMessage():e.toString():" , this.getClass().getName() , e.getMessage() , e.toString());
         Log.d("何时夕:BaseMyConsumer" + this.getClass() , ("Consumer 抛出异常:" + e.getMessage() + " " + e.toString()));
+    }
+
+    protected void destroy() {
+        if (isSaveNowResult && mNowResult != null) {
+            mNowResult.release();
+        }
     }
 
 }

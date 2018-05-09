@@ -3,6 +3,7 @@ package com.example.whensunset.pictureprocessinggraduationdesign.pictureProcessi
 import com.example.whensunset.pictureprocessinggraduationdesign.base.util.MyLog;
 import com.example.whensunset.pictureprocessinggraduationdesign.impl.BaseMyConsumer;
 import com.example.whensunset.pictureprocessinggraduationdesign.pictureProcessing.filteraction.FilterAction;
+import com.example.whensunset.pictureprocessinggraduationdesign.pictureProcessing.filteraction.StarryNightFilterAction;
 
 import org.opencv.core.Mat;
 
@@ -17,6 +18,9 @@ public class PictureFilterMyConsumer extends BaseMyConsumer {
 
     public PictureFilterMyConsumer(FilterAction filterAction) {
         mFilterAction = filterAction;
+        if (mFilterAction instanceof StarryNightFilterAction) {
+            isSaveNowResult = true;
+        }
     }
 
     public PictureFilterMyConsumer() {

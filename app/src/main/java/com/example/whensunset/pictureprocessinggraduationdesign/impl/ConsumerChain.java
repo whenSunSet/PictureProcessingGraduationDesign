@@ -15,6 +15,7 @@ import java.util.List;
 
 import io.reactivex.Flowable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 
 /**
@@ -323,7 +324,8 @@ public abstract class ConsumerChain<T> implements Chain<T , Mat> {
         int needRemoveSize = mConsumerList.size() - needRemove;
         for (int i = 0; i < needRemoveSize; i++) {
             MyLog.d(TAG, "removeAfterUndoRedoPointConsumer", "状态:needRemoveSize:i" , "移除一个consumer" , needRemoveSize , i);
-            mConsumerList.remove(needRemove);
+            BaseMyConsumer removedConsumer = mConsumerList.remove(needRemove);
+            removedConsumer.destroy();
         }
     }
 
@@ -339,6 +341,10 @@ public abstract class ConsumerChain<T> implements Chain<T , Mat> {
 
     @Override
     public void destroy() {
+        for (BaseMyConsumer removedConsumer : mConsumerList) {
+            removedConsumer.destroy();
+        }
+
         mConsumerList.clear();
         mConsumerPoint = -1;
         mFirstMat = null;
@@ -352,54 +358,70 @@ public abstract class ConsumerChain<T> implements Chain<T , Mat> {
 
     public Flowable<Mat> rxRunStartConvenient(BaseMyConsumer... consumers) {
         return rxRunStart(consumers)
-                .observeOn(Schedulers.io())
-                .subscribeOn(AndroidSchedulers.mainThread());
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
     }
 
     public Flowable<Mat> rxRunStart(BaseMyConsumer... consumers) {
-        return Flowable.just(runStart(consumers));
+        return Flowable.just(consumers)
+                .map(this::runStart);
     }
 
     public Flowable<Mat> rxRunNextConvenient(BaseMyConsumer consumer) {
         return rxRunNext(consumer)
                 .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread());
+                .observeOn(Schedulers.io());
+
     }
 
     public Flowable<Mat> rxRunNext(BaseMyConsumer consumer) {
-        return Flowable.just(runNext(consumer));
+        return Flowable.just(consumer)
+                .map(this::runNext);
     }
 
 
     public Flowable<Mat> rxRunNowConvenient(BaseMyConsumer consumer) {
         return rxRunNow(consumer)
-                .observeOn(Schedulers.io())
-                .subscribeOn(AndroidSchedulers.mainThread());
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
     }
 
     public Flowable<Mat> rxRunNow(BaseMyConsumer consumer) {
-        return Flowable.just(runNow(consumer));
+        return Flowable.just(consumer)
+                .map(this::runNow);
     }
 
 
     public Flowable<Mat> rxUndoConvenient() {
-        return Flowable.just(undo())
-                .observeOn(Schedulers.io())
-                .subscribeOn(AndroidSchedulers.mainThread());
+        return rxUndo()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
     }
 
     public Flowable<Mat> rxUndo() {
-        return Flowable.just(undo());
+        return Flowable.just("1")
+                .map(new Function<Object, Mat>() {
+                    @Override
+                    public Mat apply(Object o) throws Exception {
+                        return undo();
+                    }
+                });
     }
 
     public Flowable<Mat> rxRedoConvenient() {
-        return Flowable.just(redo())
-                .observeOn(Schedulers.io())
-                .subscribeOn(AndroidSchedulers.mainThread());
+        return rxRedo()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
     }
 
     public Flowable<Mat> rxRedo() {
-        return Flowable.just(redo());
+        return Flowable.just("1")
+                .map(new Function<String, Mat>() {
+                    @Override
+                    public Mat apply(String s) throws Exception {
+                        return redo();
+                    }
+                });
     }
 
     public List<BaseMyConsumer> getConsumerList() {

@@ -20,6 +20,7 @@ import com.example.whensunset.pictureprocessinggraduationdesign.mete.ColorPicker
 import com.example.whensunset.pictureprocessinggraduationdesign.mete.CutView;
 import com.example.whensunset.pictureprocessinggraduationdesign.mete.MoveFrameLayout;
 import com.example.whensunset.pictureprocessinggraduationdesign.pictureProcessing.filteraction.FilterAction;
+import com.example.whensunset.pictureprocessinggraduationdesign.pictureProcessing.filteraction.StarryNightFilterAction;
 import com.facebook.drawee.backends.pipeline.Fresco;
 import com.facebook.drawee.backends.pipeline.PipelineDraweeController;
 import com.facebook.drawee.view.SimpleDraweeView;
@@ -38,6 +39,7 @@ import java.util.List;
 import static com.example.whensunset.pictureprocessinggraduationdesign.mete.CutView.CUT_MODEL;
 import static com.example.whensunset.pictureprocessinggraduationdesign.mete.CutView.INSERT_IMAGE_MODEL;
 import static com.example.whensunset.pictureprocessinggraduationdesign.mete.CutView.INSERT_TEXT_MODEL;
+import static org.opencv.imgcodecs.Imgcodecs.IMREAD_COLOR;
 
 /**
  * Created by Administrator on 2016/12/6 0006.
@@ -198,14 +200,21 @@ public class BindingAdapters {
             public void process(Bitmap bitmap) {
                 Mat newMat = new Mat();
 
-                filterAction.filter(Imgcodecs.imread(path) , newMat);
-                Mat matRgba = MyUtil.matBgrToRgba(newMat);
-                Utils.matToBitmap(matRgba , bitmap);
+                if (filterAction instanceof StarryNightFilterAction) {
+                    Mat firstMatBGR = Imgcodecs.imread(path , IMREAD_COLOR);
+                    Utils.matToBitmap(firstMatBGR , bitmap);
 
-                MyLog.d(TAG, "setFilterImage", "状态:newMat:filterAction:", "在fresco内部使用滤镜处理图片" , newMat , filterAction);
+                } else {
+                    filterAction.filter(Imgcodecs.imread(path) , newMat);
+                    Mat matRgba = MyUtil.matBgrToRgba(newMat);
+                    Utils.matToBitmap(matRgba , bitmap);
 
-                newMat.release();
-                matRgba.release();
+                    MyLog.d(TAG, "setFilterImage", "状态:newMat:filterAction:", "在fresco内部使用滤镜处理图片" , newMat , filterAction);
+
+                    newMat.release();
+                    matRgba.release();
+                }
+
             }
         };
 

@@ -60,6 +60,11 @@ dependencies {
     compile 'com.facebook.fresco:fresco:1.8.1'
     compile 'com.tbruyelle.rxpermissions2:rxpermissions:0.9.3@aar'
     compile project(":openCVLibrary340")
+
+    compile 'com.squareup.retrofit2:retrofit:2.0.2'
+    // Retrofit库
+    compile 'com.squareup.okhttp3:okhttp:3.1.2'
+    // Okhttp库
 }
 repositories {
     mavenCentral()

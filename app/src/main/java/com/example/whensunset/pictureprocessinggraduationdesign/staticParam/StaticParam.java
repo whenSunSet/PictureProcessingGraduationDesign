@@ -22,7 +22,12 @@ public interface StaticParam {
     String MY_PHOTO_SHOP_DIRECTORY = Environment.getExternalStorageDirectory() + "/MyPhotoShopDirectory";
 
     String FONT_EDIT_VIEW_IMAGE =  CACHE_DIRECTORY + "/picture_text_font_edit_view.png";
+    String UPLOAD_IMAGE =  CACHE_DIRECTORY + "/upload_image.jpg";
+    String DOWNLOAD_IMAGE =  CACHE_DIRECTORY + "/download_image.jpg";
     String SHARE_IMAGE =  MY_SHARE_DIRECTORY + "/share_image.jpg";
+    String IP =  "http://192.168.198.210:8000/";
+
+
 
     // 将资源变成文件形式
     Map<String , Integer> NeedToFileImageNameMap = new HashMap<>();

@@ -15,10 +15,12 @@ public interface FilterAction {
     List<FilterAction> FILTER_ACTION_LIST = new ArrayList<>();
 
     static void init() {
+
         FilterAction.addFilterAction(CarvingFilterAction.getInstance());
         FilterAction.addFilterAction(ReliefFilterAction.getInstance());
         FilterAction.addFilterAction(NostalgiaFilterAction.getInstance());
         FilterAction.addFilterAction(ComicBooksFilterAction.getInstance());
+        FilterAction.addFilterAction(StarryNightFilterAction.getInstance());
     }
 
     static void addFilterAction(FilterAction filterAction) {
