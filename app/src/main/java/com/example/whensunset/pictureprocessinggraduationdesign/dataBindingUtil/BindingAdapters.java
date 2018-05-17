@@ -20,7 +20,7 @@ import com.example.whensunset.pictureprocessinggraduationdesign.mete.ColorPicker
 import com.example.whensunset.pictureprocessinggraduationdesign.mete.CutView;
 import com.example.whensunset.pictureprocessinggraduationdesign.mete.MoveFrameLayout;
 import com.example.whensunset.pictureprocessinggraduationdesign.pictureProcessing.filteraction.FilterAction;
-import com.example.whensunset.pictureprocessinggraduationdesign.pictureProcessing.filteraction.StarryNightFilterAction;
+import com.example.whensunset.pictureprocessinggraduationdesign.pictureProcessing.filteraction.AIFilterAction;
 import com.facebook.drawee.backends.pipeline.Fresco;
 import com.facebook.drawee.backends.pipeline.PipelineDraweeController;
 import com.facebook.drawee.view.SimpleDraweeView;
@@ -39,7 +39,6 @@ import java.util.List;
 import static com.example.whensunset.pictureprocessinggraduationdesign.mete.CutView.CUT_MODEL;
 import static com.example.whensunset.pictureprocessinggraduationdesign.mete.CutView.INSERT_IMAGE_MODEL;
 import static com.example.whensunset.pictureprocessinggraduationdesign.mete.CutView.INSERT_TEXT_MODEL;
-import static org.opencv.imgcodecs.Imgcodecs.IMREAD_COLOR;
 
 /**
  * Created by Administrator on 2016/12/6 0006.
@@ -188,7 +187,6 @@ public class BindingAdapters {
         if (sampleMatUri == null) {
             throw new RuntimeException("示例图片uri要放入");
         }
-        String path = Uri.parse(sampleMatUri).getPath();
         MyLog.d(TAG, "setFilterImage", "状态:filterAction:sampleMatUri:", "" , filterAction , sampleMatUri);
         Postprocessor filterActionPostprocessor = new BasePostprocessor() {
             @Override
@@ -198,13 +196,9 @@ public class BindingAdapters {
 
             @Override
             public void process(Bitmap bitmap) {
+                String path = Uri.parse(sampleMatUri).getPath();
                 Mat newMat = new Mat();
-
-                if (filterAction instanceof StarryNightFilterAction) {
-                    Mat firstMatBGR = Imgcodecs.imread(path , IMREAD_COLOR);
-                    Utils.matToBitmap(firstMatBGR , bitmap);
-
-                } else {
+                if (!(filterAction instanceof AIFilterAction)){
                     filterAction.filter(Imgcodecs.imread(path) , newMat);
                     Mat matRgba = MyUtil.matBgrToRgba(newMat);
                     Utils.matToBitmap(matRgba , bitmap);
@@ -214,7 +208,6 @@ public class BindingAdapters {
                     newMat.release();
                     matRgba.release();
                 }
-
             }
         };
 

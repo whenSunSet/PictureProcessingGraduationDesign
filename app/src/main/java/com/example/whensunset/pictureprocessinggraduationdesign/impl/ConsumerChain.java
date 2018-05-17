@@ -370,7 +370,7 @@ public abstract class ConsumerChain<T> implements Chain<T , Mat> {
     public Flowable<Mat> rxRunNextConvenient(BaseMyConsumer consumer) {
         return rxRunNext(consumer)
                 .subscribeOn(Schedulers.io())
-                .observeOn(Schedulers.io());
+                .observeOn(AndroidSchedulers.mainThread());
 
     }
 

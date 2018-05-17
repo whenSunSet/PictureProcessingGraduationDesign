@@ -12,7 +12,7 @@ import com.example.whensunset.pictureprocessinggraduationdesign.base.viewmodel.I
 import com.example.whensunset.pictureprocessinggraduationdesign.pictureProcessing.PictureFilterMyConsumer;
 import com.example.whensunset.pictureprocessinggraduationdesign.pictureProcessing.StringConsumerChain;
 import com.example.whensunset.pictureprocessinggraduationdesign.pictureProcessing.filteraction.FilterAction;
-import com.example.whensunset.pictureprocessinggraduationdesign.staticParam.StaticParam;
+import com.example.whensunset.pictureprocessinggraduationdesign.pictureProcessing.filteraction.AIFilterAction;
 
 import org.opencv.core.Mat;
 
@@ -20,9 +20,12 @@ import java.io.File;
 import java.util.List;
 
 import io.reactivex.Flowable;
+import io.reactivex.functions.Consumer;
 
 import static com.example.whensunset.pictureprocessinggraduationdesign.staticParam.ObserverMapKey.PictureFilterItemVM_mFilterAction;
 import static com.example.whensunset.pictureprocessinggraduationdesign.staticParam.ObserverMapKey.PictureFilterItemVM_mat;
+import static com.example.whensunset.pictureprocessinggraduationdesign.staticParam.StaticParam.PICTURE_FILTER_SAMPLE_IMAGE;
+import static com.example.whensunset.pictureprocessinggraduationdesign.staticParam.StaticParam.STARRY_NIGHT_IMAGE;
 
 
 /**
@@ -39,7 +42,7 @@ public class PictureFilterMenuVM extends BaseSeekBarRecycleViewVM<PictureFilterM
     public PictureFilterMenuVM() {
         super(3 , BR.viewModel , R.layout.activity_picture_processing_picture_filter_item);
 
-        mSampleImageUri = Uri.fromFile(new File(StaticParam.PICTURE_FILTER_SAMPLE_IMAGE)).toString();
+        mSampleImageUri = Uri.fromFile(new File(PICTURE_FILTER_SAMPLE_IMAGE)).toString();
         initItemVM();
         initClick();
     }
@@ -48,7 +51,16 @@ public class PictureFilterMenuVM extends BaseSeekBarRecycleViewVM<PictureFilterM
     protected void initItemVM() {
         final int[] position = {0};
         Flowable.fromIterable(FilterAction.getAllFilterAction())
-                .subscribe(filterAction -> mDataItemList.add(new PictureFilterItemVM(mEventListenerList , false , position[0]++ , filterAction , mSampleImageUri)));
+                .subscribe(new Consumer<FilterAction>() {
+                    @Override
+                    public void accept(FilterAction filterAction) throws Exception {
+                        if (filterAction instanceof AIFilterAction) {
+                            mDataItemList.add(new PictureFilterItemVM(mEventListenerList , false , position[0]++ , filterAction , Uri.fromFile(new File(STARRY_NIGHT_IMAGE)).toString()));
+                        } else {
+                            mDataItemList.add(new PictureFilterItemVM(mEventListenerList , false , position[0]++ , filterAction , mSampleImageUri));
+                        }
+                    }
+                });
     }
 
     @Override

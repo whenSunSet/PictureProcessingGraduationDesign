@@ -33,18 +33,21 @@ public class MainActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        final boolean[] isAllowedPermission = {false};
         RxPermissions rxPermissions = new RxPermissions(this);
         rxPermissions.requestEach(
                 Manifest.permission.READ_EXTERNAL_STORAGE ,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 .filter(permission -> permission.granted)
                 .subscribe(permission -> {
+                    if (!isAllowedPermission[0]) {
+                        mMainActivityBinding = DataBindingUtil.setContentView(MainActivity.this , R.layout.activity_main);
+                        mMainActivityVM = getViewModel(MainActivityVM.class);
+                        mMainActivityBinding.setViewModel(mMainActivityVM);
 
-                    mMainActivityBinding = DataBindingUtil.setContentView(MainActivity.this , R.layout.activity_main);
-                    mMainActivityVM = getViewModel(MainActivityVM.class);
-                    mMainActivityBinding.setViewModel(mMainActivityVM);
-
-                    registeredViewModelFiledsObserver();
+                        registeredViewModelFiledsObserver();
+                    }
+                    isAllowedPermission[0] = true;
                 });
     }
 

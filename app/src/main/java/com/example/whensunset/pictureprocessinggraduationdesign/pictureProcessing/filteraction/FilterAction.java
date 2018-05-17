@@ -20,7 +20,7 @@ public interface FilterAction {
         FilterAction.addFilterAction(ReliefFilterAction.getInstance());
         FilterAction.addFilterAction(NostalgiaFilterAction.getInstance());
         FilterAction.addFilterAction(ComicBooksFilterAction.getInstance());
-        FilterAction.addFilterAction(StarryNightFilterAction.getInstance());
+        FilterAction.addFilterAction(AIFilterAction.getInstance());
     }
 
     static void addFilterAction(FilterAction filterAction) {

@@ -114,6 +114,9 @@ public class PictureProcessingActivity extends BaseActivity {
                         .setPositiveButton("确定", (dialog, which) -> PictureProcessingActivity.this.finish());
                 builder.create().show();
                 return true;
+            } else {
+                PictureProcessingActivity.this.finish();
+                return true;
             }
         }
         return super.onKeyDown(keyCode, event);

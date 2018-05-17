@@ -237,21 +237,21 @@ public class PictureProcessingActivityVM extends ParentBaseVM {
     private void clickUndo() {
         mStringConsumerChain
                 .rxUndoConvenient()
-                .subscribe(this::showMat);
-
-        getPictureParamMenuVM().fresh();
-
-        MyLog.d(TAG, "clickUndo", "状态:", "undo完毕");
+                .subscribe(mat -> {
+                    showMat(mat);
+                    getPictureParamMenuVM().fresh();
+                    MyLog.d(TAG, "clickUndo", "状态:", "undo完毕");
+                });
     }
 
     private void clickRedo() {
         mStringConsumerChain
                 .rxRedoConvenient()
-                .subscribe(this::showMat);
-
-        getPictureParamMenuVM().fresh();
-
-        MyLog.d(TAG, "clickRedo", "状态:", "redo完毕");
+                .subscribe(mat -> {
+                    showMat(mat);
+                    getPictureParamMenuVM().fresh();
+                    MyLog.d(TAG, "clickRedo", "状态:", "redo完毕");
+                });
     }
 
     private void clickBack(int position) {

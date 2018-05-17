@@ -31,6 +31,7 @@ public class PictureParamMenuVM extends ChildBaseVM{
 
     public static final int PROGRESS_MAX = 100;
     public static final int LISTENER_SIZE = 5;
+    public static final int PROGRESS_THROTTLE_MILLISECONDS = 100;
 
     public static final int MENU_PADDING = 10;
     public static final int MENU_ITEM_SIZE = 4;
@@ -98,7 +99,7 @@ public class PictureParamMenuVM extends ChildBaseVM{
 
     private void initProgressChanged() {
         mUIActionManager
-                .<ProgressChangedUIAction>getDefaultThrottleFlowable(PROGRESS_CHANGED_ACTION)
+                .<ProgressChangedUIAction>getDefaultThrottleFlowable(PROGRESS_THROTTLE_MILLISECONDS, PROGRESS_CHANGED_ACTION)
                 .filter(progressChangedUIAction -> {
                     int progress = progressChangedUIAction.getProgress();
                     mParamList.set(mNowSelectListenerPosition.get() , progress);

@@ -65,6 +65,8 @@ dependencies {
     // Retrofit库
     compile 'com.squareup.okhttp3:okhttp:3.1.2'
     // Okhttp库
+
+    compile 'org.tensorflow:tensorflow-android:+'
 }
 repositories {
     mavenCentral()
