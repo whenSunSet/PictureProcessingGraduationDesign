@@ -13,7 +13,9 @@ public class TextChangedUIAction extends BaseUIAction {
     private CharSequence mNowText;
 
     @Override
-    public void onTriggerListener(int eventListenerPosition , BaseVM baseVM , Object... params) {
+    public void onTriggerListener(int eventListenerPosition , BaseVM baseVM , UIActionManager.CallAllPreEventAction callAllPreEventAction, UIActionManager.CallAllAfterEventAction callAllAfterEventAction, Object... params) {
+        super.onTriggerListener(eventListenerPosition , baseVM , callAllPreEventAction, callAllAfterEventAction, params);
+
         CharSequence changedText = (CharSequence) params[0];
         mLastEventListenerPosition = eventListenerPosition;
         mNowText = changedText;

@@ -6,13 +6,15 @@ import android.net.Uri;
 import com.example.whensunset.pictureprocessinggraduationdesign.BR;
 import com.example.whensunset.pictureprocessinggraduationdesign.R;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.BaseSeekBarRecycleViewVM;
+import com.example.whensunset.pictureprocessinggraduationdesign.base.uiaction.ClickUIAction;
+import com.example.whensunset.pictureprocessinggraduationdesign.base.uiaction.UIActionManager;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.util.MyLog;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.util.ObserverParamMap;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.viewmodel.ItemBaseVM;
 import com.example.whensunset.pictureprocessinggraduationdesign.pictureProcessing.PictureFilterMyConsumer;
 import com.example.whensunset.pictureprocessinggraduationdesign.pictureProcessing.StringConsumerChain;
-import com.example.whensunset.pictureprocessinggraduationdesign.pictureProcessing.filteraction.FilterAction;
 import com.example.whensunset.pictureprocessinggraduationdesign.pictureProcessing.filteraction.AIFilterAction;
+import com.example.whensunset.pictureprocessinggraduationdesign.pictureProcessing.filteraction.FilterAction;
 
 import org.opencv.core.Mat;
 
@@ -20,12 +22,12 @@ import java.io.File;
 import java.util.List;
 
 import io.reactivex.Flowable;
-import io.reactivex.functions.Consumer;
 
+import static com.example.whensunset.pictureprocessinggraduationdesign.base.uiaction.UIActionManager.CLICK_ACTION;
+import static com.example.whensunset.pictureprocessinggraduationdesign.staticParam.ObserverMapKey.PictureFilterItemVM_CallAllAfterEventAction;
 import static com.example.whensunset.pictureprocessinggraduationdesign.staticParam.ObserverMapKey.PictureFilterItemVM_mFilterAction;
 import static com.example.whensunset.pictureprocessinggraduationdesign.staticParam.ObserverMapKey.PictureFilterItemVM_mat;
 import static com.example.whensunset.pictureprocessinggraduationdesign.staticParam.StaticParam.PICTURE_FILTER_SAMPLE_IMAGE;
-import static com.example.whensunset.pictureprocessinggraduationdesign.staticParam.StaticParam.STARRY_NIGHT_IMAGE;
 
 
 /**
@@ -45,20 +47,18 @@ public class PictureFilterMenuVM extends BaseSeekBarRecycleViewVM<PictureFilterM
         mSampleImageUri = Uri.fromFile(new File(PICTURE_FILTER_SAMPLE_IMAGE)).toString();
         initItemVM();
         initClick();
+        initProgressChanged();
     }
 
     @Override
     protected void initItemVM() {
         final int[] position = {0};
         Flowable.fromIterable(FilterAction.getAllFilterAction())
-                .subscribe(new Consumer<FilterAction>() {
-                    @Override
-                    public void accept(FilterAction filterAction) throws Exception {
-                        if (filterAction instanceof AIFilterAction) {
-                            mDataItemList.add(new PictureFilterItemVM(mEventListenerList , false , position[0]++ , filterAction , Uri.fromFile(new File(STARRY_NIGHT_IMAGE)).toString()));
-                        } else {
-                            mDataItemList.add(new PictureFilterItemVM(mEventListenerList , false , position[0]++ , filterAction , mSampleImageUri));
-                        }
+                .subscribe(filterAction -> {
+                    if (filterAction instanceof AIFilterAction) {
+                        mDataItemList.add(new PictureFilterItemVM(mEventListenerList , false , position[0]++ , filterAction , ((AIFilterAction) filterAction).getImageUri()));
+                    } else {
+                        mDataItemList.add(new PictureFilterItemVM(mEventListenerList , false , position[0]++ , filterAction , mSampleImageUri));
                     }
                 });
     }
@@ -71,6 +71,8 @@ public class PictureFilterMenuVM extends BaseSeekBarRecycleViewVM<PictureFilterM
                 return;
             }
             FilterAction filterAction = ObserverParamMap.staticGetValue(observable , PictureFilterItemVM_mFilterAction);
+            UIActionManager.CallAllAfterEventAction callAllAfterEventAction = ObserverParamMap.staticGetValue(observable , PictureFilterItemVM_CallAllAfterEventAction);
+
             PictureFilterMyConsumer pictureFilterMyConsumer = new PictureFilterMyConsumer(filterAction);
             Flowable<Mat> flowable;
             if (isRunNow) {
@@ -83,6 +85,10 @@ public class PictureFilterMenuVM extends BaseSeekBarRecycleViewVM<PictureFilterM
                 ObserverParamMap observerParamMap = ObserverParamMap
                         .staticSet(PictureFilterItemVM_mat , mat1);
                 mEventListenerList.get(CLICK_ITEM).set(observerParamMap);
+
+                if (callAllAfterEventAction != null) {
+                    callAllAfterEventAction.callAllAfterEventAction();
+                }
                 MyLog.d(TAG, "useFilter", "状态:observerParamMap:", "" , observerParamMap);
             });
             MyLog.d(TAG, "initClick", "状态:filterAction:isRunNow:isShowYesNo:", "调用滤镜" , filterAction , isRunNow , true);
@@ -126,15 +132,17 @@ public class PictureFilterMenuVM extends BaseSeekBarRecycleViewVM<PictureFilterM
         }
 
         private void initClickAction() {
-            getDefaultClickThrottleFlowable()
-                    .filter(clickPosition -> {
+            mUIActionManager
+                    .<ClickUIAction>getDefaultThrottleFlowable(CLICK_ACTION)
+                    .filter(clickUIAction -> {
                         MyLog.d(TAG, "initClickAction", "状态:isAdd:mFilterAction", "判断当前的item是否是 add" , isAdd , mFilterAction);
                         return (!isAdd && mFilterAction != null);
-                    }).subscribe(clickPosition -> {
+                    }).subscribe(clickUIAction -> {
                         ObserverParamMap observerParamMap = getPositionParamMap()
-                                .set(PictureFilterItemVM_mFilterAction , mFilterAction);
+                                .set(PictureFilterItemVM_mFilterAction , mFilterAction)
+                                .set(PictureFilterItemVM_CallAllAfterEventAction, clickUIAction.getCallAllAfterEventAction());
                         mEventListenerList.get(CLICK_ITEM).set(observerParamMap);
-                        MyLog.d(TAG, "initClickAction", "状态:observerParamMap:clickPosition", "" , observerParamMap , clickPosition);
+                        MyLog.d(TAG, "initClickAction", "状态:observerParamMap:clickPosition", "" , observerParamMap , clickUIAction.getLastEventListenerPosition());
                     });
         }
 

@@ -18,8 +18,10 @@ public class ItemSelectedUIAction extends BaseUIAction{
     private int mSelectedItemPosition = -1;
 
     @Override
-    public void onTriggerListener(int eventListenerPosition , BaseVM baseVM , Object... params) {
+    public void onTriggerListener(int eventListenerPosition , BaseVM baseVM , UIActionManager.CallAllPreEventAction callAllPreEventAction, UIActionManager.CallAllAfterEventAction callAllAfterEventAction, Object... params) {
+        super.onTriggerListener(eventListenerPosition , baseVM , callAllPreEventAction, callAllAfterEventAction, params);
         int position = (int) params[0];
+        mCallAllAfterEventAction = callAllAfterEventAction;
         ItemManagerBaseVM<ItemBaseVM> itemManagerBaseVM = (ItemManagerBaseVM<ItemBaseVM>) baseVM;
         ObservableList<ItemBaseVM> dataItemList = itemManagerBaseVM.mDataItemList;
         if (dataItemList.size() <= position) {

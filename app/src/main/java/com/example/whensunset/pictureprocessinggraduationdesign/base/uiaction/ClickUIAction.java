@@ -12,8 +12,11 @@ public class ClickUIAction extends BaseUIAction {
     private UIActionListener<ClickUIAction> mOnClickListener = null;
 
     @Override
-    public void onTriggerListener(int eventListenerPosition , BaseVM baseVM , Object... params) {
+    public void onTriggerListener(int eventListenerPosition , BaseVM baseVM , UIActionManager.CallAllPreEventAction callAllPreEventAction, UIActionManager.CallAllAfterEventAction callAllAfterEventAction, Object... params) {
+        super.onTriggerListener(eventListenerPosition , baseVM , callAllPreEventAction, callAllAfterEventAction, params);
+
         mLastEventListenerPosition = eventListenerPosition;
+        mCallAllAfterEventAction = callAllAfterEventAction;
 
         if (mOnClickListener != null) {
             mOnClickListener.onUIActionChanged(this);

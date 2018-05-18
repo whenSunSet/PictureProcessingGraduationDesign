@@ -18,6 +18,9 @@ public interface UIAction {
 
     void setListener(UIActionListener<? extends UIAction> listener);
 
-    void onTriggerListener(int eventListenerPosition , BaseVM baseVM , Object... params);
+    void onTriggerListener(int eventListenerPosition , BaseVM baseVM , UIActionManager.CallAllPreEventAction callAllPreEventAction, UIActionManager.CallAllAfterEventAction callAllAfterEventAction, Object... params);
+
+    UIActionManager.CallAllAfterEventAction getCallAllAfterEventAction();
+    UIActionManager.CallAllPreEventAction getCallAllPreEventAction();
 
 }

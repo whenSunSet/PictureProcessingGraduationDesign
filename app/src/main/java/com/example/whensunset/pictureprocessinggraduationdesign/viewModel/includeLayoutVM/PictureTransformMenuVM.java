@@ -1,5 +1,6 @@
 package com.example.whensunset.pictureprocessinggraduationdesign.viewModel.includeLayoutVM;
 
+import com.example.whensunset.pictureprocessinggraduationdesign.base.uiaction.ClickUIAction;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.util.MyLog;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.util.MyUtil;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.util.ObserverParamMap;
@@ -14,6 +15,7 @@ import com.example.whensunset.pictureprocessinggraduationdesign.pictureProcessin
 
 import org.opencv.core.Rect;
 
+import static com.example.whensunset.pictureprocessinggraduationdesign.base.uiaction.UIActionManager.CLICK_ACTION;
 import static com.example.whensunset.pictureprocessinggraduationdesign.pictureProcessing.RotateMyConsumer.ROTATE_ANGLE_90;
 import static com.example.whensunset.pictureprocessinggraduationdesign.staticParam.ObserverMapKey.PictureFrameItemVM_mat;
 import static com.example.whensunset.pictureprocessinggraduationdesign.staticParam.ObserverMapKey.PictureTransformMenuVM_mat;
@@ -49,8 +51,10 @@ public class PictureTransformMenuVM extends ChildBaseVM implements CutView.OnLim
     }
 
     private void initClick() {
-        getDefaultClickThrottleFlowable()
-                .subscribe(position -> {
+        mUIActionManager
+                .<ClickUIAction>getDefaultThrottleFlowable(CLICK_ACTION)
+                .subscribe(clickUIAction -> {
+                    int position = clickUIAction.getLastEventListenerPosition();
                     BaseMyConsumer consumer = null;
                     switch (position) {
                         case SELECT_PICTURE_ROTATE:
@@ -66,12 +70,15 @@ public class PictureTransformMenuVM extends ChildBaseVM implements CutView.OnLim
                             consumer = new WhiteBalanceMyConsumer();
                             break;
                         case SELECT_PICTURE_CUT:
-                            break;
+                            clickUIAction.getCallAllAfterEventAction().callAllAfterEventAction();
+                            return;
                     }
                     mStringConsumerChain
                             .rxRunNextConvenient(consumer)
                             .subscribe(mat -> {
                                 mEventListenerList.get(position).set(ObserverParamMap.staticSet(PictureTransformMenuVM_mat, mat));
+
+                                clickUIAction.getCallAllAfterEventAction().callAllAfterEventAction();
                             });
 
                     MyLog.d(TAG, "initClickAction", "状态:consumer:", "" , consumer);

@@ -135,4 +135,16 @@ public abstract class BaseVM extends ViewModel{
     public boolean isNeedDestroy() {
         return true;
     }
+
+    public void isEventEnable(boolean isEnable) {
+        mUIActionManager.setEnable(isEnable);
+    }
+
+    public void beJoinedPreActionToEvent(UIActionManager.PreEventAction preEventAction){
+        mUIActionManager.setPreEventAction(preEventAction);
+    }
+
+    public void beJoinedAfterActionToEvent(UIActionManager.AfterEventAction afterEventAction){
+        mUIActionManager.setAfterEventAction(afterEventAction);
+    }
 }

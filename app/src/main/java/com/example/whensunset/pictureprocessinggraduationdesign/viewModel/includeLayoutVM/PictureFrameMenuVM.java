@@ -8,7 +8,9 @@ import com.example.whensunset.pictureprocessinggraduationdesign.BR;
 import com.example.whensunset.pictureprocessinggraduationdesign.R;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.BaseSeekBarRecycleViewVM;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.IImageUriFetch;
+import com.example.whensunset.pictureprocessinggraduationdesign.base.uiaction.ClickUIAction;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.uiaction.ProgressChangedUIAction;
+import com.example.whensunset.pictureprocessinggraduationdesign.base.uiaction.UIActionManager;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.util.MyLog;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.util.ObserverParamMap;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.viewmodel.ItemBaseVM;
@@ -24,10 +26,12 @@ import java.util.List;
 
 import io.reactivex.Flowable;
 
+import static com.example.whensunset.pictureprocessinggraduationdesign.base.uiaction.UIActionManager.CLICK_ACTION;
 import static com.example.whensunset.pictureprocessinggraduationdesign.base.uiaction.UIActionManager.PROGRESS_CHANGED_ACTION;
+import static com.example.whensunset.pictureprocessinggraduationdesign.staticParam.ObserverMapKey.PictureFrameItemVM_CallAllAfterEventAction;
 import static com.example.whensunset.pictureprocessinggraduationdesign.staticParam.ObserverMapKey.PictureFrameItemVM_frameImagePath;
 import static com.example.whensunset.pictureprocessinggraduationdesign.staticParam.ObserverMapKey.PictureFrameItemVM_mat;
-import static com.example.whensunset.pictureprocessinggraduationdesign.staticParam.StaticParam.PICTURE_FRAME_ADD;
+import static com.example.whensunset.pictureprocessinggraduationdesign.staticParam.StaticParam.PICTURE_FRAME_ADD_IMAGE;
 
 
 /**
@@ -53,7 +57,7 @@ public class PictureFrameMenuVM extends BaseSeekBarRecycleViewVM<PictureFrameMen
     protected void initItemVM() {
         mDataItemList.clear();
 
-        PictureFrameItemVM firstPictureFrameItemVM = new PictureFrameItemVM(mEventListenerList , Uri.fromFile(new File(PICTURE_FRAME_ADD)).toString() , 0 , true);
+        PictureFrameItemVM firstPictureFrameItemVM = new PictureFrameItemVM(mEventListenerList , Uri.fromFile(new File(PICTURE_FRAME_ADD_IMAGE)).toString() , 0 , true);
         mDataItemList.add(firstPictureFrameItemVM);
 
         final int[] nowPosition = {1};
@@ -67,8 +71,11 @@ public class PictureFrameMenuVM extends BaseSeekBarRecycleViewVM<PictureFrameMen
     protected void initClick() {
         initListener(this, (observable, i) -> {
             String frameImagePath = ObserverParamMap.staticGetValue(observable , PictureFrameItemVM_frameImagePath);
+            UIActionManager.CallAllAfterEventAction callAllAfterEventAction = ObserverParamMap.staticGetValue(observable , PictureFrameItemVM_CallAllAfterEventAction);
             mInsertImagePath.set(frameImagePath);
-
+            if (callAllAfterEventAction != null) {
+                callAllAfterEventAction.callAllAfterEventAction();
+            }
             MyLog.d(TAG, "initItemListener", "状态:selectPosition:frameImagePath:", "" , frameImagePath);
         }, CLICK_ITEM);
     }
@@ -91,15 +98,18 @@ public class PictureFrameMenuVM extends BaseSeekBarRecycleViewVM<PictureFrameMen
         nowInsertImageRect = mStringConsumerChain.getNowRect();
     }
 
-    public void runInsertImage() {
+    public void runInsertImage(UIActionManager.CallAllAfterEventAction callAllAfterEventAction) {
         if (!TextUtils.isEmpty(mInsertImagePath.get())) {
             PictureFrameMyConsumer consumer = new PictureFrameMyConsumer(mSelectParam.get() , mInsertImagePath.get() , nowInsertImageRect);
             mStringConsumerChain
                     .rxRunNextConvenient(consumer)
-                    .subscribe(mat -> mEventListenerList.get(LEAVE_BSBRV_VM_LISTENER).set(ObserverParamMap.staticSet(PictureFrameItemVM_mat , mat)));
+                    .subscribe(mat -> {
+                        mEventListenerList.get(LEAVE_BSBRV_VM_LISTENER).set(ObserverParamMap.staticSet(PictureFrameItemVM_mat , mat));
+                        callAllAfterEventAction.callAllAfterEventAction();
+                    });
         }
 
-        MyLog.d(TAG, "runInsertImage", "状态:mInsertImagePath:", "在离开frame的时候进行图片插入" , mInsertImagePath.get());
+        MyLog.d(TAG, "runInsertImage", "状态:mInsertImagePath:mSelectParam:", "在离开frame的时候进行图片插入" , mInsertImagePath.get(), mSelectParam.get());
     }
 
     private Rect nowInsertImageRect = new Rect();
@@ -135,17 +145,15 @@ public class PictureFrameMenuVM extends BaseSeekBarRecycleViewVM<PictureFrameMen
         }
 
         private void initClick() {
-            getDefaultClickThrottleFlowable()
-                    .filter(position -> {
+            mUIActionManager
+                    .<ClickUIAction>getDefaultThrottleFlowable(CLICK_ACTION)
+                    .filter(clickUIAction -> {
                         MyLog.d(TAG, "initClick", "状态:isAdd", "判断当前的item是否是 add" , isAdd);
                         return !isAdd;
-                    }).map(position -> {
-                        String frameImagePath = Uri.parse(mImageUri.get()).getPath();
-                        MyLog.d(TAG, "initClick", "状态:position:frameImagePath:", "" , position , frameImagePath);
-                        return frameImagePath;
-                    }).subscribe(frameImagePath -> {
+                    }).subscribe(clickUIAction -> {
                         ObserverParamMap observerParamMap = getPositionParamMap()
-                                .set(PictureFrameItemVM_frameImagePath , frameImagePath);
+                                .set(PictureFrameItemVM_frameImagePath , Uri.parse(mImageUri.get()).getPath())
+                                .set(PictureFrameItemVM_CallAllAfterEventAction, clickUIAction.getCallAllAfterEventAction());
                         mEventListenerList.get(CLICK_ITEM).set(observerParamMap);
                         MyLog.d(TAG, "initClick", "状态:observerParamMap:", "结束了为图片添加图片框" , observerParamMap);
                     });

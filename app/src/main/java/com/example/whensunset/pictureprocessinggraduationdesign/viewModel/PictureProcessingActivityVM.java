@@ -9,6 +9,8 @@ import android.support.v4.content.FileProvider;
 
 import com.example.whensunset.pictureprocessinggraduationdesign.PictureProcessingApplication;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.BaseSeekBarRecycleViewVM;
+import com.example.whensunset.pictureprocessinggraduationdesign.base.uiaction.ClickUIAction;
+import com.example.whensunset.pictureprocessinggraduationdesign.base.uiaction.UIActionManager;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.util.MyLog;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.util.MyUtil;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.util.ObserverParamMap;
@@ -30,7 +32,12 @@ import org.opencv.core.Mat;
 
 import java.io.File;
 
+import io.reactivex.Flowable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
+
 import static com.example.whensunset.pictureprocessinggraduationdesign.base.BaseSeekBarRecycleViewVM.LEAVE_BSBRV_VM_LISTENER;
+import static com.example.whensunset.pictureprocessinggraduationdesign.base.uiaction.UIActionManager.CLICK_ACTION;
 import static com.example.whensunset.pictureprocessinggraduationdesign.base.viewmodel.ItemManagerBaseVM.CLICK_ITEM;
 import static com.example.whensunset.pictureprocessinggraduationdesign.mete.CutView.CUT_MODEL;
 import static com.example.whensunset.pictureprocessinggraduationdesign.mete.CutView.INSERT_IMAGE_MODEL;
@@ -43,6 +50,7 @@ import static com.example.whensunset.pictureprocessinggraduationdesign.staticPar
 import static com.example.whensunset.pictureprocessinggraduationdesign.staticParam.ObserverMapKey.PictureTextItemVM_mat;
 import static com.example.whensunset.pictureprocessinggraduationdesign.staticParam.ObserverMapKey.PictureTransformMenuVM_mat;
 import static com.example.whensunset.pictureprocessinggraduationdesign.staticParam.ObserverMapKey.PictureTransformMenuVM_position;
+import static com.example.whensunset.pictureprocessinggraduationdesign.staticParam.StaticParam.LOADING_GIF;
 import static com.example.whensunset.pictureprocessinggraduationdesign.staticParam.StaticParam.SHARE_IMAGE;
 import static com.example.whensunset.pictureprocessinggraduationdesign.viewModel.includeLayoutVM.PictureParamMenuVM.PARAM_PROGRESS_CHANGE;
 import static com.example.whensunset.pictureprocessinggraduationdesign.viewModel.includeLayoutVM.PictureParamMenuVM.SELECT_BRIGHTNESS;
@@ -89,6 +97,9 @@ public class PictureProcessingActivityVM extends ParentBaseVM {
     public final ObservableField<Boolean> mCanUndo = new ObservableField<>(false);
     public final ObservableField<Boolean> mCanRedo = new ObservableField<>(false);
     public final ObservableField<Boolean> mIsShowYesNo = new ObservableField<>(false);
+    public final ObservableField<Boolean> mIsInLoading = new ObservableField<>(false);
+    public final ObservableField<String> mLoadingGifUri = new ObservableField<>(Uri.fromFile(new File(LOADING_GIF)).toString());
+    public final ObservableField<String> mLoadingText = new ObservableField<>("处理中...");
     public final ObservableField<CutView.OnLimitRectChangedListener> mCutViewListener = new ObservableField<>();
     public final ObservableField<BaseSeekBarRecycleViewVM> mNowBaseSeekBarRecycleViewVM = new ObservableField<>();
 
@@ -114,6 +125,32 @@ public class PictureProcessingActivityVM extends ParentBaseVM {
         initClick();
 
         changeNowChildVM(getPictureFilterMenuVM());
+
+        joinPreActionToMyAllVM((eventListenerPosition, uiActionFlag, baseVM, params) -> {
+            if (uiActionFlag == CLICK_ACTION) {
+                mIsInLoading.set(true);
+                isEventEnable(false);
+
+                if (baseVM instanceof PictureFilterMenuVM.PictureFilterItemVM) {
+                    mLoadingText.set("AI算法处理中...");
+                }
+            }
+            MyLog.d(TAG, "doPreAction", "状态:", "PictureProcessingActivityVM前置了操作");
+        });
+
+        joinAfterActionToMyAllVM((eventListenerPosition, uiActionFlag, baseVM, params) -> {
+            if (uiActionFlag == CLICK_ACTION){
+                mIsInLoading.set(false);
+                isEventEnable(true);
+
+                if (baseVM instanceof PictureFilterMenuVM.PictureFilterItemVM) {
+                    mLoadingText.set("处理中...");
+                }
+            }
+            MyLog.d(TAG, "doPreAction", "状态:", "PictureProcessingActivityVM后置了操作");
+        });
+
+
         MyLog.d(TAG, "PictureProcessingActivityVM", "imageUri:", imageUri );
     }
 
@@ -171,32 +208,51 @@ public class PictureProcessingActivityVM extends ParentBaseVM {
     }
 
     private void initClick() {
-        getDefaultClickThrottleFlowable()
-                .filter(position -> {
+        mUIActionManager
+                .<ClickUIAction>getDefaultThrottleFlowable(CLICK_ACTION)
+                .filter(clickUIAction -> {
+                    int position = clickUIAction.getLastEventListenerPosition();
                     if (position == CLICK_UNDO) {
-                        clickUndo();
+                        clickUndo(clickUIAction.getCallAllAfterEventAction());
                         return false;
                     } else if (position == CLICK_REDO) {
-                        clickRedo();
+                        clickRedo(clickUIAction.getCallAllAfterEventAction());
                         return false;
                     } else if (position == CLICK_BACK) {
                         clickBack(position);
+                        clickUIAction.getCallAllAfterEventAction().callAllAfterEventAction();
                         return false;
                     } else if (position == CLICK_YES) {
-                        clickYes();
+                        clickYes(clickUIAction.getCallAllAfterEventAction());
                         return false;
                     } else if (position == CLICK_NO) {
                         clickNo();
+                        clickUIAction.getCallAllAfterEventAction().callAllAfterEventAction();
                         return false;
                     } else if (position == CLICK_SHARE) {
-                        clickShare();
+                        Flowable.fromArray(1)
+                                .map(integer -> clickShare())
+                                .subscribeOn(Schedulers.io())
+                                .observeOn(AndroidSchedulers.mainThread())
+                                .subscribe(intent -> {
+                                    mEventListenerList.get(CLICK_SHARE).set(ObserverParamMap.staticSet(PictureProcessingActivityVM_intent , intent));
+                                    clickUIAction.getCallAllAfterEventAction().callAllAfterEventAction();
+                                });
                         return false;
                     } else if (position == CLICK_SAVE) {
-                        clickSave();
+                        Flowable.fromArray(1)
+                                .map(integer -> clickSave())
+                                .subscribeOn(Schedulers.io())
+                                .observeOn(AndroidSchedulers.mainThread())
+                                .subscribe(imageDirectory -> {
+                                    showToast("该图片被储存在：" + imageDirectory + " 文件夹中");
+                                    clickUIAction.getCallAllAfterEventAction().callAllAfterEventAction();
+                                });
                         return false;
                     }
                     return true;
-                }).subscribe(position -> {
+                }).subscribe(clickUIAction -> {
+                    int position = clickUIAction.getLastEventListenerPosition();
                     ChildBaseVM childBaseVM = getChildBaseVM(position);
                     switch (position) {
                         case SELECT_PICTURE_FILTER:
@@ -226,30 +282,33 @@ public class PictureProcessingActivityVM extends ParentBaseVM {
                             break;
                     }
 
-            mSelectTab.set(position);
-            if (mIsShowYesNo.get()) {
-                clickYes();
-            }
-            changeNowChildVM(childBaseVM);
-        });
+                    mSelectTab.set(position);
+//                    if (mIsShowYesNo.get()) {
+//                        clickYes();
+//                    }
+                    changeNowChildVM(childBaseVM);
+                    clickUIAction.getCallAllAfterEventAction().callAllAfterEventAction();
+                });
     }
 
-    private void clickUndo() {
+    private void clickUndo(UIActionManager.CallAllAfterEventAction callAllAfterEventAction) {
         mStringConsumerChain
                 .rxUndoConvenient()
                 .subscribe(mat -> {
                     showMat(mat);
                     getPictureParamMenuVM().fresh();
+                    callAllAfterEventAction.callAllAfterEventAction();
                     MyLog.d(TAG, "clickUndo", "状态:", "undo完毕");
                 });
     }
 
-    private void clickRedo() {
+    private void clickRedo(UIActionManager.CallAllAfterEventAction callAllAfterEventAction) {
         mStringConsumerChain
                 .rxRedoConvenient()
                 .subscribe(mat -> {
                     showMat(mat);
                     getPictureParamMenuVM().fresh();
+                    callAllAfterEventAction.callAllAfterEventAction();
                     MyLog.d(TAG, "clickRedo", "状态:", "redo完毕");
                 });
     }
@@ -258,14 +317,15 @@ public class PictureProcessingActivityVM extends ParentBaseVM {
         mEventListenerList.get(position).set(ObserverParamMap.staticSet(PictureTransformMenuVM_position , CLICK_BACK));
     }
 
-    private void clickYes() {
+    private void clickYes(UIActionManager.CallAllAfterEventAction callAllAfterEventAction) {
         if (mNowChildBaseVM == getPictureFilterMenuVM()) {
             getPictureFilterMenuVM().setRunNow(false);
+            callAllAfterEventAction.callAllAfterEventAction();
         } else if (mNowChildBaseVM == getPictureFrameMenuVM()) {
-            getPictureFrameMenuVM().runInsertImage();
+            getPictureFrameMenuVM().runInsertImage(callAllAfterEventAction);
             getPictureFrameMenuVM().mInsertImagePath.set("");
         } else if (mNowChildBaseVM == getPictureTextMenuVM()) {
-            getPictureTextMenuVM().runInsertText();
+            getPictureTextMenuVM().runInsertText(callAllAfterEventAction);
         }
 
         if (mNowChildBaseVM instanceof ItemManagerBaseVM) {
@@ -283,7 +343,7 @@ public class PictureProcessingActivityVM extends ParentBaseVM {
         } else if (mNowChildBaseVM == getPictureFrameMenuVM()) {
             getPictureFrameMenuVM().mInsertImagePath.set("");
         } else if (mNowChildBaseVM == getPictureTextMenuVM()) {
-            getPictureTextMenuVM().mText.set("");;
+            getPictureTextMenuVM().mText.set("");
         }
 
         if (mNowChildBaseVM instanceof ItemManagerBaseVM) {
@@ -292,7 +352,7 @@ public class PictureProcessingActivityVM extends ParentBaseVM {
         mIsShowYesNo.set(false);
     }
 
-    private void clickShare() {
+    private Intent clickShare() {
         MyUtil.saveBitmap(mImageBitMap.get() , SHARE_IMAGE);
 
         Intent intent = new Intent(Intent.ACTION_SEND);
@@ -310,12 +370,13 @@ public class PictureProcessingActivityVM extends ParentBaseVM {
         intent.putExtra(Intent.EXTRA_STREAM , data);
         intent.putExtra(Intent.EXTRA_SUBJECT, "分享");
         intent.putExtra(Intent.EXTRA_TEXT, "分享了一张图片");
-        mEventListenerList.get(CLICK_SHARE).set(ObserverParamMap.staticSet(PictureProcessingActivityVM_intent , intent));
+
 
         MyLog.d(TAG, "clickShare", "状态:", "");
+        return intent;
     }
 
-    private void clickSave() {
+    private String clickSave() {
 
         String imageName = mImagePath.substring(mImagePath.lastIndexOf("/") + 1);
         String imageDirectory = StaticParam.MY_PHOTO_SHOP_DIRECTORY;
@@ -330,12 +391,13 @@ public class PictureProcessingActivityVM extends ParentBaseVM {
         saveImagePath.append(imageNames[1]);
         MyUtil.saveBitmap(mImageBitMap.get() , saveImagePath.toString());
 
-        showToast("该图片被储存在：" + imageDirectory + " 文件夹中");
+
         ObservableField<? extends Object> observableField = mEventListenerList.get(CLICK_SAVE);
         observableField.set(null);
         observableField.notifyChange();
         MyLog.d(TAG, "clickShare", "状态:imageName:imageNames:imageDirectory:saveImagePath:",
                 "" , imageName , imageNames ,imageDirectory , saveImagePath.toString());
+        return imageDirectory;
     }
 
     private void showMat(Mat mat) {

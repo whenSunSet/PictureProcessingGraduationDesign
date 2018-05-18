@@ -22,9 +22,12 @@ public interface StaticParam {
     String AI_PROCCESSED_IMAGE =  MY_SHARE_DIRECTORY + "/ai_processed_image.jpg";
     String IP =  "http://192.168.198.210:8000/";
 
-    public static String PICTURE_FILTER_SAMPLE_IMAGE = CACHE_DIRECTORY + "/picture_filter_sample_image.jpg";
-    public static String PICTURE_FRAME_ADD = CACHE_DIRECTORY + "/picture_frame_add.png";
-    public static String STARRY_NIGHT_IMAGE = CACHE_DIRECTORY + "/starry_night_image.jpg";
+    String PICTURE_FILTER_SAMPLE_ASSET_IMAGE_NAME = "picture_filter_sample_image.jpg";
+    String PICTURE_FRAME_ADD_ASSET_IMAGE_NAME = "picture_frame_add.png";
+    String LOADING_ASSET_GIF_NAME = "loading.gif";
 
+    String PICTURE_FILTER_SAMPLE_IMAGE = CACHE_DIRECTORY + "/picture_filter_sample_image.jpg";
+    String PICTURE_FRAME_ADD_IMAGE = CACHE_DIRECTORY + "/picture_frame_add.png";
+    String LOADING_GIF = CACHE_DIRECTORY + "/loading.gif";
 
 }

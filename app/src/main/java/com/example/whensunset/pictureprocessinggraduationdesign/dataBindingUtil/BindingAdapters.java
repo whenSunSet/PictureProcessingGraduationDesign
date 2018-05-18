@@ -19,10 +19,11 @@ import com.example.whensunset.pictureprocessinggraduationdesign.base.util.MyUtil
 import com.example.whensunset.pictureprocessinggraduationdesign.mete.ColorPickerView;
 import com.example.whensunset.pictureprocessinggraduationdesign.mete.CutView;
 import com.example.whensunset.pictureprocessinggraduationdesign.mete.MoveFrameLayout;
-import com.example.whensunset.pictureprocessinggraduationdesign.pictureProcessing.filteraction.FilterAction;
 import com.example.whensunset.pictureprocessinggraduationdesign.pictureProcessing.filteraction.AIFilterAction;
+import com.example.whensunset.pictureprocessinggraduationdesign.pictureProcessing.filteraction.FilterAction;
 import com.facebook.drawee.backends.pipeline.Fresco;
 import com.facebook.drawee.backends.pipeline.PipelineDraweeController;
+import com.facebook.drawee.interfaces.DraweeController;
 import com.facebook.drawee.view.SimpleDraweeView;
 import com.facebook.imagepipeline.common.ResizeOptions;
 import com.facebook.imagepipeline.request.BasePostprocessor;
@@ -74,6 +75,15 @@ public class BindingAdapters {
     @BindingAdapter("bitmap")
     public static void setBitMap(ImageView view , Bitmap bitmap) {
         view.setImageBitmap(bitmap);
+    }
+
+    @BindingAdapter("animationUri")
+    public static void setAnimationUri(SimpleDraweeView simpleDraweeView , String uri) {
+        DraweeController controller = Fresco.newDraweeControllerBuilder()
+                .setUri(uri)
+                .setAutoPlayAnimations(true)
+                .build();
+        simpleDraweeView.setController(controller);
     }
 
     @BindingAdapter("typeface")
@@ -199,6 +209,7 @@ public class BindingAdapters {
                 String path = Uri.parse(sampleMatUri).getPath();
                 Mat newMat = new Mat();
                 if (!(filterAction instanceof AIFilterAction)){
+
                     filterAction.filter(Imgcodecs.imread(path) , newMat);
                     Mat matRgba = MyUtil.matBgrToRgba(newMat);
                     Utils.matToBitmap(matRgba , bitmap);

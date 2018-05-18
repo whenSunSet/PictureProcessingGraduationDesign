@@ -4,6 +4,7 @@ import android.databinding.ObservableArrayList;
 import android.databinding.ObservableField;
 import android.databinding.ObservableList;
 
+import com.example.whensunset.pictureprocessinggraduationdesign.base.uiaction.UIActionManager;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.util.MyLog;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.util.ObserverParamMap;
 import com.example.whensunset.pictureprocessinggraduationdesign.dataBindingUtil.ItemViewArg;
@@ -83,6 +84,43 @@ public abstract class ItemManagerBaseVM <T extends ItemBaseVM> extends ChildBase
                 return viewCount;
             }
         };
+    }
+
+    public void joinPreActionToMyAllVM(UIActionManager.PreEventAction preEventAction) {
+        joinPreActionToAllChildVM(preEventAction);
+        beJoinedPreActionToEvent(preEventAction);
+    }
+
+    public void joinAfterActionToMyAllVM(UIActionManager.AfterEventAction afterEventAction) {
+        joinAfterActionToAllChildVM(afterEventAction);
+        beJoinedAfterActionToEvent(afterEventAction);
+    }
+
+    public void joinPreActionToAllChildVM(UIActionManager.PreEventAction preEventAction) {
+        for (int i = 0; i < mDataItemList.size(); i++) {
+            ItemBaseVM itemBaseVM = mDataItemList.get(i);
+            itemBaseVM.beJoinedPreActionToEvent(preEventAction);
+        }
+    }
+
+    public void joinAfterActionToAllChildVM(UIActionManager.AfterEventAction afterEventAction) {
+        for (int i = 0; i < mDataItemList.size(); i++) {
+            ItemBaseVM itemBaseVM = mDataItemList.get(i);
+            itemBaseVM.beJoinedAfterActionToEvent(afterEventAction);
+        }
+    }
+
+    @Override
+    public void isEventEnable(boolean isEnable) {
+        super.isEventEnable(isEnable);
+        controlChildVMEventIsEnable(isEnable);
+    }
+
+    public void controlChildVMEventIsEnable(boolean isEnable) {
+        for (int i = 0; i < mDataItemList.size(); i++) {
+            ItemBaseVM itemBaseVM = mDataItemList.get(i);
+            itemBaseVM.isEventEnable(isEnable);
+        }
     }
 
     @Override

@@ -2,20 +2,23 @@ package com.example.whensunset.pictureprocessinggraduationdesign.viewModel.inclu
 
 import android.databinding.ObservableField;
 
+import com.example.whensunset.pictureprocessinggraduationdesign.base.uiaction.ClickUIAction;
+import com.example.whensunset.pictureprocessinggraduationdesign.base.uiaction.ProgressChangedUIAction;
+import com.example.whensunset.pictureprocessinggraduationdesign.base.uiaction.UIActionManager;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.util.MyLog;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.util.MyUtil;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.util.ObserverParamMap;
-import com.example.whensunset.pictureprocessinggraduationdesign.base.uiaction.ProgressChangedUIAction;
-import com.example.whensunset.pictureprocessinggraduationdesign.base.uiaction.UIActionManager;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.viewmodel.ChildBaseVM;
 import com.example.whensunset.pictureprocessinggraduationdesign.impl.BaseMyConsumer;
 import com.example.whensunset.pictureprocessinggraduationdesign.pictureProcessing.PictureParamMyConsumer;
 import com.example.whensunset.pictureprocessinggraduationdesign.pictureProcessing.StringConsumerChain;
 
+import org.opencv.core.Mat;
+
 import java.util.ArrayList;
 import java.util.List;
 
-import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.Flowable;
 
 import static com.example.whensunset.pictureprocessinggraduationdesign.base.uiaction.UIActionManager.CLICK_ACTION;
 import static com.example.whensunset.pictureprocessinggraduationdesign.base.uiaction.UIActionManager.PROGRESS_CHANGED_ACTION;
@@ -74,9 +77,10 @@ public class PictureParamMenuVM extends ChildBaseVM{
     }
 
     private void initClick() {
-        getDefaultClickThrottleFlowable()
-                .subscribe(position -> {
-                    mNowSelectListenerPosition.set(position);
+        mUIActionManager
+                .<ClickUIAction>getDefaultThrottleFlowable(CLICK_ACTION)
+                .subscribe(clickUIAction -> {
+                    mNowSelectListenerPosition.set(clickUIAction.getLastEventListenerPosition());
                     mSelectParam.set(mParamList.get(mNowSelectListenerPosition.get()));
                     isInTonal.set(false);
 
@@ -92,6 +96,7 @@ public class PictureParamMenuVM extends ChildBaseVM{
                             break;
                     }
 
+                    clickUIAction.getCallAllAfterEventAction().callAllAfterEventAction();
                     MyLog.d(TAG, "onTextChanged", "状态:mNowSelectListenerPosition:mSelectParam:mParamList:",
                             "切换了需要变化了图片参数" , mNowSelectListenerPosition , mSelectParam.get() , mParamList);
                 });
@@ -112,19 +117,21 @@ public class PictureParamMenuVM extends ChildBaseVM{
                         }
                     }
                     return false;
-                }).flatMap(progressChangedUIAction -> {
+                }).subscribe(progressChangedUIAction -> {
                     MyLog.d(TAG, "apply", "状态:isRunNow", "判断是否runNow" , isRunNow);
+                    Flowable<Mat> flowable = null;
                     PictureParamMyConsumer pictureParamMyConsumer = new PictureParamMyConsumer(mParamList);
                     if (isRunNow) {
-                        return mStringConsumerChain.rxRunNow(pictureParamMyConsumer);
+                        flowable = mStringConsumerChain.rxRunNowConvenient(pictureParamMyConsumer);
                     } else {
                         isRunNow = true;
-                        return mStringConsumerChain.rxRunNext(pictureParamMyConsumer);
+                        flowable = mStringConsumerChain.rxRunNextConvenient(pictureParamMyConsumer);
                     }
-                }).observeOn(AndroidSchedulers.mainThread())
-                .subscribe(mat -> {
-                    MyLog.d(TAG, "initProgressChangedAction", "状态:mat", "修改图片参数之后，PictureParamMyConsumer运行完毕，接下来要将图片显示" , mat);
-                    mEventListenerList.get(PARAM_PROGRESS_CHANGE).set(ObserverParamMap.staticSet(PictureParamMenuVM_mat, mat));
+
+                    flowable.subscribe(mat -> {
+                        mEventListenerList.get(PARAM_PROGRESS_CHANGE).set(ObserverParamMap.staticSet(PictureParamMenuVM_mat, mat));
+                        MyLog.d(TAG, "initProgressChangedAction", "状态:mat", "修改图片参数之后，PictureParamMyConsumer运行完毕，接下来要将图片显示" , mat);
+                    });
                 });
     }
 

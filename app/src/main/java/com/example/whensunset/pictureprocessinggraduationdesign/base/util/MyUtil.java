@@ -245,4 +245,58 @@ public class MyUtil {
             return false;
         }
     }
+
+    public static Bitmap getBitmapFromAsset(String imageName){
+        Bitmap bitmap;
+        InputStream ims = null;
+        try {
+            // get input stream
+            ims = PictureProcessingApplication.getAppContext().getAssets().open(imageName);
+            // load image as Drawable
+            bitmap = BitmapFactory.decodeStream(ims);
+            // set image to ImageView
+        } catch(IOException ex) {
+            throw new RuntimeException("从asset中读取图片失败");
+        } finally {
+            try {
+                assert ims != null;
+                ims.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return bitmap;
+    }
+
+    public static void assetToFile(String imageName, String filePath){
+        InputStream ims = null;
+        FileOutputStream fileOutputStream = null;
+        try {
+            // get input stream
+            ims = PictureProcessingApplication.getAppContext().getAssets().open(imageName);
+            File file = new File(filePath);
+            if(file.exists()){
+                file.delete();
+            }
+            fileOutputStream = new FileOutputStream(filePath);
+            byte[] buffer = new byte[512];
+            int count = 0;
+            while((count = ims.read(buffer)) > 0){
+                fileOutputStream.write(buffer, 0 ,count);
+            }
+            fileOutputStream.flush();
+        } catch (IOException e) {
+            throw new RuntimeException("将asset写入文件失败");
+        } finally {
+            try {
+                if (fileOutputStream != null && ims != null) {
+                    fileOutputStream.close();
+                    ims.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+    }
 }

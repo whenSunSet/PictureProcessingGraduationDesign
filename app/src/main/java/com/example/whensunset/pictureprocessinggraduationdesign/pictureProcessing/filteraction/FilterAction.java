@@ -5,6 +5,11 @@ import org.opencv.core.Mat;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.example.whensunset.pictureprocessinggraduationdesign.pictureProcessing.filteraction.AIFilterAction.FEATHERS;
+import static com.example.whensunset.pictureprocessinggraduationdesign.pictureProcessing.filteraction.AIFilterAction.STARRY;
+import static com.example.whensunset.pictureprocessinggraduationdesign.pictureProcessing.filteraction.AIFilterAction.SUMIAO;
+import static com.example.whensunset.pictureprocessinggraduationdesign.pictureProcessing.filteraction.AIFilterAction.WAVE;
+
 /**
  * Created by whensunset on 2018/3/28.
  */
@@ -20,7 +25,11 @@ public interface FilterAction {
         FilterAction.addFilterAction(ReliefFilterAction.getInstance());
         FilterAction.addFilterAction(NostalgiaFilterAction.getInstance());
         FilterAction.addFilterAction(ComicBooksFilterAction.getInstance());
-        FilterAction.addFilterAction(AIFilterAction.getInstance());
+//        FilterAction.addFilterAction(new AIFilterAction(SCREAM));
+        FilterAction.addFilterAction(new AIFilterAction(FEATHERS));
+        FilterAction.addFilterAction(new AIFilterAction(STARRY));
+        FilterAction.addFilterAction(new AIFilterAction(WAVE));
+        FilterAction.addFilterAction(new AIFilterAction(SUMIAO));
     }
 
     static void addFilterAction(FilterAction filterAction) {

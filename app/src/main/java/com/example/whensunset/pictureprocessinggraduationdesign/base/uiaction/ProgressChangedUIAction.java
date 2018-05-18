@@ -13,7 +13,8 @@ public class ProgressChangedUIAction extends BaseUIAction{
     private int mProgress = Integer.MIN_VALUE;
 
     @Override
-    public void onTriggerListener(int eventListenerPosition , BaseVM baseVM , Object... params) {
+    public void onTriggerListener(int eventListenerPosition , BaseVM baseVM , UIActionManager.CallAllPreEventAction callAllPreEventAction, UIActionManager.CallAllAfterEventAction callAllAfterEventAction, Object... params) {
+        super.onTriggerListener(eventListenerPosition , baseVM , callAllPreEventAction, callAllAfterEventAction, params);
         int progress = (int) params[0];
         mProgress = progress;
         mLastEventListenerPosition = eventListenerPosition;

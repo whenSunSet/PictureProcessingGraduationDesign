@@ -58,12 +58,13 @@ dependencies {
     compile 'io.reactivex.rxjava2:rxjava:2.1.10'
     compile 'io.reactivex.rxjava2:rxandroid:2.0.2'
     compile 'com.facebook.fresco:fresco:1.8.1'
+    compile 'com.facebook.fresco:animated-gif:1.8.1'
     compile 'com.tbruyelle.rxpermissions2:rxpermissions:0.9.3@aar'
     compile project(":openCVLibrary340")
 
-    compile 'com.squareup.retrofit2:retrofit:2.0.2'
+    compile 'com.squareup.retrofit2:retrofit:2.2.0'
     // Retrofit库
-    compile 'com.squareup.okhttp3:okhttp:3.1.2'
+    compile 'com.squareup.okhttp3:okhttp:3.9.0'
     // Okhttp库
 
     compile 'org.tensorflow:tensorflow-android:+'

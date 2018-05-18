@@ -21,6 +21,10 @@ public interface ObserverMapKey {
     String PictureTextItemVM_mPictureTextParamDialogVM = "mPictureTextParamDialogVM";
     String PictureTextItemVM_mat = "mat";
     String PictureFilterItemVM_mFilterAction = "mFilterAction";
+    String PictureFilterItemVM_CallAllAfterEventAction = "CallAllAfterEventAction";
+    String PictureFrameItemVM_CallAllAfterEventAction = "CallAllAfterEventAction";
+    String PictureTextItemVM_CallAllAfterEventAction = "CallAllAfterEventAction";
+
     String PictureFilterItemVM_mPosition = "mPosition";
     String PictureFilterItemVM_mat = "mat";
     String PictureFilterItemVM_isShowYesNo = "isShowYesNo";

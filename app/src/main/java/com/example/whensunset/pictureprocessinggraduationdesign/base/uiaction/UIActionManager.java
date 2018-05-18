@@ -5,7 +5,9 @@ import android.annotation.SuppressLint;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.util.MyLog;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.viewmodel.BaseVM;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -25,6 +27,12 @@ public class UIActionManager {
     public static final int ITEM_SELECTED_ACTION = 1;
     public static final int PROGRESS_CHANGED_ACTION = 2;
     public static final int TEXT_CHANGED_ACTION = 3;
+
+    private boolean isEnable = true;
+
+    private List<PreEventAction> mPreEventActionList = new ArrayList<>();
+    private List<AfterEventAction> mAfterEventActionList = new ArrayList<>();
+
     @SuppressLint("UseSparseArrays")
     private static final Map<Integer , Class<? extends UIAction>> UIActionClassMap = new HashMap<>();
 
@@ -74,6 +82,11 @@ public class UIActionManager {
     }
 
     public void doUIAction(int eventListenerPosition , int uiActionFlag , Object... params) {
+        if (!isEnable) {
+            MyLog.d(TAG, "doUIAction", "状态:ViewModelName:", "本ViewModel的事件不允许被触发", mBaseVM.getRealClassName());
+            return;
+        }
+
         UIAction uiAction = getUIAction(uiActionFlag);
         mBaseVM.checkEventListenerList(eventListenerPosition);
         if (!uiAction.checkParams(params)) {
@@ -82,7 +95,24 @@ public class UIActionManager {
             throw new RuntimeException("参数校验失败，不可继续执行");
         }
 
-        uiAction.onTriggerListener(eventListenerPosition , mBaseVM , params);
+        uiAction.onTriggerListener(
+                eventListenerPosition,
+                mBaseVM,
+                () -> callPreEventAction(eventListenerPosition, uiActionFlag, mBaseVM, params),
+                () -> callAfterEventAction(eventListenerPosition, uiActionFlag, mBaseVM, params),
+                params);
+    }
+
+    private void callPreEventAction(int eventListenerPosition, int uiActionFlag, BaseVM baseVM, Object... params) {
+        for (int i = 0; i < mPreEventActionList.size(); i++) {
+            mPreEventActionList.get(i).doPreAction(eventListenerPosition, uiActionFlag, baseVM, params);
+        }
+    }
+
+    private void callAfterEventAction(int eventListenerPosition, int uiActionFlag, BaseVM baseVM, Object... params) {
+        for (int i = 0; i < mAfterEventActionList.size(); i++) {
+            mAfterEventActionList.get(i).doAfterAction(eventListenerPosition, uiActionFlag, baseVM, params);
+        }
     }
 
     private UIAction initUIAction(int type) {
@@ -107,7 +137,10 @@ public class UIActionManager {
                 .filter(uiAction -> {
                     MyLog.d(TAG, "getDefaultThrottleFlowable", "状态:uiAction", "" , uiAction);
                     return uiAction != null;
-                }).map(uiAction -> (T) uiAction);
+                }).map(uiAction -> {
+                    uiAction.getCallAllPreEventAction().callAllPreEventAction();
+                    return (T) uiAction;
+                });
     }
 
     class ViewModelThrottleOnSubscribe<T extends UIAction> implements FlowableOnSubscribe<T> {
@@ -146,5 +179,36 @@ public class UIActionManager {
         }
 
         return uiAction;
+    }
+
+    public boolean isEnable() {
+        return isEnable;
+    }
+
+    public void setEnable(boolean enable) {
+        isEnable = enable;
+    }
+
+    public interface PreEventAction{
+        void doPreAction(int eventListenerPosition, int uiActionFlag, BaseVM baseVM, Object... params);
+    }
+    public interface AfterEventAction{
+        void doAfterAction(int eventListenerPosition, int uiActionFlag, BaseVM baseVM, Object... params);
+    }
+
+    public interface CallAllAfterEventAction{
+        void callAllAfterEventAction();
+    }
+
+    public interface CallAllPreEventAction{
+        void callAllPreEventAction();
+    }
+
+    public void setPreEventAction(PreEventAction preEventAction) {
+        mPreEventActionList.add(preEventAction);
+    }
+
+    public void setAfterEventAction(AfterEventAction afterEventAction) {
+        mAfterEventActionList.add(afterEventAction);
     }
 }

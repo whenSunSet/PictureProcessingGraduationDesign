@@ -15,226 +15,256 @@
         <variable name="viewModel" type="com.example.whensunset.pictureprocessinggraduationdesign.viewModel.PictureProcessingActivityVM"/>
     </data>
 
-    <RelativeLayout
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <android.support.design.widget.AppBarLayout
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="30dp"
-            android:theme="@style/AppTheme.AppBarOverlay">
-
-            <android.support.v7.widget.Toolbar
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="?attr/colorPrimary"
-                app:popupTheme="@style/AppTheme.PopupOverlay" >
-
-               <RelativeLayout
-                   android:paddingRight="20dp"
-                   android:layout_width="match_parent"
-                   android:layout_height="match_parent">
-
-                   <ImageView
-                       android:src="@drawable/back"
-                       android:onClick="@{() -> viewModel.mUIActionManager.doClick(PictureProcessingActivityVM.CLICK_BACK)}"
-                       android:layout_centerVertical="true"
-                       android:layout_width="20dp"
-                       android:layout_height="20dp" />
-
-                   <ImageView
-                       android:src="@drawable/picture_no"
-                       android:visibility="@{viewModel.mIsShowYesNo ? View.VISIBLE : View.GONE}"
-                       android:onClick="@{() -> viewModel.mUIActionManager.doClick(PictureProcessingActivityVM.CLICK_NO)}"
-                       android:layout_centerVertical="true"
-                       android:id="@+id/no"
-                       android:layout_toLeftOf="@id/yes"
-                       android:layout_width="40dp"
-                       android:layout_height="20dp" />
-
-                   <ImageView
-                       android:src="@drawable/picture_yes"
-                       android:visibility="@{viewModel.mIsShowYesNo ? View.VISIBLE : View.GONE}"
-                       android:onClick="@{() -> viewModel.mUIActionManager.doClick(PictureProcessingActivityVM.CLICK_YES)}"
-                       android:layout_centerInParent="true"
-                       android:id="@+id/yes"
-                       android:layout_width="40dp"
-                       android:layout_height="20dp" />
-
-                   <ImageView
-                       android:src="@drawable/picture_share"
-                       android:visibility="@{viewModel.mIsShowYesNo ? View.GONE : View.VISIBLE}"
-                       android:onClick="@{() -> viewModel.mUIActionManager.doClick(PictureProcessingActivityVM.CLICK_SHARE)}"
-                       android:layout_centerVertical="true"
-                       android:id="@+id/share"
-                       android:layout_toLeftOf="@id/undo"
-                       android:layout_width="40dp"
-                       android:layout_height="20dp" />
-
-                   <ImageView
-                       android:src="@drawable/picture_save"
-                       android:visibility="@{viewModel.mIsShowYesNo ? View.GONE : View.VISIBLE}"
-                       android:onClick="@{() -> viewModel.mUIActionManager.doClick(PictureProcessingActivityVM.CLICK_SAVE)}"
-                       android:layout_centerVertical="true"
-                       android:id="@+id/save"
-                       android:layout_toLeftOf="@id/share"
-                       android:layout_width="40dp"
-                       android:layout_height="20dp" />
-
-                   <ImageView
-                       android:src="@{viewModel.mCanUndo ? @drawable/undo_white : @drawable/undo_gray}"
-                       android:visibility="@{viewModel.mIsShowYesNo ? View.GONE : View.VISIBLE}"
-                       android:clickable="@{viewModel.mCanUndo}"
-                       android:onClick="@{() -> viewModel.mUIActionManager.doClick(PictureProcessingActivityVM.CLICK_UNDO)}"
-                       android:layout_centerVertical="true"
-                       android:id="@+id/undo"
-                       android:layout_toLeftOf="@id/redo"
-                       android:layout_width="40dp"
-                       android:layout_height="20dp" />
-
-                   <ImageView
-                       android:src="@{viewModel.mCanRedo ? @drawable/redo_white : @drawable/redo_gray}"
-                       android:visibility="@{viewModel.mIsShowYesNo ? View.GONE : View.VISIBLE}"
-                       android:clickable="@{viewModel.mCanRedo}"
-                       android:onClick="@{() -> viewModel.mUIActionManager.doClick(PictureProcessingActivityVM.CLICK_REDO)}"
-                       android:layout_centerVertical="true"
-                       android:id="@+id/redo"
-                       android:layout_width="40dp"
-                       android:layout_height="20dp"
-                       android:layout_alignParentRight="true" />
-
-               </RelativeLayout>
-
-            </android.support.v7.widget.Toolbar>
-
-        </android.support.design.widget.AppBarLayout>
-
-        <FrameLayout
-            android:layout_below="@id/toolbar"
-            android:layout_above="@+id/selectMenu"
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <com.example.whensunset.pictureprocessinggraduationdesign.mete.CutView
-                android:id="@+id/pic"
-                android:background="@color/moreGray"
-                android:layout_height="match_parent"
+            <android.support.design.widget.AppBarLayout
+                android:id="@+id/toolbar"
                 android:layout_width="match_parent"
+                android:layout_height="30dp"
+                android:theme="@style/AppTheme.AppBarOverlay">
 
-                bind:insertImageAlpha="@{viewModel.getPictureFrameMenuVM().mSelectParam}"
-                bind:insertImagePath="@{viewModel.getPictureFrameMenuVM().mInsertImagePath}"
-                bind:onLimitRectChangedListener="@{viewModel.mCutViewListener}"
-                bind:onLimitMaxRectChangedListener="@{viewModel.getPictureTextMenuVM()}"
-                bind:model="@{viewModel.mCutViewModel}"
-                bind:bitmap="@{viewModel.mImageBitMap}"/>
+                <android.support.v7.widget.Toolbar
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="?attr/colorPrimary"
+                    app:popupTheme="@style/AppTheme.PopupOverlay" >
 
-            <com.example.whensunset.pictureprocessinggraduationdesign.mete.MoveFrameLayout
-                bind:onPlaceChangedListener="@{viewModel.getPictureTextMenuVM()}"
-                android:visibility="@{(viewModel.mSelectTab == PictureProcessingActivityVM.SELECT_PICTURE_TEXT) ? View.VISIBLE : View.GONE}"
-                android:background="#00000000"
-                android:layout_width="wrap_content"
-                android:layout_gravity="center"
-                android:minWidth="40dp"
-                android:minHeight="40dp"
-                android:layout_height="wrap_content">
+                    <RelativeLayout
+                        android:paddingRight="20dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent">
 
-                <com.example.whensunset.pictureprocessinggraduationdesign.mete.FontEditText
-                    android:id="@+id/picture_text_font_edit_view"
+                        <ImageView
+                            android:src="@drawable/back"
+                            android:onClick="@{() -> viewModel.mUIActionManager.doClick(PictureProcessingActivityVM.CLICK_BACK)}"
+                            android:layout_centerVertical="true"
+                            android:layout_width="20dp"
+                            android:layout_height="20dp" />
+
+                        <ImageView
+                            android:src="@drawable/picture_no"
+                            android:visibility="@{viewModel.mIsShowYesNo ? View.VISIBLE : View.GONE}"
+                            android:onClick="@{() -> viewModel.mUIActionManager.doClick(PictureProcessingActivityVM.CLICK_NO)}"
+                            android:layout_centerVertical="true"
+                            android:id="@+id/no"
+                            android:layout_toLeftOf="@id/yes"
+                            android:layout_width="40dp"
+                            android:layout_height="20dp" />
+
+                        <ImageView
+                            android:src="@drawable/picture_yes"
+                            android:visibility="@{viewModel.mIsShowYesNo ? View.VISIBLE : View.GONE}"
+                            android:onClick="@{() -> viewModel.mUIActionManager.doClick(PictureProcessingActivityVM.CLICK_YES)}"
+                            android:layout_centerInParent="true"
+                            android:id="@+id/yes"
+                            android:layout_width="40dp"
+                            android:layout_height="20dp" />
+
+                        <ImageView
+                            android:src="@drawable/picture_share"
+                            android:visibility="@{viewModel.mIsShowYesNo ? View.GONE : View.VISIBLE}"
+                            android:onClick="@{() -> viewModel.mUIActionManager.doClick(PictureProcessingActivityVM.CLICK_SHARE)}"
+                            android:layout_centerVertical="true"
+                            android:id="@+id/share"
+                            android:layout_toLeftOf="@id/undo"
+                            android:layout_width="40dp"
+                            android:layout_height="20dp" />
+
+                        <ImageView
+                            android:src="@drawable/picture_save"
+                            android:visibility="@{viewModel.mIsShowYesNo ? View.GONE : View.VISIBLE}"
+                            android:onClick="@{() -> viewModel.mUIActionManager.doClick(PictureProcessingActivityVM.CLICK_SAVE)}"
+                            android:layout_centerVertical="true"
+                            android:id="@+id/save"
+                            android:layout_toLeftOf="@id/share"
+                            android:layout_width="40dp"
+                            android:layout_height="20dp" />
+
+                        <ImageView
+                            android:src="@{viewModel.mCanUndo ? @drawable/undo_white : @drawable/undo_gray}"
+                            android:visibility="@{viewModel.mIsShowYesNo ? View.GONE : View.VISIBLE}"
+                            android:clickable="@{viewModel.mCanUndo}"
+                            android:onClick="@{() -> viewModel.mUIActionManager.doClick(PictureProcessingActivityVM.CLICK_UNDO)}"
+                            android:layout_centerVertical="true"
+                            android:id="@+id/undo"
+                            android:layout_toLeftOf="@id/redo"
+                            android:layout_width="40dp"
+                            android:layout_height="20dp" />
+
+                        <ImageView
+                            android:src="@{viewModel.mCanRedo ? @drawable/redo_white : @drawable/redo_gray}"
+                            android:visibility="@{viewModel.mIsShowYesNo ? View.GONE : View.VISIBLE}"
+                            android:clickable="@{viewModel.mCanRedo}"
+                            android:onClick="@{() -> viewModel.mUIActionManager.doClick(PictureProcessingActivityVM.CLICK_REDO)}"
+                            android:layout_centerVertical="true"
+                            android:id="@+id/redo"
+                            android:layout_width="40dp"
+                            android:layout_height="20dp"
+                            android:layout_alignParentRight="true" />
+
+                    </RelativeLayout>
+
+                </android.support.v7.widget.Toolbar>
+
+            </android.support.design.widget.AppBarLayout>
+
+            <FrameLayout
+                android:layout_below="@id/toolbar"
+                android:layout_above="@+id/selectMenu"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <com.example.whensunset.pictureprocessinggraduationdesign.mete.CutView
+                    android:id="@+id/pic"
+                    android:background="@color/moreGray"
+                    android:layout_height="match_parent"
+                    android:layout_width="match_parent"
+
+                    bind:insertImageAlpha="@{viewModel.getPictureFrameMenuVM().mSelectParam}"
+                    bind:insertImagePath="@{viewModel.getPictureFrameMenuVM().mInsertImagePath}"
+                    bind:onLimitRectChangedListener="@{viewModel.mCutViewListener}"
+                    bind:onLimitMaxRectChangedListener="@{viewModel.getPictureTextMenuVM()}"
+                    bind:model="@{viewModel.mCutViewModel}"
+                    bind:bitmap="@{viewModel.mImageBitMap}"/>
+
+                <com.example.whensunset.pictureprocessinggraduationdesign.mete.MoveFrameLayout
+                    bind:onPlaceChangedListener="@{viewModel.getPictureTextMenuVM()}"
+                    android:visibility="@{(viewModel.mSelectTab == PictureProcessingActivityVM.SELECT_PICTURE_TEXT) ? View.VISIBLE : View.GONE}"
                     android:background="#00000000"
-                    android:text="@={viewModel.getPictureTextMenuVM().mText}"
-                    bind:typeface="@{viewModel.getPictureTextMenuVM().mNowTypeface}"
-                    android:onTextChanged="@{(s, start, before, count) -> viewModel.getPictureTextMenuVM().mUIActionManager.doTextChanged(PictureTextMenuVM.TEXT_CHANGE , s)}"
-                    android:textColor="@{viewModel.getPictureTextMenuVM().mTextColor}"
-                    android:textSize="@{viewModel.getPictureTextMenuVM().mTextSize}"
+                    android:layout_width="wrap_content"
+                    android:layout_gravity="center"
                     android:minWidth="40dp"
                     android:minHeight="40dp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content">
 
-            </com.example.whensunset.pictureprocessinggraduationdesign.mete.MoveFrameLayout>
+                    <com.example.whensunset.pictureprocessinggraduationdesign.mete.FontEditText
+                        android:id="@+id/picture_text_font_edit_view"
+                        android:background="#00000000"
+                        android:text="@={viewModel.getPictureTextMenuVM().mText}"
+                        bind:typeface="@{viewModel.getPictureTextMenuVM().mNowTypeface}"
+                        android:onTextChanged="@{(s, start, before, count) -> viewModel.getPictureTextMenuVM().mUIActionManager.doTextChanged(PictureTextMenuVM.TEXT_CHANGE , s)}"
+                        android:textColor="@{viewModel.getPictureTextMenuVM().mTextColor}"
+                        android:textSize="@{viewModel.getPictureTextMenuVM().mTextSize}"
+                        android:minWidth="40dp"
+                        android:minHeight="40dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
 
-        </FrameLayout>
+                </com.example.whensunset.pictureprocessinggraduationdesign.mete.MoveFrameLayout>
 
+            </FrameLayout>
+
+
+            <FrameLayout
+                android:id="@+id/selectMenu"
+                android:background="@color/gray"
+                android:layout_above="@id/tab"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <ViewStub
+                    android:id="@+id/viewstub"
+                    android:layout="@layout/activity_picture_processing_picture_transform_menu"
+                    bind:viewModel="@{viewModel.getPictureTransformMenuVM()}"
+                    android:visibility="@{(viewModel.mSelectTab == PictureProcessingActivityVM.SELECT_PICTURE_TRANSFORM) ? View.VISIBLE : View.GONE}"
+                    bind:bindingVisibility="@{(viewModel.mSelectTab == PictureProcessingActivityVM.SELECT_PICTURE_TRANSFORM) ? View.VISIBLE : View.GONE}"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+
+                <ViewStub
+                    android:id="@+id/picture_param_menu"
+                    android:layout="@layout/activity_picture_processing_picture_param_menu"
+                    bind:viewModel="@{viewModel.getPictureParamMenuVM()}"
+                    android:visibility="@{(viewModel.mSelectTab == PictureProcessingActivityVM.SELECT_PICTURE_PARAM) ? View.VISIBLE : View.GONE}"
+
+                    bind:bindingVisibility="@{(viewModel.mSelectTab == PictureProcessingActivityVM.SELECT_PICTURE_PARAM) ? View.VISIBLE : View.GONE}"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+
+                <ViewStub
+                    android:id="@+id/picture_seekbar_recycleview_menu"
+                    android:layout="@layout/activity_picture_processing_picture_seekbar_recycleview_menu"
+                    bind:viewModel="@{viewModel.mNowBaseSeekBarRecycleViewVM}"
+                    android:visibility="@{(viewModel.mSelectTab == PictureProcessingActivityVM.SELECT_PICTURE_FRAME || viewModel.mSelectTab == PictureProcessingActivityVM.SELECT_PICTURE_TEXT || viewModel.mSelectTab == PictureProcessingActivityVM.SELECT_PICTURE_FILTER) ? View.VISIBLE : View.GONE}"
+
+                    bind:bindingVisibility="@{(viewModel.mSelectTab == PictureProcessingActivityVM.SELECT_PICTURE_FRAME || viewModel.mSelectTab == PictureProcessingActivityVM.SELECT_PICTURE_TEXT || viewModel.mSelectTab == PictureProcessingActivityVM.SELECT_PICTURE_FILTER) ? View.VISIBLE : View.GONE}"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+
+            </FrameLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:background="@color/black"
+                android:id="@+id/tab"
+                android:layout_alignParentBottom="true"
+                android:layout_width="match_parent"
+                android:layout_height="30dp">
+
+                <ImageView
+                    android:id="@+id/picture_filter_image_view"
+                    android:src="@{(viewModel.mSelectTab == PictureProcessingActivityVM.SELECT_PICTURE_FILTER) ? @drawable/picture_filter_blue : @drawable/picture_filter_white}"
+                    android:onClick="@{() -> viewModel.mUIActionManager.doClick(PictureProcessingActivityVM.SELECT_PICTURE_FILTER)}"
+                    style="@style/PictureProcessingTabImageView"/>
+
+                <ImageView
+                    android:src="@{(viewModel.mSelectTab == PictureProcessingActivityVM.SELECT_PICTURE_TRANSFORM) ? @drawable/picture_transform_blue : @drawable/picture_transform_white}"
+                    android:id="@+id/picture_transform_image_view"
+                    android:onClick="@{() -> viewModel.mUIActionManager.doClick(PictureProcessingActivityVM.SELECT_PICTURE_TRANSFORM)}"
+                    style="@style/PictureProcessingTabImageView"/>
+
+                <ImageView
+                    android:src="@{(viewModel.mSelectTab == PictureProcessingActivityVM.SELECT_PICTURE_PARAM) ? @drawable/picture_param_blue : @drawable/picture_param_white}"
+                    android:id="@+id/picture_param_image_view"
+                    android:onClick="@{() -> viewModel.mUIActionManager.doClick(PictureProcessingActivityVM.SELECT_PICTURE_PARAM)}"
+                    style="@style/PictureProcessingTabImageView"/>
+
+                <ImageView
+                    android:src="@{(viewModel.mSelectTab == PictureProcessingActivityVM.SELECT_PICTURE_FRAME) ? @drawable/picture_frame_blue : @drawable/picture_frame_white}"
+                    android:onClick="@{() -> viewModel.mUIActionManager.doClick(PictureProcessingActivityVM.SELECT_PICTURE_FRAME)}"
+                    android:id="@+id/picture_frame_image_view"
+                    style="@style/PictureProcessingTabImageView"/>
+
+                <ImageView
+                    android:src="@{(viewModel.mSelectTab == PictureProcessingActivityVM.SELECT_PICTURE_TEXT) ? @drawable/picture_text_blue : @drawable/picture_text_white}"
+                    android:onClick="@{() -> viewModel.mUIActionManager.doClick(PictureProcessingActivityVM.SELECT_PICTURE_TEXT)}"
+                    android:id="@+id/picture_text_image_view"
+                    style="@style/PictureProcessingTabImageView"/>
+
+            </LinearLayout>
+
+        </RelativeLayout>
 
         <FrameLayout
-            android:id="@+id/selectMenu"
-            android:background="@color/gray"
-            android:layout_above="@id/tab"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-            
-            <ViewStub
-                android:id="@+id/viewstub"
-                android:layout="@layout/activity_picture_processing_picture_transform_menu"
-                bind:viewModel="@{viewModel.getPictureTransformMenuVM()}"
-                android:visibility="@{(viewModel.mSelectTab == PictureProcessingActivityVM.SELECT_PICTURE_TRANSFORM) ? View.VISIBLE : View.GONE}"
-                bind:bindingVisibility="@{(viewModel.mSelectTab == PictureProcessingActivityVM.SELECT_PICTURE_TRANSFORM) ? View.VISIBLE : View.GONE}"
+            android:visibility="@{viewModel.mIsInLoading ? View.VISIBLE : View.GONE}"
+            android:layout_gravity="center"
+            android:layout_width="200dp"
+            android:layout_height="80dp">
+
+            <com.facebook.drawee.view.SimpleDraweeView
+                bind:animationUri="@{viewModel.mLoadingGifUri}"
+                android:layout_gravity="center"
+                android:layout_width="80dp"
+                android:layout_height="80dp" />
+
+            <TextView
+                android:layout_gravity="bottom"
+                android:gravity="center"
+                android:textSize="10dp"
+                android:textColor="@color/white"
+                android:text="@{viewModel.mLoadingText}"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" />
-
-            <ViewStub
-                android:id="@+id/picture_param_menu"
-                android:layout="@layout/activity_picture_processing_picture_param_menu"
-                bind:viewModel="@{viewModel.getPictureParamMenuVM()}"
-                android:visibility="@{(viewModel.mSelectTab == PictureProcessingActivityVM.SELECT_PICTURE_PARAM) ? View.VISIBLE : View.GONE}"
-
-                bind:bindingVisibility="@{(viewModel.mSelectTab == PictureProcessingActivityVM.SELECT_PICTURE_PARAM) ? View.VISIBLE : View.GONE}"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
-
-            <ViewStub
-                android:id="@+id/picture_seekbar_recycleview_menu"
-                android:layout="@layout/activity_picture_processing_picture_seekbar_recycleview_menu"
-                bind:viewModel="@{viewModel.mNowBaseSeekBarRecycleViewVM}"
-                android:visibility="@{(viewModel.mSelectTab == PictureProcessingActivityVM.SELECT_PICTURE_FRAME || viewModel.mSelectTab == PictureProcessingActivityVM.SELECT_PICTURE_TEXT || viewModel.mSelectTab == PictureProcessingActivityVM.SELECT_PICTURE_FILTER) ? View.VISIBLE : View.GONE}"
-
-                bind:bindingVisibility="@{(viewModel.mSelectTab == PictureProcessingActivityVM.SELECT_PICTURE_FRAME || viewModel.mSelectTab == PictureProcessingActivityVM.SELECT_PICTURE_TEXT || viewModel.mSelectTab == PictureProcessingActivityVM.SELECT_PICTURE_FILTER) ? View.VISIBLE : View.GONE}"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+                android:layout_height="wrap_content" />
 
         </FrameLayout>
 
-        <LinearLayout
-            android:orientation="horizontal"
-            android:background="@color/black"
-            android:id="@+id/tab"
-            android:layout_alignParentBottom="true"
-            android:layout_width="match_parent"
-            android:layout_height="30dp">
+    </FrameLayout>
 
-            <ImageView
-                android:id="@+id/picture_filter_image_view"
-                android:src="@{(viewModel.mSelectTab == PictureProcessingActivityVM.SELECT_PICTURE_FILTER) ? @drawable/picture_filter_blue : @drawable/picture_filter_white}"
-                android:onClick="@{() -> viewModel.mUIActionManager.doClick(PictureProcessingActivityVM.SELECT_PICTURE_FILTER)}"
-                style="@style/PictureProcessingTabImageView"/>
-
-            <ImageView
-                android:src="@{(viewModel.mSelectTab == PictureProcessingActivityVM.SELECT_PICTURE_TRANSFORM) ? @drawable/picture_transform_blue : @drawable/picture_transform_white}"
-                android:id="@+id/picture_transform_image_view"
-                android:onClick="@{() -> viewModel.mUIActionManager.doClick(PictureProcessingActivityVM.SELECT_PICTURE_TRANSFORM)}"
-                style="@style/PictureProcessingTabImageView"/>
-
-            <ImageView
-                android:src="@{(viewModel.mSelectTab == PictureProcessingActivityVM.SELECT_PICTURE_PARAM) ? @drawable/picture_param_blue : @drawable/picture_param_white}"
-                android:id="@+id/picture_param_image_view"
-                android:onClick="@{() -> viewModel.mUIActionManager.doClick(PictureProcessingActivityVM.SELECT_PICTURE_PARAM)}"
-                style="@style/PictureProcessingTabImageView"/>
-
-            <ImageView
-                android:src="@{(viewModel.mSelectTab == PictureProcessingActivityVM.SELECT_PICTURE_FRAME) ? @drawable/picture_frame_blue : @drawable/picture_frame_white}"
-                android:onClick="@{() -> viewModel.mUIActionManager.doClick(PictureProcessingActivityVM.SELECT_PICTURE_FRAME)}"
-                android:id="@+id/picture_frame_image_view"
-                style="@style/PictureProcessingTabImageView"/>
-
-            <ImageView
-                android:src="@{(viewModel.mSelectTab == PictureProcessingActivityVM.SELECT_PICTURE_TEXT) ? @drawable/picture_text_blue : @drawable/picture_text_white}"
-                android:onClick="@{() -> viewModel.mUIActionManager.doClick(PictureProcessingActivityVM.SELECT_PICTURE_TEXT)}"
-                android:id="@+id/picture_text_image_view"
-                style="@style/PictureProcessingTabImageView"/>
-
-        </LinearLayout>
-
-    </RelativeLayout>
 
 </layout>

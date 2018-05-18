@@ -9,6 +9,7 @@ import com.example.whensunset.pictureprocessinggraduationdesign.BR;
 import com.example.whensunset.pictureprocessinggraduationdesign.R;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.BaseSeekBarRecycleViewVM;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.ITypefaceFetch;
+import com.example.whensunset.pictureprocessinggraduationdesign.base.uiaction.ClickUIAction;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.uiaction.ProgressChangedUIAction;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.uiaction.TextChangedUIAction;
 import com.example.whensunset.pictureprocessinggraduationdesign.base.uiaction.UIActionManager;
@@ -24,8 +25,10 @@ import java.util.List;
 
 import io.reactivex.Flowable;
 
+import static com.example.whensunset.pictureprocessinggraduationdesign.base.uiaction.UIActionManager.CLICK_ACTION;
 import static com.example.whensunset.pictureprocessinggraduationdesign.base.uiaction.UIActionManager.PROGRESS_CHANGED_ACTION;
 import static com.example.whensunset.pictureprocessinggraduationdesign.base.uiaction.UIActionManager.TEXT_CHANGED_ACTION;
+import static com.example.whensunset.pictureprocessinggraduationdesign.staticParam.ObserverMapKey.PictureTextItemVM_CallAllAfterEventAction;
 import static com.example.whensunset.pictureprocessinggraduationdesign.staticParam.ObserverMapKey.PictureTextItemVM_mPictureTextParamDialogVM;
 import static com.example.whensunset.pictureprocessinggraduationdesign.staticParam.ObserverMapKey.PictureTextItemVM_mTypefaceName;
 import static com.example.whensunset.pictureprocessinggraduationdesign.staticParam.ObserverMapKey.PictureTextItemVM_mat;
@@ -74,6 +77,11 @@ public class PictureTextMenuVM extends BaseSeekBarRecycleViewVM<PictureTextMenuV
     protected void initClick() {
         initListener(this, (observable, i) -> {
             String typefaceName = ObserverParamMap.staticGetValue(observable , PictureTextItemVM_mTypefaceName);
+            UIActionManager.CallAllAfterEventAction callAllAfterEventAction = ObserverParamMap.staticGetValue(observable , PictureTextItemVM_CallAllAfterEventAction);
+            if (callAllAfterEventAction != null){
+                callAllAfterEventAction.callAllAfterEventAction();
+            }
+
             mNowTypeface.set(typefaceName);
 
             MyLog.d(TAG, "initClick", "状态:typefaceName:", "更新typeface" , typefaceName);
@@ -90,9 +98,8 @@ public class PictureTextMenuVM extends BaseSeekBarRecycleViewVM<PictureTextMenuV
     protected void initProgressChanged() {
         mUIActionManager
                 .<ProgressChangedUIAction>getDefaultThrottleFlowable(PROGRESS_CHANGED_ACTION)
-                .map(ProgressChangedUIAction::getProgress)
-                .subscribe(progress -> {
-                    mSelectParam.set(progress);
+                .subscribe(progressChangedUIAction -> {
+                    mSelectParam.set(progressChangedUIAction.getProgress());
                     buildTextColor();
                     MyLog.d(TAG, "initProgressChanged", "状态:", "滑动了");
                 });
@@ -104,7 +111,9 @@ public class PictureTextMenuVM extends BaseSeekBarRecycleViewVM<PictureTextMenuV
                 .filter(textChangedUIAction -> {
                     CharSequence charSequence = textChangedUIAction.getNowText();
                     return charSequence.length() > 0;
-                }).subscribe(s -> mEventListenerList.get(TEXT_CHANGE).notifyChange());
+                }).subscribe(textChangedUIAction -> {
+                    mEventListenerList.get(TEXT_CHANGE).notifyChange();
+                });
     }
 
     @Override
@@ -121,7 +130,7 @@ public class PictureTextMenuVM extends BaseSeekBarRecycleViewVM<PictureTextMenuV
         MyLog.d(TAG, "buildTextColor", "状态:progress:nowTextColor:realAlpha:", "滑动了" , mSelectParam.get() , Integer.toHexString(nowTextColor) ,realAlpha);
     }
 
-    public void runInsertText() {
+    public void runInsertText(UIActionManager.CallAllAfterEventAction callAllAfterEventAction) {
         if (!mNowLimitMaxRect.contains(mEditTextRect)) {
             showToast("被添加的文字超出图片界限，无法插入文字！");
             return;
@@ -149,6 +158,8 @@ public class PictureTextMenuVM extends BaseSeekBarRecycleViewVM<PictureTextMenuV
                 .subscribe(mat -> {
                     mText.set("");
                     mEventListenerList.get(LEAVE_BSBRV_VM_LISTENER).set(ObserverParamMap.staticSet(PictureTextItemVM_mat , mat));
+
+                    callAllAfterEventAction.callAllAfterEventAction();
                 });
 
         MyLog.d(TAG, "runInsertText", "状态:mNowLimitMaxRect:mEditTextRect:mZoomCoefficient:opencvRect:", "插入文字" , mNowLimitMaxRect , mEditTextRect , mZoomCoefficient , opencvRect);
@@ -192,17 +203,19 @@ public class PictureTextMenuVM extends BaseSeekBarRecycleViewVM<PictureTextMenuV
         }
 
         private void initClick() {
-            getDefaultClickThrottleFlowable()
-                    .filter(clickPosition -> {
+            mUIActionManager
+                    .<ClickUIAction>getDefaultThrottleFlowable(CLICK_ACTION)
+                    .filter(clickUIAction -> {
                         MyLog.d(TAG, "initClick", "状态:isAdd", "判断当前的item是否是 add" , isAdd);
                         return !isAdd;
-                    }).subscribe(clickPosition -> {
+                    }).subscribe(clickUIAction -> {
                         mPictureTextParamDialogVM.mTypefaceName.set(mTypefaceName.get());
                         ObserverParamMap observerParamMap = getPositionParamMap()
                                 .set(PictureTextItemVM_mTypefaceName , mTypefaceName.get())
-                                .set(PictureTextItemVM_mPictureTextParamDialogVM , mPictureTextParamDialogVM);
+                                .set(PictureTextItemVM_mPictureTextParamDialogVM , mPictureTextParamDialogVM)
+                                .set(PictureTextItemVM_CallAllAfterEventAction, clickUIAction.getCallAllAfterEventAction());
                         mEventListenerList.get(CLICK_ITEM).set(observerParamMap);
-                        MyLog.d(TAG, "accept", "状态:observerParamMap:clickPosition:", "" , observerParamMap , clickPosition );
+                        MyLog.d(TAG, "accept", "状态:observerParamMap:clickPosition:", "" , observerParamMap , clickUIAction.getLastEventListenerPosition());
                     });
         }
 
